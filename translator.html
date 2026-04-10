@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>D&D Переводчик</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --gold: #d4af37;
+        --gold-light: #ffdd99;
+        --dark-bg: rgba(0,0,0,0.8);
+        --dark-bg-hover: #2a1a0a;
+    }
+    
+    * {
+        box-sizing: border-box;
+    }
+    
+    body {
+        background: black;
+        text-align: center;
+        padding: 12px;
+        font-family: 'Cinzel', 'Arial', sans-serif;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin: 0;
+        min-height: 100vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        transition: background 1.2s ease-in-out;
+    }
+    
+    /* Хедер с тремя элементами: автор, поддержка, руководство */
+    .header {
+        position: absolute; top: 12px; right: 15px; left: 15px; z-index: 30;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(0,0,0,0.7);
+    padding: 6px 15px;
+    border: 1px solid var(--gold);
+    border-radius: 40px;
+    backdrop-filter: blur(2px);
+    font-family: 'MedievalSharp', monospace;
+    font-size: 13px;
+    color: white;
+}
+    .header-left a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .header-left a:hover { 
+        color: var(--gold-light); 
+        text-shadow: 0 0 4px var(--gold);
+    }
+    .telegram-icon {
+        width: 16px;
+        height: 16px;
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+        vertical-align: middle;
+    }
+    .help-button {
+        background: rgba(0,0,0,0.7);
+        border: 1px solid var(--gold);
+        border-radius: 40px;
+        padding: 6px 15px;
+        cursor: pointer;
+        font-size: 16px;
+        font-family: 'Cinzel', serif;
+        transition: all 0.2s ease;
+        color: var(--gold);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .help-button:hover {
+        background: var(--dark-bg-hover);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        transform: translateY(-1px);
+        color: var(--gold-light);
+    }
+    
+    /* Модальное окно */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: rgba(20,15,10,0.95);
+        border: 2px solid var(--gold);
+        border-radius: 32px;
+        padding: 25px 30px;
+        max-width: 500px;
+        width: 90%;
+        color: #e4c7a2;
+        font-family: 'MedievalSharp', monospace;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        position: relative;
+        animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .modal-content h3 {
+        font-family: 'Cinzel', serif;
+        font-size: 24px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: var(--gold-light);
+        text-align: center;
+    }
+    .modal-content p {
+        line-height: 1.5;
+        font-size: 14px;
+        margin: 10px 0;
+    }
+    .modal-content ul {
+        padding-left: 20px;
+        margin: 10px 0;
+    }
+    .modal-content li {
+        margin: 5px 0;
+        font-size: 13px;
+    }
+    .modal-content hr {
+        border-color: #5a3e1a;
+        margin: 15px 0;
+    }
+    .close-modal {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        font-size: 28px;
+        cursor: pointer;
+        color: var(--gold);
+        transition: color 0.2s;
+    }
+    .close-modal:hover {
+        color: var(--gold-light);
+    }
+    
+    h2 {
+        margin: 70px 0 20px 0;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        word-break: keep-all;
+        color: #e4c7a2;
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+    
+    .buttons {
+        display: flex; flex-wrap: wrap; justify-content: center;
+        gap: 10px; margin: 15px 0 25px 0;
+    }
+    
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .dropdown > button {
+        padding: 8px 20px;
+        background: rgba(0,0,0,0.8);
+        color: #e4c7a2;
+        border: 1px solid var(--gold);
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Cinzel', serif;
+        font-weight: 600;
+        border-radius: 40px;
+        transition: all 0.25s ease;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .dropdown > button:hover {
+        background: var(--dark-bg-hover);
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+        transform: translateY(-2px);
+        border-color: var(--gold-light);
+        color: #fff0d0;
+    }
+    
+    .dropdown.active > button {
+        background: #3a1a0a;
+        color: #ffffff;
+        border-color: #ffcc66;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+        text-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+    
+    .dropdown[data-group="infernal-group"].active > button {
+        background: #8b0000;
+        border-color: #ff4444;
+        box-shadow: 0 0 12px #ff4444;
+    }
+    
+    .dropdown[data-group="dwarf-group"].active > button {
+        background: #8b5a2b;
+        border-color: #d4a055;
+        box-shadow: 0 0 12px #d4a055;
+    }
+    
+    .dropdown[data-group="elf-group"].active > button {
+        background: #1a4d3a;
+        border-color: #33cc99;
+        box-shadow: 0 0 12px #33cc99;
+    }
+    
+    .dropdown[data-group="dragon-group"].active > button {
+        background: #8b691b;
+        border-color: #ffcc33;
+        box-shadow: 0 0 12px #ffcc33;
+    }
+    
+    button[data-single="deep"].active {
+        background: #4a0a4a;
+        border-color: #aa66ff;
+        box-shadow: 0 0 12px #aa66ff;
+        color: white;
+    }
+    
+    button[data-single="celestial"].active {
+        background: #1a3a5a;
+        border-color: #88ccff;
+        box-shadow: 0 0 12px #88ccff;
+        color: white;
+    }
+    
+    button[data-single="thief"].active {
+        background: #2a2a2a;
+        border-color: #aaaaaa;
+        box-shadow: 0 0 12px #aaaaaa;
+        color: white;
+    }
+    
+    button[data-single="druidic"].active {
+        background: #1a4a2a;
+        border-color: #44ff88;
+        box-shadow: 0 0 12px #44ff88;
+        color: white;
+    }
+    
+    .dropdown::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        background: transparent;
+        z-index: 99;
+    }
+    
+    .dropdown:hover .dropdown-content,
+    .dropdown-content:hover {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+    
+    .dropdown-content {
+        position: absolute;
+        background: rgba(0,0,0,0.95);
+        border: 1px solid var(--gold);
+        z-index: 100;
+        min-width: 200px;
+        border-radius: 28px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+        overflow: hidden;
+        top: 100%;
+        left: 0;
+        margin-top: 0;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+    
+    .dropdown-content button {
+        width: 100%;
+        border-bottom: 1px solid #5a3e1a;
+        text-align: left;
+        padding: 10px 18px;
+        font-size: 13px;
+        border-radius: 0;
+        background: rgba(0,0,0,0.85);
+        color: #e4c7a2;
+        transition: all 0.15s ease;
+        font-family: 'Cinzel', serif;
+        cursor: pointer;
+    }
+    .dropdown-content button:hover {
+        background: #3a2a1a;
+        color: #ffdd99;
+    }
+    .dropdown-content button.active-mode {
+        background: #4a2a0a;
+        color: var(--gold-light);
+        border-left: 3px solid var(--gold);
+        font-weight: bold;
+    }
+    .dropdown-content button:first-child { border-radius: 28px 28px 0 0; }
+    .dropdown-content button:last-child { border-radius: 0 0 28px 28px; border-bottom: none; }
+    
+    .single-button {
+        padding: 8px 20px;
+        background: rgba(0,0,0,0.8);
+        color: #e4c7a2;
+        border: 1px solid var(--gold);
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Cinzel', serif;
+        font-weight: 600;
+        border-radius: 40px;
+        transition: all 0.25s ease;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .single-button:hover {
+        background: var(--dark-bg-hover);
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+        transform: translateY(-2px);
+        border-color: var(--gold-light);
+        color: #fff0d0;
+    }
+    
+    textarea {
+        width: 92%; max-width: 760px; height: 120px;
+        font-size: 17px; padding: 14px;
+        background: rgba(0,0,0,0.85); color: #f0cf9f;
+        border: 1px solid #aa7c44;
+        margin: 10px auto 15px;
+        border-radius: 28px;
+        resize: vertical;
+        font-family: 'MedievalSharp', monospace;
+        transition: all 0.2s ease;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: #e4b363;
+        box-shadow: 0 0 14px rgba(212,175,55,0.4);
+    }
+    
+    .output {
+        margin: 10px auto;
+        width: 92%; max-width: 760px; min-height: 170px;
+        overflow-y: auto; font-size: 26px; letter-spacing: 2px;
+        text-align: left; padding: 20px;
+        background: rgba(0,0,0,0.82);
+        border: 1px solid #a0692e;
+        border-radius: 32px;
+        line-height: 1.45;
+        text-shadow: 0 1px 4px #000;
+        font-family: 'Noto Sans Symbols 2', 'MedievalSharp', monospace;
+        direction: ltr !important;
+        unicode-bidi: plaintext;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(2px);
+    }
+    
+    /* Инфернальный оригинал — полупрозрачный белый фон */
+    .output.infernal-original {
+        background: rgba(245, 240, 235, 0.75) !important;
+        backdrop-filter: blur(2px);
+        border: 2px solid rgba(220, 60, 50, 0.8);
+        color: #2c1c08;
+        text-shadow: none;
+        padding: 20px;
+        min-height: 170px;
+        border-radius: 32px;
+    }
+    
+    .reading {
+        margin: 12px auto;
+        font-size: 17px;
+        font-family: 'Verdana', 'Geneva', sans-serif;
+        background: rgba(0,0,0,0.65);
+        border: 1px solid #b8945c;
+        border-radius: 60px;
+        padding: 10px 28px;
+        max-width: 85%;
+        display: inline-block;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        letter-spacing: 0.6px;
+        color: #ecd9b4;
+    }
+    
+    .info-box {
+        margin: 12px auto;
+        max-width: 760px;
+        background: rgba(0,0,0,0.6);
+        border: 1px solid #9b6e3c;
+        border-radius: 40px;
+        padding: 6px 20px;
+        font-size: 13px;
+        font-family: 'MedievalSharp', monospace;
+        color: #dbbc87;
+        display: inline-block;
+        backdrop-filter: blur(4px);
+    }
+    
+    .controls { 
+        margin: 20px 0; 
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+    }
+    .controls button { 
+        padding: 8px 24px;
+        border-radius: 40px;
+        background: rgba(0,0,0,0.8);
+        font-size: 14px;
+        border: 1px solid var(--gold);
+        color: #e4c7a2;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-family: 'Cinzel', serif;
+    }
+    .controls button:hover {
+        background: var(--dark-bg-hover);
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+        transform: translateY(-2px);
+        border-color: var(--gold-light);
+        color: #fff0d0;
+    }
+    
+    .table {
+        margin: 25px auto 40px auto;
+        display: grid;
+        gap: 12px;
+        max-width: 880px;
+        background: rgba(20,15,5,0.45);
+        padding: 20px;
+        border: 1px solid #7a5a2e;
+        border-radius: 40px;
+        width: 92%;
+        backdrop-filter: blur(2px);
+        transition: all 0.3s ease;
+    }
+    
+    .cell {
+        height: auto;
+        min-height: 78px;
+        border: 1px solid #b88746;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        background: rgba(25,18,8,0.8);
+        border-radius: 24px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        text-align: center;
+        line-height: 1.3;
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+        backdrop-filter: blur(2px);
+        padding: 10px 6px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    .cell.visible { opacity: 1; transform: translateY(0) scale(1); }
+    .cell:hover { 
+        transform: translateY(-3px) scale(1.02); 
+        box-shadow: 0 6px 16px rgba(180,130,50,0.25);
+        border-color: #e4b363;
+        background: rgba(60,40,15,0.9);
+    }
+    .cell span:first-child { font-size: 13px; opacity: 0.9; font-family: 'Cinzel', serif; color: #eedba7; display: block; margin-bottom: 4px; }
+    .cell span.glyph {
+        font-size: 24px;
+        margin-top: 4px;
+        font-family: 'Noto Sans Symbols 2', monospace;
+        display: block;
+    }
+    
+    .alphabet-thief {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+    }
+    .alphabet-thief .cell {
+        min-height: 70px;
+        padding: 8px 5px;
+    }
+    .alphabet-thief .cell span:first-child {
+        font-size: 11px;
+        line-height: 1.2;
+    }
+    .alphabet-thief .cell .glyph {
+        font-size: 20px;
+        margin-top: 4px;
+    }
+    
+    /* Анимации глифов */
+    .infernal .glyph, .output.infernal { color: #ffaa66; text-shadow: 0 0 6px #a33; animation: gentleFlicker 3s infinite alternate; }
+    .abyssal .glyph, .output.abyssal { color: #cc99ff; text-shadow: 0 0 5px #639; animation: softPulse 3s infinite; }
+    .dwarf .glyph, .giant .glyph, .primordial .glyph,
+    .output.dwarf, .output.giant, .output.primordial { color: #eecd99; text-shadow: 0 0 4px #b97; animation: stoneGlow 3s infinite ease-in-out; }
+    .gnome .glyph, .output.gnome { color: #ffccee; text-shadow: 0 0 4px #d8a; animation: gnomeSpark 2.8s infinite alternate; }
+    .goblin .glyph, .output.goblin { color: #aaffaa; text-shadow: 0 0 3px #4a4; animation: goblinShake 2.4s infinite; }
+    .orc .glyph, .output.orc { color: #ff8888; text-shadow: 0 0 4px #a33; animation: orcBeat 2.4s infinite; }
+    .elf .glyph, .sylvan .glyph, .output.elf, .output.sylvan { color: #aaffdd; text-shadow: 0 0 6px #2b7; animation: elvenFlow 3.2s infinite alternate; }
+    .drow .glyph, .output.drow { color: #ffbbff; text-shadow: 0 0 5px #939; animation: drowFade 3s infinite ease; }
+    .dragon .glyph, .output.dragon { color: #ffdd77; text-shadow: 0 0 8px #d80; animation: dragonGlow 2.8s infinite alternate; }
+    .celestial .glyph, .output.celestial { color: #ccffff; text-shadow: 0 0 6px #6bf; animation: celestialTwinkle 3.4s infinite alternate; }
+    .thief .glyph, .output.thief { color: #ffcc88; text-shadow: 0 0 4px #b73; animation: thiefShadow 2.5s infinite alternate; }
+    .deep .glyph, .output.deep { color: #88ccff; text-shadow: 0 0 5px #27a; animation: deepWave 3s infinite; }
+    .druidic .glyph, .output.druidic { color: #66ff88; text-shadow: 0 0 6px #2a6a3a; animation: druidicGlow 3s infinite alternate; }
+    
+    @keyframes gentleFlicker { 0% { text-shadow: 0 0 3px #a33; } 100% { text-shadow: 0 0 12px #e84; } }
+    @keyframes softPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.92; text-shadow: 0 0 10px #86a; } }
+    @keyframes stoneGlow { 0%,100% { text-shadow: 0 0 3px #b97; } 50% { text-shadow: 0 0 12px #eca; } }
+    @keyframes gnomeSpark { 0% { text-shadow: 0 0 3px #d8a; } 100% { text-shadow: 0 0 14px #fbf; } }
+    @keyframes goblinShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(2px); } 75% { transform: translateX(-2px); } }
+    @keyframes orcBeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    @keyframes elvenFlow { 0% { text-shadow: 0 0 4px #2b7; } 100% { text-shadow: 0 0 14px #6fc; } }
+    @keyframes drowFade { 0%,100% { opacity: 1; text-shadow: 0 0 4px #a5a; } 50% { opacity: 0.92; text-shadow: 0 0 12px #d9d; } }
+    @keyframes dragonGlow { 0% { text-shadow: 0 0 5px #d80; } 100% { text-shadow: 0 0 16px #fe6; } }
+    @keyframes celestialTwinkle { 0% { text-shadow: 0 0 4px #6bf; } 100% { text-shadow: 0 0 16px #eff; } }
+    @keyframes thiefShadow { 0% { text-shadow: 0 0 3px #b73; } 100% { text-shadow: 0 0 12px #fda; } }
+    @keyframes deepWave { 0%,100% { opacity: 1; } 50% { opacity: 0.92; text-shadow: 0 0 10px #3af; } }
+    @keyframes druidicGlow { 0% { text-shadow: 0 0 3px #2a6a3a; } 100% { text-shadow: 0 0 14px #66ff88; } }
+    
+    .output.dragon-original {
+        background: rgba(255, 248, 235, 0.75) !important;
+        backdrop-filter: blur(2px);
+        border: 2px solid rgba(255, 215, 140, 0.9);
+        color: #2c1c08;
+        text-shadow: none;
+        padding: 20px;
+        min-height: 170px;
+        transition: box-shadow 0.3s ease, border-color 0.3s;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        border-radius: 32px;
+    }
+    
+    .output.elf-original {
+        background: rgba(240, 248, 255, 0.85) !important;
+        backdrop-filter: blur(2px);
+        border: 2px solid #88ccaa;
+        color: #2c3e2c;
+        text-shadow: none;
+        padding: 20px;
+        min-height: 170px;
+        transition: box-shadow 0.3s ease, border-color 0.3s;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        border-radius: 32px;
+    }
+    
+    .output.dwarf-original {
+        background: rgba(245, 240, 225, 0.85) !important;
+        backdrop-filter: blur(2px);
+        border: 2px solid #c9a87b;
+        color: #3d2a1a;
+        text-shadow: none;
+        padding: 20px;
+        min-height: 170px;
+        transition: box-shadow 0.3s ease, border-color 0.3s;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        border-radius: 32px;
+    }
+    
+    .output.druidic {
+        font-family: 'Segoe UI', 'Noto Sans Symbols 2', monospace;
+        letter-spacing: 2px;
+    }
+    
+    .dragon-img, .elf-img, .dwarf-img, .infernal-img {
+        height: 44px;
+        margin-right: 4px;
+        margin-left: 0;
+        vertical-align: middle;
+        transition: transform 0.15s ease;
+        display: inline-block;
+    }
+    .dragon-img:hover, .elf-img:hover, .dwarf-img:hover, .infernal-img:hover {
+        transform: scale(1.03);
+    }
+    
+    .table.alphabet-normal { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); }
+    .dragon-table, .elf-table, .dwarf-table, .infernal-table { 
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
+        gap: 12px;
+        background: rgba(25,20,10,0.5);
+        border-radius: 40px;
+    }
+    .dragon-cell, .elf-cell, .dwarf-cell, .infernal-cell {
+        height: 90px;
+        background: rgba(255, 250, 230, 0.9);
+        border: 1px solid #dbb872;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .dragon-cell:hover, .elf-cell:hover, .dwarf-cell:hover, .infernal-cell:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(160,110,40,0.3);
+        background: #fff9ef;
+        border-color: #e7bc7a;
+    }
+    .dragon-cell .letter, .elf-cell .letter, .dwarf-cell .letter, .infernal-cell .letter {
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Cinzel', serif;
+        color: #6b4a24;
+        margin-bottom: 6px;
+    }
+    .dragon-cell .glyph-img, .elf-cell .glyph-img, .dwarf-cell .glyph-img, .infernal-cell .glyph-img {
+        height: 44px;
+        image-rendering: crisp-edges;
+    }
+    
+    @media (max-width: 640px) {
+        .table { gap: 8px; padding: 14px; }
+        .cell { min-height: 65px; }
+        .cell span.glyph { font-size: 22px; }
+        textarea { height: 100px; font-size: 16px; }
+        .output { font-size: 22px; min-height: 140px; }
+        h2 { font-size: 28px; margin-top: 50px; }
+        .reading { font-size: 14px; padding: 6px 18px; }
+        .header { font-size: 10px; }
+        .alphabet-thief { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+        .alphabet-thief .cell span:first-child { font-size: 10px; }
+        .dropdown > button, .single-button { padding: 6px 14px; font-size: 12px; }
+        .controls button { padding: 6px 16px; font-size: 12px; }
+        .dropdown::after { height: 8px; }
+        .dragon-img, .elf-img, .dwarf-img, .infernal-img { height: 32px; margin-right: 2px; }
+        .header-left { padding: 4px 10px; font-size: 10px; gap: 8px; }
+        .help-button { padding: 4px 10px; font-size: 12px; }
+        .modal-content { padding: 20px; max-width: 95%; }
+        .modal-content h3 { font-size: 20px; }
+        .modal-content p, .modal-content li { font-size: 11px; }
+    }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="index.html" style="background:#5a3e2a; padding:4px 12px; border-radius:20px;">⚔️ Трекер боя</a>
+            <span>📢 Автор:</span>
+            <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank">
+                <svg class="telegram-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.02-.13-.05-.18-.07-.05-.17-.03-.25-.02-.1.01-1.7 1.08-4.8 3.17-.45.31-.86.46-1.23.45-.4-.01-1.18-.23-1.76-.42-.71-.23-1.27-.35-1.22-.74.03-.2.3-.41.83-.63 3.2-1.39 5.34-2.31 6.42-2.76 3.05-1.28 3.69-1.5 4.1-1.51.09 0 .29.02.42.13.11.09.14.22.15.32.01.13-.01.3-.03.46z"/>
+                </svg>
+                t.me/dnd_ekb_ekaterinburg
+            </a>
+            <span>💲</span>
+            <a href="https://pay.cloudtips.ru/p/dfc6c2f5" target="_blank">Поддержать автора</a>
+        </div>
+        <div class="help-button" id="helpBtn">
+            <span>❓</span> Руководство
+        </div>
+    </div>
+
+    <!-- Модальное окно с руководством -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h3>❓ Руководство</h3>
+            <p><strong>D&D Переводчик</strong> — инструмент для перевода текста на вымышленные языки вселенной Dungeons &amp; Dragons.</p>
+            <p><strong>📝 Как пользоваться:</strong><br>
+            1. Введите текст в верхнее поле на русском языке<br>
+            2. Выберите язык из списка — перевод появится автоматически</p>
+            <p><strong>🌐 Режимы перевода:</strong><br>
+            • <strong>Обычные языки</strong> — текст преобразуется в специальные символы с примерным звучанием<br>
+            • <strong>Оригинальные языки (PHB/BGDIA)</strong> — каноничные глифы из Книги игрока в виде картинок<br>
+            • <strong>Воровской жаргон</strong> — нажмите на любой глиф в таблице, чтобы вставить его в поле ввода (обратный перевод не поддерживается)</p>
+            <p><strong>🖼️ Кнопки:</strong><br>
+            • <strong>Скопировать перевод</strong> — копирует текст<br>
+            • <strong>Скопировать картинку</strong> — копирует глифы как изображение (для оригинальных языков)<br>
+            • <strong>Очистить</strong> — очищает все поля</p>
+            <hr>
+            <p style="text-align: center; font-size: 12px;">Приятного использования! 🎲</p>
+        </div>
+    </div>
+
+    <h2>D&amp;D Переводчик</h2>
+
+    <div class="buttons" id="buttonsContainer"></div>
+
+    <textarea id="input" oninput="convert()" placeholder="Введите текст на русском или глифы..."></textarea>
+    <div class="output" id="output"></div>
+    <div class="reading" id="reading"></div>
+    <div class="info-box" id="info"></div>
+
+    <div class="controls" id="controls">
+        <button id="copyTextBtn" onclick="copyText()">📋 Скопировать перевод</button>
+        <button onclick="clearAll()">🗑 Очистить</button>
+    </div>
+
+    <div class="table" id="alphabet"></div>
+
+<script>
+    let mode = "infernal";
+
+    const backgrounds = {
+        infernal: "images/inferno.jpg", abyssal: "images/abyss.jpg",
+        dwarf: "images/dwarf.jpg", giant: "images/giant.jpg", gnome: "images/gnome.jpg",
+        goblin: "images/goblin.jpg", orc: "images/orc.jpg", primordial: "images/primordial.jpg",
+        elf: "images/elf.jpg", sylvan: "images/sylvan.jpg", drow: "images/drow.jpg",
+        deep: "images/deep.jpg", dragon: "images/dragon.jpg", celestial: "images/celestial.jpg",
+        thief: "images/thief.jpg",
+        "dragon-original": "images/dragon.jpg",
+        "elf-original": "images/elf.jpg",
+        "dwarf-original": "images/dwarf.jpg",
+        "infernal-original": "images/inferno.jpg",
+        "druidic": "images/forest.jpg"
+    };
+
+    // ========== ДРАКОНЬИ PNG-ГЛИФЫ ==========
+    const iokharicPNGs = {
+        'а': 'images/а.png', 'б': 'images/б.png', 'в': 'images/в.png', 'г': 'images/г.png',
+        'д': 'images/д.png', 'е': 'images/е.png', 'ё': 'images/ё.png', 'ж': 'images/ж.png',
+        'з': 'images/з.png', 'и': 'images/и.png', 'й': 'images/й.png', 'к': 'images/к.png',
+        'л': 'images/л.png', 'м': 'images/м.png', 'н': 'images/н.png', 'о': 'images/о.png',
+        'п': 'images/п.png', 'р': 'images/р.png', 'с': 'images/с.png', 'т': 'images/т.png',
+        'у': 'images/у.png', 'ф': 'images/ф.png', 'х': 'images/х.png', 'ц': 'images/ц.png',
+        'ч': 'images/ч.png', 'ш': 'images/ш.png', 'щ': 'images/щ.png', 'ъ': 'images/ъ.png',
+        'ы': 'images/ы.png', 'ь': 'images/ь.png', 'э': 'images/э.png', 'ю': 'images/ю.png',
+        'я': 'images/я.png'
+    };
+
+    // ========== ЭЛЬФИЙСКИЕ PNG-ГЛИФЫ ==========
+    const elvishPNGs = {
+        'а': 'images/а1.png', 'б': 'images/б2.png', 'в': 'images/в3.png', 'г': 'images/г4.png',
+        'д': 'images/д5.png', 'е': 'images/е6.png', 'ё': 'images/ё7.png', 'ж': 'images/ж8.png',
+        'з': 'images/з9.png', 'и': 'images/и10.png', 'й': 'images/й11.png', 'к': 'images/к12.png',
+        'л': 'images/л13.png', 'м': 'images/м14.png', 'н': 'images/н15.png', 'о': 'images/о16.png',
+        'п': 'images/п17.png', 'р': 'images/р18.png', 'с': 'images/с19.png', 'т': 'images/т20.png',
+        'у': 'images/у21.png', 'ф': 'images/ф22.png', 'х': 'images/х23.png', 'ц': 'images/ц24.png',
+        'ч': 'images/ч25.png', 'ш': 'images/ш26.png', 'щ': 'images/щ27.png', 'ъ': 'images/ъ28.png',
+        'ы': 'images/ы29.png', 'ь': 'images/ь30.png', 'э': 'images/э31.png', 'ю': 'images/ю32.png',
+        'я': 'images/я33.png'
+    };
+
+    // ========== ДВАРФИЙСКИЕ PNG-ГЛИФЫ ==========
+    const dwarvishPNGs = {
+        'а': 'images/а.1.png', 'б': 'images/б.2.png', 'в': 'images/в.3.png', 'г': 'images/г.4.png',
+        'д': 'images/д.5.png', 'е': 'images/е.6.png', 'ё': 'images/ё.7.png', 'ж': 'images/ж.8.png',
+        'з': 'images/з.9.png', 'и': 'images/и.10.png', 'й': 'images/й.11.png', 'к': 'images/к.12.png',
+        'л': 'images/л.13.png', 'м': 'images/м.14.png', 'н': 'images/н.15.png', 'о': 'images/о.16.png',
+        'п': 'images/п.17.png', 'р': 'images/р.18.png', 'с': 'images/с.19.png', 'т': 'images/т.20.png',
+        'у': 'images/у.21.png', 'ф': 'images/ф.22.png', 'х': 'images/х.23.png', 'ц': 'images/ц.24.png',
+        'ч': 'images/ч.25.png', 'ш': 'images/ш.26.png', 'щ': 'images/щ.27.png', 'ъ': 'images/ъ.28.png',
+        'ы': 'images/ы.29.png', 'ь': 'images/ь.30.png', 'э': 'images/э.31.png', 'ю': 'images/ю.32.png',
+        'я': 'images/я.33.png'
+    };
+
+    // ========== ИНФЕРНАЛЬНЫЕ PNG-ГЛИФЫ ==========
+    const infernalPNGs = {
+        'а': 'images/аа.png', 'б': 'images/бб.png', 'в': 'images/вв.png', 'г': 'images/гг.png',
+        'д': 'images/дд.png', 'е': 'images/ее.png', 'ё': 'images/ёё.png', 'ж': 'images/жж.png',
+        'з': 'images/зз.png', 'и': 'images/ии.png', 'й': 'images/йй.png', 'к': 'images/кк.png',
+        'л': 'images/лл.png', 'м': 'images/мм.png', 'н': 'images/нн.png', 'о': 'images/оо.png',
+        'п': 'images/пп.png', 'р': 'images/рр.png', 'с': 'images/сс.png', 'т': 'images/тт.png',
+        'у': 'images/уу.png', 'ф': 'images/фф.png', 'х': 'images/хх.png', 'ц': 'images/цц.png',
+        'ч': 'images/чч.png', 'ш': 'images/шш.png', 'щ': 'images/щщ.png', 'ъ': 'images/ъъ.png',
+        'ы': 'images/ыы.png', 'ь': 'images/ьь.png', 'э': 'images/ээ.png', 'ю': 'images/юю.png',
+        'я': 'images/яя.png'
+    };
+
+    // ========== ДРУИДИЧЕСКИЕ ГЛИФЫ (шрифт Shavian) ==========
+    const druidicGlyphs = {
+        'а': '𐑐', 'б': '𐑑', 'в': '𐑒', 'г': '𐑓',
+        'д': '𐑔', 'е': '𐑕', 'ё': '𐑖', 'ж': '𐑗',
+        'з': '𐑘', 'и': '𐑙', 'й': '𐑚', 'к': '𐑛',
+        'л': '𐑜', 'м': '𐑝', 'н': '𐑞', 'о': '𐑟',
+        'п': '𐑠', 'р': '𐑡', 'с': '𐑢', 'т': '𐑣',
+        'у': '𐑤', 'ф': '𐑥', 'х': '𐑦', 'ц': '𐑧',
+        'ч': '𐑨', 'ш': '𐑩', 'щ': '𐑪', 'ъ': '',
+        'ы': '𐑫', 'ь': '', 'э': '𐑬', 'ю': '𐑭',
+        'я': '𐑮'
+    };
+
+    // Воровской жаргон
+    const thiefWords = [
+        {ru:"золото", cant:"железо", glyph:"⌘"},
+        {ru:"серебро", cant:"камень", glyph:"⌫"},
+        {ru:"отмычки", cant:"палки", glyph:"⌬"},
+        {ru:"яд", cant:"масло", glyph:"⌭"},
+        {ru:"кинжал", cant:"столовый прибор", glyph:"⌮"},
+        {ru:"ограбить", cant:"чистка", glyph:"⌯"},
+        {ru:"украсть", cant:"новинка", glyph:"⌰"},
+        {ru:"цель", cant:"полуорк", glyph:"⌱"},
+        {ru:"трюк", cant:"твист", glyph:"⌲"},
+        {ru:"смерть", cant:"мороз", glyph:"⌳"},
+        {ru:"убийство", cant:"подарок", glyph:"⌴"},
+        {ru:"скрыть оружие", cant:"принаряжаемся", glyph:"⌵"},
+        {ru:"магия", cant:"петь", glyph:"⌶"},
+        {ru:"очаровать", cant:"поцелуй", glyph:"⌷"},
+        {ru:"стража", cant:"плащи", glyph:"⌸"},
+        {ru:"тюрьма", cant:"отдыхает", glyph:"⌹"},
+        {ru:"скупщик", cant:"кузнец", glyph:"⌺"},
+        {ru:"грим", cant:"штукатурка", glyph:"⌻"},
+        {ru:"калтропы", cant:"гнездо ворона", glyph:"⌼"},
+        {ru:"карманник", cant:"чистильщик", glyph:"⌽"},
+        {ru:"мошенник", cant:"повар", glyph:"⌾"},
+        {ru:"игра", cant:"обед", glyph:"⌿"},
+        {ru:"карты", cant:"бумажки", glyph:"⍀"},
+        {ru:"кости", cant:"кастет", glyph:"⍁"},
+        {ru:"ставки", cant:"еда", glyph:"⍂"},
+        {ru:"напоить", cant:"гольшом", glyph:"⍃"},
+        {ru:"ранить", cant:"боком", glyph:"⍄"},
+        {ru:"казнить", cant:"танец", glyph:"⍅"},
+        {ru:"добыча", cant:"берлога", glyph:"⍆"},
+        {ru:"магический предмет", cant:"кусок железа", glyph:"⍇"}
+    ];
+
+    // Словари для воровского жаргона (прямой и обратный)
+    const thiefDict = {};
+    const reverseThiefDict = {};
+    const glyphToRuWord = {};
+    
+    thiefWords.forEach(item => {
+        thiefDict[item.ru.toLowerCase()] = {word: item.cant, glyph: item.glyph};
+        reverseThiefDict[item.cant.toLowerCase()] = item.ru;
+        glyphToRuWord[item.glyph] = item.ru;
+    });
+
+    // Глифы для обычных режимов
+    const infernalGlyphs = {а:"𝔄", б:"𝔅", в:"𝔇", г:"𝔈", д:"𝔉", е:"𝔊", ё:"𝔍", ж:"𝔎", з:"𝔏", и:"𝔐", й:"𝔑",к:"𝔒", л:"𝔓", м:"𝔔", н:"𝔖", о:"𝔗", п:"𝔘", р:"𝔙", с:"𝕌", т:"𝔛", у:"𝔜",ф:"ℭ", х:"ℌ", ц:"ℑ", ч:"ℜ", ш:"ℨ", щ:"𝕋", ъ:"𝕴", ы:"𝕵", ь:"𝕶", э:"𝕷", ю:"𝕍", я:"𝕳"};
+    const dwarfGlyphs = {а:"ᚨ",б:"ᛒ",в:"ᚹ",г:"ᚷ",д:"ᛞ",е:"ᛖ",ё:"ᛟ",ж:"ᛃ",з:"ᛉ",и:"ᛁ",й:"ᛇ",к:"ᚲ",л:"ᛚ",м:"ᛗ",н:"ᚾ",о:"ᛟ",п:"ᛈ",р:"ᚱ",с:"ᛊ",т:"ᛏ",у:"ᚢ",ф:"ᚠ",х:"ᚺ",ц:"ᛋ",ч:"ᛍ",ш:"ᛎ",щ:"ᛯ",ъ:"ᛪ",ы:"ᛦ",ь:"ᛧ",э:"ᛠ",ю:"ᛡ",я:"ᛣ"};
+    const elfGlyphs = {а:"Ϟ",б:"ϟ",в:"Ϡ",г:"ϡ",д:"Ϣ",е:"ϣ",ё:"Ϥ",ж:"ϥ",з:"Ϧ",и:"ϧ",й:"Ϩ",к:"ϩ",л:"Ϫ",м:"ϫ",н:"Ϭ",о:"ϭ",п:"Ϯ",р:"ϯ",с:"ϰ",т:"ϱ",у:"ϲ",ф:"ϳ",х:"ϴ",ц:"ϵ",ч:"϶",ш:"Ϸ",щ:"ϸ",ъ:"Ϲ̇",ы:"Ϲ",ь:"Ϲ̈",э:"Ϻ",ю:"ϻ",я:"ϼ"};
+    const dragonGlyphs = {а:"𒀀", б:"𒀁", в:"𒀂", г:"𒀃", д:"𒀄", е:"𒀅", ё:"𒀆", ж:"𒀇", з:"𒀈", и:"𒀉", й:"𒀊", к:"𒀋", л:"𒀌", м:"𒀍", н:"𒀎", о:"𒀏", п:"𒀐", р:"𒀑", с:"𒀒", т:"𒀓", у:"𒀔", ф:"𒀕", х:"𒀖", ц:"𒀗", ч:"𒀘", ш:"𒀙", щ:"𒀚", ъ:"𒀛", ы:"𒀜", ь:"𒀝", э:"𒀞", ю:"𒀟", я:"𒀠"};
+    const celestialGlyphs = {а:"𐡀", б:"𐡁", в:"𐡅", г:"𐡂", д:"𐡃", е:"𐡄", ё:"𐡟", ж:"𐡆", з:"𐡈", и:"𐡉", й:"𐡝",к:"𐡊", л:"𐡋", м:"𐡌", н:"𐡍", о:"𐡏", п:"𐡐", р:"𐡓", с:"𐡔", т:"𐡕", у:"𐡜",ф:"𐡗", х:"𐡘", ц:"𐡙", ч:"𐡞", ш:"𐡑", щ:"𐡇", ъ:"𐡎", ы:"𐡛", ь:"𐡛", э:"𐭪", ю:"𐭫", я:"𐭮"};
+
+    function reverse(obj) {
+        let r = {};
+        for (let k in obj) r[obj[k]] = k;
+        return r;
+    }
+
+    const infernalReverse = reverse(infernalGlyphs);
+    const dwarfReverse = reverse(dwarfGlyphs);
+    const elfReverse = reverse(elfGlyphs);
+    const dragonReverse = reverse(dragonGlyphs);
+    const celestialReverse = reverse(celestialGlyphs);
+    const druidicReverse = reverse(druidicGlyphs);
+
+    // Звучания
+    const infernalSound = {а:"kha",б:"ba",в:"vakh",г:"gar",д:"dakh",е:"ekh",ё:"iokh",ж:"zhak",з:"zhar",и:"ikh",й:"yikh",к:"khor",л:"lakh",м:"makh",н:"nakh",о:"okh",п:"pakh",р:"rakh",с:"sakh",т:"thak",у:"ukh",ф:"fakh",х:"khra",ц:"tsakh",ч:"chak",ш:"shakh",щ:"shrak",ъ:"",ы:"ykh",ь:"",э:"ekh",ю:"yukh",я:"yakh"};
+    const abyssalSound = {а:"grr",б:"brru",в:"vrru",г:"grru",д:"drru",е:"eh",ё:"ioh",ж:"zhrr",з:"zrr",и:"ih",й:"irh",к:"krru",л:"lrru",м:"mrru",н:"nrru",о:"oh",п:"prru",р:"rrra",с:"srru",т:"trru",у:"uh",ф:"frru",х:"khrra",ц:"tsrru",ч:"chrru",ш:"shrru",щ:"shrrra",ъ:"",ы:"rru",ь:"",э:"eh",ю:"rru",я:"rra"};
+    const dwarfSound = {а:"ar",б:"bar",в:"var",г:"gar",д:"dur",е:"er",ё:"or",ж:"zor",з:"zur",и:"ir",й:"ir",к:"kar",л:"lor",м:"mor",н:"nar",о:"or",п:"par",р:"ruk",с:"skar",т:"tor",у:"ur",ф:"far",х:"khar",ц:"kar",ч:"chor",ш:"shar",щ:"shor",ъ:"",ы:"yr",ь:"",э:"er",ю:"ur",я:"ar"};
+    const gnomeSound = {а:"li",б:"bi",в:"vi",г:"gi",д:"di",е:"e",ё:"io",ж:"zhi",з:"zi",и:"i",й:"yi",к:"ki",л:"li",м:"mi",н:"ni",о:"o",п:"pi",р:"ri",с:"si",т:"ti",у:"u",ф:"fi",х:"hi",ц:"tsi",ч:"chi",ш:"shi",щ:"shi",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya"};
+    const goblinSound = {а:"ak",б:"bak",в:"vak",г:"gak",д:"dak",е:"ek",ё:"ok",ж:"zhak",з:"zak",и:"ik",й:"ik",к:"kak",л:"lak",м:"mak",н:"nak",о:"ok",п:"pak",р:"rak",с:"sak",т:"tak",у:"uk",ф:"fak",х:"khak",ц:"tsak",ч:"chak",ш:"shak",щ:"shak",ъ:"",ы:"yk",ь:"",э:"ek",ю:"uk",я:"yak"};
+    const orcSound = {а:"ug",б:"bug",в:"vug",г:"gug",д:"dug",е:"eg",ё:"og",ж:"zhug",з:"zug",и:"ig",й:"ig",к:"kug",л:"lug",м:"mug",н:"nug",о:"og",п:"pug",р:"rug",с:"sug",т:"tug",у:"ug",ф:"fug",х:"khug",ц:"tsug",ч:"chug",ш:"shug",щ:"shug",ъ:"",ы:"ug",ь:"",э:"eg",ю:"ug",я:"ag"};
+    const primordialSound = {а:"rum",б:"brum",в:"vrum",г:"grum",д:"drum",е:"em",ё:"om",ж:"zhum",з:"zum",и:"im",й:"ir",к:"krum",л:"lum",м:"mum",н:"num",о:"om",п:"prum",р:"rrum",с:"sum",т:"trum",у:"um",ф:"frum",х:"khrum",ц:"tsum",ч:"chum",ш:"shum",щ:"shum",ъ:"",ы:"um",ь:"",э:"em",ю:"um",я:"am"};
+    const giantSound = {а:"gor",б:"bar",в:"var",г:"gor",д:"dor",е:"e",ё:"o",ж:"zor",з:"zor",и:"i",й:"i",к:"kar",л:"lor",м:"mor",н:"nar",о:"o",п:"par",р:"ruk",с:"skar",т:"tor",у:"ur",ф:"far",х:"khor",ц:"kar",ч:"chor",ш:"shor",щ:"shor",ъ:"",ы:"ur",ь:"",э:"e",ю:"ur",я:"ar"};
+    const elfSound = {а:"ae",б:"bhel",в:"vhel",г:"ghel",д:"dhel",е:"e",ё:"eo",ж:"zhel",з:"zel",и:"i",й:"yi",к:"khel",л:"lae",м:"mael",н:"nael",о:"o",п:"phel",р:"rael",с:"sae",т:"thel",у:"u",ф:"fael",х:"hael",ц:"tsel",ч:"chel",ш:"shel",щ:"shael",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"yae"};
+    const sylvanSound = {а:"thal",б:"bhi",в:"vhi",г:"ghi",д:"dhi",е:"ei",ё:"eio",ж:"zhil",з:"zil",и:"il",й:"yil",к:"khi",л:"llyn",м:"mhi",н:"nhi",о:"o",п:"phi",р:"rhi",с:"si",т:"thi",у:"u",ф:"fhi",х:"hwi",ц:"tsi",ч:"chi",ш:"shyi",щ:"shyi",ъ:"",ы:"wy",ь:"",э:"ei",ю:"yul",я:"yath"};
+    const drowSound = {а:"dha",б:"bha",в:"vha",г:"gha",д:"dha",е:"e",ё:"eo",ж:"zha",з:"za",и:"i",й:"yi",к:"kha",л:"lha",м:"mha",н:"nha",о:"o",п:"pha",р:"rha",с:"ssa",т:"tha",у:"u",ф:"fha",х:"kha",ц:"tsa",ч:"cha",ш:"ssha",щ:"sshae",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"yha"};
+    const dragonSound = {а:"dra",б:"gra",в:"sva",г:"gar",д:"dar",е:"ess",ё:"ios",ж:"zha",з:"zar",и:"iss",й:"ir",к:"kar",л:"lar",м:"mar",н:"nar",о:"oss",п:"par",р:"rra",с:"sar",т:"tar",у:"ur",ф:"far",х:"khar",ц:"tsar",ч:"char",ш:"sshar",щ:"sshar",ъ:"",ы:"yr",ь:"",э:"er",ю:"sur",я:"ar"};
+    const deepSound = {а:"glu",б:"blu",в:"vlu",г:"gru",д:"dlu",е:"eh",ё:"eoh",ж:"zhu",з:"zu",и:"ih",й:"yih",к:"klu",л:"llu",м:"mlu",н:"nlu",о:"oh",п:"plu",р:"rru",с:"slu",т:"tlu",у:"uh",ф:"flu",х:"khu",ц:"tslu",ч:"chlu",ш:"shlu",щ:"shlu",ъ:"",ы:"u",ь:"",э:"eh",ю:"ulu",я:"alu"};
+    const celestialSound = {а:"ael",б:"bael",в:"vael",г:"gael",д:"dael",е:"el",ё:"eol",ж:"zhael",з:"zael",и:"iel",й:"yiel",к:"kael",л:"lael",м:"mael",н:"nael",о:"ol",п:"pael",р:"rael",с:"sael",т:"tael",у:"uel",ф:"fael",х:"hael",ц:"tsael",ч:"chael",ш:"shael",щ:"shael",ъ:"",ы:"yel",ь:"",э:"el",ю:"yuel",я:"yael"};
+    
+    // Уникальное звучание для друидического
+    const druidicSound = {
+        'а': 'al', 'б': 'bir', 'в': 'val', 'г': 'gal',
+        'д': 'dal', 'е': 'el', 'ё': 'el', 'ж': 'zhal',
+        'з': 'zal', 'и': 'il', 'й': 'il', 'к': 'kal',
+        'л': 'lal', 'м': 'mal', 'н': 'nal', 'о': 'ol',
+        'п': 'pal', 'р': 'ral', 'с': 'sal', 'т': 'tal',
+        'у': 'ul', 'ф': 'fal', 'х': 'hal', 'ц': 'tsal',
+        'ч': 'chal', 'ш': 'shal', 'щ': 'shal', 'ъ': '',
+        'ы': 'yl', 'ь': '', 'э': 'el', 'ю': 'yul',
+        'я': 'yal'
+    };
+
+    // Функция для удаления дублирующихся слогов внутри слова
+    function removeDuplicateSyllables(word) {
+        if (!word) return '';
+        let result = '';
+        let lastSyllable = '';
+        // Разбиваем на слоги по 2-3 символа
+        for (let i = 0; i < word.length; i++) {
+            let syllable = word[i];
+            // Если следующий символ гласная, добавляем его для 2-буквенных слогов
+            if (i + 1 < word.length && /[aeiou]/i.test(word[i+1])) {
+                syllable += word[i+1];
+                i++;
+            }
+            if (syllable !== lastSyllable) {
+                result += syllable;
+                lastSyllable = syllable;
+            }
+        }
+        return result;
+    }
+
+    function compressSound(text) {
+        let words = text.split(/\s+/);
+        let compressed = words.map(word => removeDuplicateSyllables(word));
+        return compressed.join(' ').trim();
+    }
+
+    const buttonGroups = [
+        { name: "Инфернальный", groupId: "infernal-group", modes: ["infernal-original", "infernal", "abyssal"], displayNames: ["Инфернальный оригинал (BGDIA)", "Инфернальный", "Бездна"] },
+        { name: "Дварфийский", groupId: "dwarf-group", modes: ["dwarf-original", "dwarf", "giant", "gnome", "goblin", "orc", "primordial"], displayNames: ["Дварфийский оригинал (PHB)", "Дварфийский", "Великаний", "Гномий", "Гоблинский", "Орочий", "Первичный"] },
+        { name: "Эльфийский", groupId: "elf-group", modes: ["elf", "elf-original", "sylvan", "drow"], displayNames: ["Эльфийский", "Эльфийский оригинал (PHB)", "Сильван", "Подземный"] },
+        { name: "Драконий", groupId: "dragon-group", modes: ["dragon", "dragon-original"], displayNames: ["Драконий", "Драконий оригинал (PHB)"] }
+    ];
+    
+    const singleModes = [
+        { name: "Глубинная речь", mode: "deep", groupId: "deep" },
+        { name: "Небесный", mode: "celestial", groupId: "celestial" },
+        { name: "Воровской жаргон", mode: "thief", groupId: "thief" },
+        { name: "Друидический", mode: "druidic", groupId: "druidic" }
+    ];
+
+    function buildInterface() {
+        const container = document.getElementById("buttonsContainer");
+        container.innerHTML = "";
+        
+        buttonGroups.forEach(group => {
+            const dropdownDiv = document.createElement("div");
+            dropdownDiv.className = "dropdown";
+            dropdownDiv.setAttribute("data-group", group.groupId);
+            
+            const mainBtn = document.createElement("button");
+            mainBtn.textContent = group.name + " ▾";
+            dropdownDiv.appendChild(mainBtn);
+            
+            const contentDiv = document.createElement("div");
+            contentDiv.className = "dropdown-content";
+            
+            group.modes.forEach((modeKey, idx) => {
+                const btn = document.createElement("button");
+                btn.textContent = group.displayNames[idx];
+                btn.onclick = () => setMode(modeKey);
+                contentDiv.appendChild(btn);
+            });
+            
+            dropdownDiv.appendChild(contentDiv);
+            container.appendChild(dropdownDiv);
+        });
+        
+        singleModes.forEach(single => {
+            const btn = document.createElement("button");
+            btn.textContent = single.name;
+            btn.className = "single-button";
+            btn.setAttribute("data-single", single.mode);
+            btn.onclick = () => setMode(single.mode);
+            container.appendChild(btn);
+        });
+    }
+    
+    function updateActiveUI() {
+        document.querySelectorAll(".dropdown").forEach(drop => drop.classList.remove("active"));
+        document.querySelectorAll(".dropdown-content button").forEach(btn => btn.classList.remove("active-mode"));
+        document.querySelectorAll(".single-button").forEach(btn => btn.classList.remove("active"));
+        
+        for (let group of buttonGroups) {
+            const idx = group.modes.indexOf(mode);
+            if (idx !== -1) {
+                const dropdown = document.querySelector(`.dropdown[data-group="${group.groupId}"]`);
+                if (dropdown) dropdown.classList.add("active");
+                const subBtns = dropdown.querySelectorAll(".dropdown-content button");
+                if (subBtns[idx]) subBtns[idx].classList.add("active-mode");
+                return;
+            }
+        }
+        
+        for (let single of singleModes) {
+            if (mode === single.mode) {
+                const btn = document.querySelector(`.single-button[data-single="${single.mode}"]`);
+                if (btn) btn.classList.add("active");
+                return;
+            }
+        }
+    }
+
+    function setMode(m) {
+        mode = m;
+        document.body.style.background = `url(${backgrounds[m] || backgrounds.dragon}) center/cover no-repeat fixed`;
+        const output = document.getElementById("output");
+        output.className = `output ${m}`;
+        updateButtons();
+        updateActiveUI();
+        buildAlphabet();
+        convert();
+    }
+
+    function updateButtons() {
+        const copyTextBtn = document.getElementById("copyTextBtn");
+        let copyImageBtn = document.getElementById("copyImageBtn");
+        
+        if (mode === "dragon-original" || mode === "elf-original" || mode === "dwarf-original" || mode === "infernal-original") {
+            copyTextBtn.style.display = "none";
+            if (!copyImageBtn) {
+                const controls = document.getElementById("controls");
+                const imgBtn = document.createElement("button");
+                imgBtn.id = "copyImageBtn";
+                imgBtn.innerHTML = "🖼 Скопировать картинку";
+                imgBtn.onclick = copyAsImage;
+                controls.insertBefore(imgBtn, controls.lastChild);
+            } else {
+                copyImageBtn.style.display = "inline-block";
+            }
+        } else {
+            copyTextBtn.style.display = "inline-block";
+            if (copyImageBtn) copyImageBtn.style.display = "none";
+        }
+    }
+
+    function getElfSound(text) {
+        let result = "";
+        for (let c of text.toLowerCase()) {
+            if (c === ' ' || c === '\n') { result += ' '; continue; }
+            let sound = elfSound[c];
+            if (sound) result += sound;
+        }
+        let words = result.split(/\s+/).filter(w => w);
+        let compressed = words.map(w => removeDuplicateSyllables(w));
+        let shortWords = compressed.map(w => w.slice(0,6));
+        return shortWords.join(" ");
+    }
+
+    function getDwarfSound(text) {
+        let result = "";
+        for (let c of text.toLowerCase()) {
+            if (c === ' ' || c === '\n') { result += ' '; continue; }
+            let sound = dwarfSound[c];
+            if (sound) result += sound;
+        }
+        let words = result.split(/\s+/).filter(w => w);
+        let compressed = words.map(w => removeDuplicateSyllables(w));
+        let shortWords = compressed.map(w => w.slice(0,6));
+        return shortWords.join(" ");
+    }
+
+    function getInfernalSound(text) {
+        let result = "";
+        for (let c of text.toLowerCase()) {
+            if (c === ' ' || c === '\n') { result += ' '; continue; }
+            let sound = infernalSound[c];
+            if (sound) result += sound;
+        }
+        let words = result.split(/\s+/).filter(w => w);
+        let compressed = words.map(w => removeDuplicateSyllables(w));
+        let shortWords = compressed.map(w => w.slice(0,6));
+        return shortWords.join(" ");
+    }
+
+    function getDragonSound(text) {
+        let result = "";
+        for (let c of text.toLowerCase()) {
+            if (c === ' ' || c === '\n') { result += ' '; continue; }
+            let sound = dragonSound[c];
+            if (sound) result += sound;
+        }
+        let words = result.split(/\s+/).filter(w => w);
+        let compressed = words.map(w => removeDuplicateSyllables(w));
+        let shortWords = compressed.map(w => w.slice(0,6));
+        return shortWords.join(" ");
+    }
+
+    function getDruidicSound(text) {
+        let result = "";
+        for (let c of text.toLowerCase()) {
+            if (c === ' ' || c === '\n') { result += ' '; continue; }
+            let sound = druidicSound[c];
+            if (sound) result += sound;
+        }
+        let words = result.split(/\s+/).filter(w => w);
+        let compressed = words.map(w => removeDuplicateSyllables(w));
+        let shortWords = compressed.map(w => w.slice(0,6));
+        return shortWords.join(" ");
+    }
+
+    function convert() {
+        let input = document.getElementById("input").value;
+        const outputEl = document.getElementById("output");
+
+        // Воровской жаргон (с обратным переводом)
+        if (mode === "thief") {
+            let outputText = input;
+            
+            // 1. Сначала заменяем глифы на русские слова
+            for (let [glyph, ruWord] of Object.entries(glyphToRuWord)) {
+                if (outputText.includes(glyph)) {
+                    outputText = outputText.split(glyph).join(ruWord);
+                }
+            }
+            
+            // 2. Заменяем воровские термины на русские слова
+            for (let [cantWord, ruWord] of Object.entries(reverseThiefDict)) {
+                const regex = new RegExp("\\b" + cantWord + "\\b", "gi");
+                outputText = outputText.replace(regex, ruWord);
+            }
+            
+            // 3. Заменяем русские слова на воровской термин + глиф
+            for (let [ruWord, data] of Object.entries(thiefDict)) {
+                const regex = new RegExp("\\b" + ruWord + "\\b", "gi");
+                outputText = outputText.replace(regex, data.word + " " + data.glyph);
+            }
+            
+            outputEl.innerText = outputText;
+            document.getElementById("reading").innerHTML = "Воровской жаргон";
+            document.getElementById("info").innerHTML = "Письменность: Воровские метки | Диалект: Воровской жаргон";
+            return;
+        }
+
+        // Инфернальный оригинал
+        if (mode === "infernal-original") {
+            let html = "";
+            for (let c of input) {
+                if (c === " ") { html += " "; continue; }
+                if (c === "\n") { html += "<br>"; continue; }
+                let lower = c.toLowerCase();
+                if (infernalPNGs[lower]) {
+                    html += `<img src="${infernalPNGs[lower]}" class="infernal-img" onerror="this.style.display='none';">`;
+                } else {
+                    html += c;
+                }
+            }
+            outputEl.innerHTML = html;
+            const soundText = getInfernalSound(input);
+            document.getElementById("reading").innerHTML = "Звучание: " + soundText;
+            document.getElementById("info").innerHTML = "Письменность: Инфернальная | Диалект: Инфернальный оригинал (BGDIA)";
+            return;
+        }
+
+        // Дварфийский оригинал
+        if (mode === "dwarf-original") {
+            let html = "";
+            for (let c of input) {
+                if (c === " ") { html += " "; continue; }
+                if (c === "\n") { html += "<br>"; continue; }
+                let lower = c.toLowerCase();
+                if (dwarvishPNGs[lower]) {
+                    html += `<img src="${dwarvishPNGs[lower]}" class="dwarf-img" onerror="this.style.display='none';">`;
+                } else {
+                    html += c;
+                }
+            }
+            outputEl.innerHTML = html;
+            const soundText = getDwarfSound(input);
+            document.getElementById("reading").innerHTML = "Звучание: " + soundText;
+            document.getElementById("info").innerHTML = "Письменность: Дварфийская | Диалект: Дварфийский оригинал (PHB)";
+            return;
+        }
+
+        // Эльфийский оригинал
+        if (mode === "elf-original") {
+            let html = "";
+            for (let c of input) {
+                if (c === " ") { html += " "; continue; }
+                if (c === "\n") { html += "<br>"; continue; }
+                let lower = c.toLowerCase();
+                if (elvishPNGs[lower]) {
+                    html += `<img src="${elvishPNGs[lower]}" class="elf-img" onerror="this.style.display='none';">`;
+                } else {
+                    html += c;
+                }
+            }
+            outputEl.innerHTML = html;
+            const soundText = getElfSound(input);
+            document.getElementById("reading").innerHTML = "Звучание: " + soundText;
+            document.getElementById("info").innerHTML = "Письменность: Эльфийская | Диалект: Эльфийский оригинал (PHB)";
+            return;
+        }
+
+        // Драконий оригинал
+        if (mode === "dragon-original") {
+            let html = "";
+            for (let c of input) {
+                if (c === " ") { html += " "; continue; }
+                if (c === "\n") { html += "<br>"; continue; }
+                let lower = c.toLowerCase();
+                if (iokharicPNGs[lower]) {
+                    html += `<img src="${iokharicPNGs[lower]}" class="dragon-img" onerror="this.style.display='none';">`;
+                } else {
+                    html += c;
+                }
+            }
+            outputEl.innerHTML = html;
+            const soundText = getDragonSound(input);
+            document.getElementById("reading").innerHTML = "Звучание: " + soundText;
+            document.getElementById("info").innerHTML = "Письменность: Драконья | Диалект: Драконий оригинал (PHB)";
+            return;
+        }
+
+        // ДРУИДИЧЕСКИЙ
+        if (mode === "druidic") {
+            let glyphs = druidicGlyphs;
+            let reverseMap = druidicReverse;
+            
+            let glyphText = "", read = "", russian = "";
+            let isGlyphInput = false;
+            
+            for (let c of input) {
+                if (c === " " || c === "\n") {
+                    glyphText += c;
+                    read += c;
+                    russian += c;
+                    continue;
+                }
+                let lower = c.toLowerCase();
+                if (reverseMap[c]) {
+                    isGlyphInput = true;
+                    let r = reverseMap[c];
+                    russian += r;
+                    glyphText += c;
+                    read += druidicSound[r] || "";
+                } else {
+                    russian += lower;
+                    glyphText += glyphs[lower] || lower;
+                    read += druidicSound[lower] || "";
+                }
+            }
+            
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            
+            outputEl.innerText = glyphText;
+            document.getElementById("reading").innerHTML = isGlyphInput ? "Перевод на русский: " + russian : "Звучание: " + finalSound;
+            document.getElementById("info").innerHTML = "Письменность: Друидическая | Диалект: Друидический";
+            return;
+        }
+
+        // Обычный драконий
+        if (mode === "dragon") {
+            let glyphs = dragonGlyphs;
+            let reverseMap = dragonReverse;
+            let glyphText = "", read = "", russian = "";
+            let isGlyphInput = false;
+            for (let c of input) {
+                if (c === " " || c === "\n") { glyphText += c; read += c; russian += c; continue; }
+                let lower = c.toLowerCase();
+                if (reverseMap[c]) {
+                    isGlyphInput = true;
+                    let r = reverseMap[c];
+                    russian += r;
+                    glyphText += c;
+                    read += dragonSound[r] || "";
+                } else {
+                    russian += lower;
+                    glyphText += glyphs[lower] || lower;
+                    read += dragonSound[lower] || "";
+                }
+            }
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            outputEl.innerText = glyphText;
+            document.getElementById("reading").innerHTML = isGlyphInput ? "Перевод на русский: " + russian : "Звучание: " + finalSound;
+            document.getElementById("info").innerHTML = "Письменность: Драконья | Диалект: Драконий";
+            return;
+        }
+
+        // Обычный дварфийский и диалекты
+        if (mode === "dwarf" || mode === "giant" || mode === "gnome" || mode === "goblin" || mode === "orc" || mode === "primordial") {
+            let glyphs = dwarfGlyphs;
+            let sounds = mode === "dwarf" ? dwarfSound :
+                         mode === "giant" ? giantSound :
+                         mode === "gnome" ? gnomeSound :
+                         mode === "goblin" ? goblinSound :
+                         mode === "orc" ? orcSound : primordialSound;
+            let reverseMap = dwarfReverse;
+            let glyphText = "", read = "", russian = "";
+            let isGlyphInput = false;
+            for (let c of input) {
+                if (c === " " || c === "\n") { glyphText += c; read += c; russian += c; continue; }
+                let lower = c.toLowerCase();
+                if (reverseMap[c]) {
+                    isGlyphInput = true;
+                    let r = reverseMap[c];
+                    russian += r;
+                    glyphText += c;
+                    read += sounds[r] || "";
+                } else {
+                    russian += lower;
+                    glyphText += glyphs[lower] || lower;
+                    read += sounds[lower] || "";
+                }
+            }
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            outputEl.innerText = glyphText;
+            document.getElementById("reading").innerHTML = isGlyphInput ? "Перевод на русский: " + russian : "Звучание: " + finalSound;
+            const names = {dwarf:"Дварфийский", giant:"Великаний", gnome:"Гномий", goblin:"Гоблинский", orc:"Орочий", primordial:"Первичный"};
+            document.getElementById("info").innerHTML = `Письменность: Дварфийская | Диалект: ${names[mode]}`;
+            return;
+        }
+
+        // Обычный эльфийский и диалекты
+        if (mode === "elf" || mode === "sylvan" || mode === "drow") {
+            let glyphs = elfGlyphs;
+            let sounds = mode === "elf" ? elfSound : mode === "sylvan" ? sylvanSound : drowSound;
+            let reverseMap = elfReverse;
+            let glyphText = "", read = "", russian = "";
+            let isGlyphInput = false;
+            for (let c of input) {
+                if (c === " " || c === "\n") { glyphText += c; read += c; russian += c; continue; }
+                let lower = c.toLowerCase();
+                if (reverseMap[c]) {
+                    isGlyphInput = true;
+                    let r = reverseMap[c];
+                    russian += r;
+                    glyphText += c;
+                    read += sounds[r] || "";
+                } else {
+                    russian += lower;
+                    glyphText += glyphs[lower] || lower;
+                    read += sounds[lower] || "";
+                }
+            }
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            outputEl.innerText = glyphText;
+            document.getElementById("reading").innerHTML = isGlyphInput ? "Перевод на русский: " + russian : "Звучание: " + finalSound;
+            const names = {elf:"Эльфийский", sylvan:"Сильван", drow:"Подземный"};
+            document.getElementById("info").innerHTML = `Письменность: Эльфийская | Диалект: ${names[mode]}`;
+            return;
+        }
+
+        // Инфернальный и бездна
+        if (mode === "infernal" || mode === "abyssal") {
+            let glyphs = infernalGlyphs;
+            let sounds = mode === "infernal" ? infernalSound : abyssalSound;
+            let reverseMap = infernalReverse;
+            let glyphText = "", read = "", russian = "";
+            let isGlyphInput = false;
+            for (let c of input) {
+                if (c === " " || c === "\n") { glyphText += c; read += c; russian += c; continue; }
+                let lower = c.toLowerCase();
+                if (reverseMap[c]) {
+                    isGlyphInput = true;
+                    let r = reverseMap[c];
+                    russian += r;
+                    glyphText += c;
+                    read += sounds[r] || "";
+                } else {
+                    russian += lower;
+                    glyphText += glyphs[lower] || lower;
+                    read += sounds[lower] || "";
+                }
+            }
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            outputEl.innerText = glyphText;
+            document.getElementById("reading").innerHTML = isGlyphInput ? "Перевод на русский: " + russian : "Звучание: " + finalSound;
+            document.getElementById("info").innerHTML = `Письменность: Инфернальная | Диалект: ${mode === "infernal" ? "Инфернальный" : "Бездна"}`;
+            return;
+        }
+
+        // Небесный
+        if (mode === "celestial") {
+            let glyphs = celestialGlyphs;
+            let sounds = celestialSound;
+            let reverseMap = celestialReverse;
+            let glyphText = "", read = "", russian = "";
+            let isGlyphInput = false;
+            for (let c of input) {
+                if (c === " " || c === "\n") { glyphText += c; read += c; russian += c; continue; }
+                let lower = c.toLowerCase();
+                if (reverseMap[c]) {
+                    isGlyphInput = true;
+                    let r = reverseMap[c];
+                    russian += r;
+                    glyphText += c;
+                    read += sounds[r] || "";
+                } else {
+                    russian += lower;
+                    glyphText += glyphs[lower] || lower;
+                    read += sounds[lower] || "";
+                }
+            }
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            outputEl.innerText = glyphText;
+            document.getElementById("reading").innerHTML = isGlyphInput ? "Перевод на русский: " + russian : "Звучание: " + finalSound;
+            document.getElementById("info").innerHTML = "Письменность: Небесная";
+            return;
+        }
+
+        // Глубинная речь
+        if (mode === "deep") {
+            let sounds = deepSound;
+            let read = "";
+            for (let c of input) {
+                if (c === " " || c === "\n") { read += c; continue; }
+                let lower = c.toLowerCase();
+                read += sounds[lower] || "";
+            }
+            let words = read.split(/\s+/).filter(w => w);
+            let compressed = words.map(w => removeDuplicateSyllables(w));
+            let shortWords = compressed.map(w => w.slice(0,6));
+            let finalSound = shortWords.join(" ");
+            outputEl.innerText = input;
+            document.getElementById("reading").innerHTML = "Звучание: " + finalSound;
+            document.getElementById("info").innerHTML = "Глубинная речь | Письменности нет";
+            return;
+        }
+    }
+
+    function buildAlphabet() {
+        let container = document.getElementById("alphabet");
+        container.innerHTML = "";
+        container.className = "table";
+
+        if (mode === "deep") {
+            container.innerHTML = '<p style="color:#ffcc88; font-size:18px; padding:40px; grid-column:1/-1; font-family:MedievalSharp;">У глубинной речи нет письменности</p>';
+            return;
+        }
+
+        if (mode === "dragon-original") {
+            container.classList.add("dragon-table");
+            const letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".split("");
+            letters.forEach((letter, i) => {
+                let cell = document.createElement("div");
+                cell.className = "dragon-cell";
+                cell.style.animationDelay = (i * 20) + "ms";
+                const imgSrc = iokharicPNGs[letter];
+                cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><img src="${imgSrc}" class="glyph-img" onerror="this.style.display='none';">`;
+                cell.onclick = () => { document.getElementById("input").value += letter; convert(); };
+                container.appendChild(cell);
+                setTimeout(() => cell.classList.add("visible"), 30);
+            });
+            return;
+        }
+
+        if (mode === "elf-original") {
+            container.classList.add("elf-table");
+            const letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".split("");
+            letters.forEach((letter, i) => {
+                let cell = document.createElement("div");
+                cell.className = "elf-cell";
+                cell.style.animationDelay = (i * 20) + "ms";
+                const imgSrc = elvishPNGs[letter];
+                if (imgSrc) {
+                    cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><img src="${imgSrc}" class="glyph-img" onerror="this.style.display='none';">`;
+                    cell.onclick = () => { document.getElementById("input").value += letter; convert(); };
+                } else {
+                    cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><div style="color:#888;">(нет глифа)</div>`;
+                }
+                container.appendChild(cell);
+                setTimeout(() => cell.classList.add("visible"), 30);
+            });
+            return;
+        }
+
+        if (mode === "dwarf-original") {
+            container.classList.add("dwarf-table");
+            const letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".split("");
+            letters.forEach((letter, i) => {
+                let cell = document.createElement("div");
+                cell.className = "dwarf-cell";
+                cell.style.animationDelay = (i * 20) + "ms";
+                const imgSrc = dwarvishPNGs[letter];
+                if (imgSrc) {
+                    cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><img src="${imgSrc}" class="glyph-img" onerror="this.style.display='none';">`;
+                    cell.onclick = () => { document.getElementById("input").value += letter; convert(); };
+                } else {
+                    cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><div style="color:#888;">(нет глифа)</div>`;
+                }
+                container.appendChild(cell);
+                setTimeout(() => cell.classList.add("visible"), 30);
+            });
+            return;
+        }
+
+        if (mode === "infernal-original") {
+            container.classList.add("infernal-table");
+            const letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".split("");
+            letters.forEach((letter, i) => {
+                let cell = document.createElement("div");
+                cell.className = "infernal-cell";
+                cell.style.animationDelay = (i * 20) + "ms";
+                const imgSrc = infernalPNGs[letter];
+                if (imgSrc) {
+                    cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><img src="${imgSrc}" class="glyph-img" onerror="this.style.display='none';">`;
+                    cell.onclick = () => { document.getElementById("input").value += letter; convert(); };
+                } else {
+                    cell.innerHTML = `<div class="letter">${letter.toUpperCase()}</div><div style="color:#888;">(нет глифа)</div>`;
+                }
+                container.appendChild(cell);
+                setTimeout(() => cell.classList.add("visible"), 30);
+            });
+            return;
+        }
+
+        // Друидический алфавит
+        if (mode === "druidic") {
+            container.classList.add("alphabet-normal");
+            const letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя".split("");
+            letters.forEach((letter, i) => {
+                let cell = document.createElement("div");
+                cell.className = `cell druidic`;
+                cell.style.animationDelay = (i * 20) + "ms";
+                const glyph = druidicGlyphs[letter] || '?';
+                cell.innerHTML = `<span>${letter.toUpperCase()}</span><span class="glyph">${glyph}</span>`;
+                cell.onclick = () => { document.getElementById("input").value += glyph; convert(); };
+                container.appendChild(cell);
+                setTimeout(() => cell.classList.add("visible"), 30);
+            });
+            return;
+        }
+
+        const isThief = mode === "thief";
+        if (isThief) container.classList.add("alphabet-thief");
+        else container.classList.add("alphabet-normal");
+
+        let currentGlyphs;
+        if (mode === "elf" || mode === "sylvan" || mode === "drow") currentGlyphs = elfGlyphs;
+        else if (mode === "infernal" || mode === "abyssal") currentGlyphs = infernalGlyphs;
+        else if (mode === "dwarf" || mode === "giant" || mode === "gnome" || mode === "goblin" || mode === "orc" || mode === "primordial") currentGlyphs = dwarfGlyphs;
+        else if (mode === "dragon") currentGlyphs = dragonGlyphs;
+        else if (mode === "celestial") currentGlyphs = celestialGlyphs;
+        else currentGlyphs = infernalGlyphs;
+
+        const items = isThief ? thiefWords : Object.keys(currentGlyphs);
+        items.forEach((item, i) => {
+            let cell = document.createElement("div");
+            cell.className = `cell ${mode}`;
+            cell.style.animationDelay = (i * 20) + "ms";
+            if (isThief) {
+                cell.innerHTML = `<span><b>${item.ru}</b> → ${item.cant}</span><span class="glyph">${item.glyph}</span>`;
+                cell.onclick = () => { document.getElementById("input").value += item.glyph + " "; convert(); };
+            } else {
+                cell.innerHTML = `<span>${item.toUpperCase()}</span><span class="glyph">${currentGlyphs[item]}</span>`;
+                cell.onclick = () => { document.getElementById("input").value += currentGlyphs[item]; convert(); };
+            }
+            container.appendChild(cell);
+            setTimeout(() => cell.classList.add("visible"), 30);
+        });
+    }
+
+    function copyText() {
+        const output = document.getElementById("output");
+        let textToCopy = (mode === "dragon-original" || mode === "elf-original" || mode === "dwarf-original" || mode === "infernal-original") ? document.getElementById("input").value : output.innerText;
+        if (textToCopy && textToCopy.trim()) navigator.clipboard.writeText(textToCopy).then(() => alert("✅ Перевод скопирован!"));
+        else alert("Нет текста для копирования");
+    }
+
+    function clearAll() {
+        document.getElementById("input").value = "";
+        document.getElementById("output").innerHTML = "";
+        document.getElementById("reading").innerHTML = "";
+        document.getElementById("info").innerHTML = "";
+    }
+
+    async function copyAsImage() {
+        const output = document.getElementById("output");
+        if (!output.innerHTML.trim() || output.innerHTML === " ") { 
+            alert("Сначала введите текст!"); 
+            return; 
+        }
+        if (window.location.protocol === "file:") {
+            alert("⚠️ Копирование картинки не работает при открытии файла напрямую (file://).\n\n🔧 Решение:\nЗагрузите сайт на GitHub Pages или используйте локальный сервер (Live Server в VS Code).");
+            return;
+        }
+        try {
+            if (typeof html2canvas === 'undefined') {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+            const canvas = await html2canvas(output, { backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false });
+            canvas.toBlob(async (blob) => {
+                if (!blob) { 
+                    alert("Не удалось создать изображение"); 
+                    return; 
+                }
+                try { 
+                    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                    alert("✅ Картинка скопирована в буфер!\nТеперь можно отправить в Telegram (Ctrl+V)");
+                } catch (e) { 
+                    alert("Ошибка копирования: " + e.message); 
+                }
+            }, "image/png", 1.0);
+        } catch (err) { 
+            console.error(err); 
+            alert("Ошибка: " + err.message); 
+        }
+    }
+
+    // Модальное окно
+    const modal = document.getElementById("helpModal");
+    const helpBtn = document.getElementById("helpBtn");
+    const closeModal = document.getElementById("closeModal");
+
+    helpBtn.onclick = function() {
+        modal.style.display = "flex";
+    }
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    buildInterface();
+    window.onload = () => {
+        setMode("infernal");
+    };
+</script>
+</body>
+</html>
