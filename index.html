@@ -674,27 +674,37 @@
 
     // ========== Очистка текста ==========
     function cleanText(str) {
-        if (!str) return '';
-        let cleaned = String(str);
-        cleaned = cleaned.replace(/<[^>]*>/g, ' ');
-        cleaned = cleaned.replace(/@UUID\[[^\]]+\]/g, '');
-        cleaned = cleaned.replace(/@Compendium\[[^\]]+\]/g, '');
-        cleaned = cleaned.replace(/\[\[\/r\s+[^\]]+\]\]/g, '');
-        cleaned = cleaned.replace(/\[\[\/damage\s+[^\]]+\]\]/g, '');
-        cleaned = cleaned.replace(/&reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
-        cleaned = cleaned.replace(/&Reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
-        cleaned = cleaned.replace(/&reference\[[^\]]+\]/g, '');
-        cleaned = cleaned.replace(/&Reference\[[^\]]+\]/g, '');
-        cleaned = cleaned.replace(/reference\[[^\]]+\]/gi, '');
-        cleaned = cleaned.replace(/&[a-zA-Z]+;/g, '');
-        cleaned = cleaned.replace(/\{@[^}]+\}/g, '');
-        cleaned = cleaned.replace(/\(\)/g, '');
-        cleaned = cleaned.replace(/\(\s*\)/g, '');
-        cleaned = cleaned.replace(/\(\s*\+\d+\s*\)/g, '');
-        cleaned = cleaned.replace(/[\[\]\(\)]/g, ' ');
-        cleaned = cleaned.replace(/\s+/g, ' ').trim();
-        return cleaned || '—';
-    }
+    if (!str) return '';
+    let cleaned = String(str);
+    // Заменяем броски урона и проверки
+    cleaned = cleaned.replace(/\[\[\/r\s+([^\]]+)\]\]/g, '$1'); // [[/r 1d20+5]] -> 1d20+5
+    cleaned = cleaned.replace(/\[\[\/damage\s+([^\]]+)\]\]/g, (match, formula) => {
+        // formula может содержать type=...
+        let typeMatch = formula.match(/type=([a-zA-Z]+)/);
+        let diceFormula = formula.replace(/\s*type=[a-zA-Z]+\s*/, '').trim();
+        if (typeMatch) {
+            let typeRus = translations.damage[typeMatch[1].toLowerCase()] || typeMatch[1];
+            return `${diceFormula} (${typeRus})`;
+        }
+        return diceFormula;
+    });
+    // Удаляем прочие теги
+    cleaned = cleaned.replace(/@UUID\[[^\]]+\]/g, '');
+    cleaned = cleaned.replace(/@Compendium\[[^\]]+\]/g, '');
+    cleaned = cleaned.replace(/&reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
+    cleaned = cleaned.replace(/&Reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
+    cleaned = cleaned.replace(/&reference\[[^\]]+\]/g, '');
+    cleaned = cleaned.replace(/&Reference\[[^\]]+\]/g, '');
+    cleaned = cleaned.replace(/reference\[[^\]]+\]/gi, '');
+    cleaned = cleaned.replace(/&[a-zA-Z]+;/g, '');
+    cleaned = cleaned.replace(/\{@[^}]+\}/g, '');
+    cleaned = cleaned.replace(/\(\)/g, '');
+    cleaned = cleaned.replace(/\(\s*\)/g, '');
+    cleaned = cleaned.replace(/\(\s*\+\d+\s*\)/g, '');
+    cleaned = cleaned.replace(/[\[\]\(\)]/g, ' ');
+    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+    return cleaned || '—';
+}
     function extractString(value) {
         if (!value) return '';
         if (typeof value === 'string') return cleanText(value);
