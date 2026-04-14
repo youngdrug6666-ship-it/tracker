@@ -4,29 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Мастер D&D 5e — Эпический трекер боя</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+	
     <style>
         /* === Стили без изменений === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Roboto', sans-serif; }
         body { min-height: 100vh; background: url('fon.jpg') center/cover fixed no-repeat; color: #f0ede8; padding: 0px 24px 24px 24px; position: relative; overflow-y: auto; }
+        :root { --top-bar-offset: 76px; }
         body::before { display: none; }
         .top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: rgba(12, 18, 26, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(210, 180, 100, 0.5); transition: transform 0.3s ease; }
         .top-bar.collapsed { transform: translateY(-100%); }
-        .top-bar-content { display: flex; justify-content: space-between; align-items: center; padding: 6px 20px; flex-wrap: wrap; gap: 10px; }
-        .top-bar-left { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .top-bar-content { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; flex-wrap: wrap; gap: 10px; }
+        .top-bar-left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .top-bar .btn { background: #2d3a48; border: none; border-radius: 60px; padding: 6px 18px; color: white; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
         .top-bar .btn-primary { background: #3a6b47; }
+        .btn-label { display: inline-flex; gap: 6px; align-items: center; }
+        .fa-icon { width: 14px; height: 14px; }
         .round-indicator { background: #1f2937; border-radius: 48px; padding: 4px 14px; display: flex; gap: 10px; align-items: center; }
-        .right-panel-links { display: flex; gap: 12px; align-items: center; }
+        .right-panel-links { display: flex; gap: 10px; align-items: center; }
         .right-panel-links a, .right-panel-links .help-btn { color: #ffe6b3; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: none; border: none; }
         .right-panel-links a:hover, .right-panel-links .help-btn:hover { color: #ffdd99; transform: scale(1.05); }
+        .menu-wrapper { position: relative; }
+        .burger-menu { position: absolute; top: calc(100% + 8px); right: 0; min-width: 280px; background: rgba(20, 28, 40, 0.97); border: 1px solid rgba(210, 180, 100, 0.5); border-radius: 14px; padding: 10px; display: none; z-index: 250; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .burger-menu.open { display: block; }
+        .burger-grid { display: flex; flex-direction: column; gap: 8px; }
+        .burger-grid .btn, .burger-grid .json-import, .burger-grid .session-select { width: 100%; text-align: left; }
         .telegram-icon { width: 16px; height: 16px; }
-        .toggle-fixed { position: fixed; left: 1400px; z-index: 300; background: rgba(20, 30, 45, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(210, 180, 100, 0.6); color: #ffe6b3; font-size: 1.3rem; font-weight: bold; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s ease; }
-        .toggle-top-bar-fixed { top: 0px; }
-        .toggle-toolbar-fixed { top: 10px; }
-        .toggle-fixed:hover { background: rgba(70, 50, 30, 0.8); border-color: #f3cd81; color: white; transform: scale(1.08); box-shadow: 0 0 15px rgba(210, 180, 100, 0.4); }
-        .bestiary-panel { position: fixed; left: 0; top: 0; width: 540px; height: 100vh; background: rgba(16, 22, 32, 0.96); backdrop-filter: blur(16px); z-index: 100; transform: translateX(-100%); transition: transform 0.3s; display: flex; flex-direction: column; padding: 88px 24px 24px; border-right: 1px solid rgba(210, 180, 100, 0.3); border-radius: 0 36px 36px 0; }
+                .bestiary-panel { position: fixed; left: 0; top: 0; width: 540px; height: 100vh; background: rgba(16, 22, 32, 0.96); backdrop-filter: blur(16px); z-index: 100; transform: translateX(-100%); transition: transform 0.3s; display: flex; flex-direction: column; padding: 88px 24px 24px; border-right: 1px solid rgba(210, 180, 100, 0.3); border-radius: 0 36px 36px 0; }
         .bestiary-panel.open { transform: translateX(0); }
-        .tracker-area { transition: margin-left 0.3s; }
+        .tracker-area { transition: margin-left 0.3s; padding-top: var(--top-bar-offset); }
         .tracker-area.shifted { margin-left: 540px; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
         .modal-content { background: rgba(20,15,10,0.95); border: 2px solid #d4af37; border-radius: 32px; padding: 20px 25px; max-width: 900px; width: 90%; color: #e4c7a2; box-shadow: 0 0 30px rgba(0,0,0,0.5); position: relative; max-height: 85vh; overflow-y: auto; }
@@ -61,11 +67,11 @@
         @media (max-width: 1300px) { .combat-grid { grid-template-columns: repeat(3, minmax(260px, 1fr)); } }
         @media (max-width: 1000px) { .combat-grid { grid-template-columns: repeat(2, minmax(260px, 1fr)); } }
         @media (max-width: 700px) { .combat-grid { grid-template-columns: 1fr; } }
-        .combat-card { position: relative; border-radius: 24px; padding: 8px; border-left: 5px solid; box-shadow: 0 8px 20px rgba(0,0,0,0.4); overflow: hidden; min-height: 280px; display: flex; flex-direction: column; }
+        .combat-card { position: relative; border-radius: 24px; padding: 8px; border-left: 5px solid; box-shadow: 0 8px 20px rgba(0,0,0,0.4); overflow: visible; min-height: 280px; display: flex; flex-direction: column; }
         .hero-card { border-left-color: #9bcd6c; background: rgba(32, 42, 52, 0.6); }
         .monster-card { border-left-color: #cc5555; background: rgba(55, 40, 40, 0.6); }
-        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: brightness(0.85) contrast(1.05); z-index: 1; }
-        .card-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.7)); z-index: 2; }
+        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: brightness(0.85) contrast(1.05); z-index: 1; border-radius: 24px; }
+        .card-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.7)); z-index: 2; border-radius: 24px; }
         .card-content { position: relative; z-index: 3; display: flex; flex-direction: column; gap: 4px; }
         .combat-card.current-turn-hero, .combat-card.current-turn-monster { box-shadow: 0 0 0 3px #b87cff, 0 0 0 8px rgba(184, 124, 255, 0.3), 0 0 20px 8px rgba(156, 80, 255, 0.5); transform: scale(1.01); animation: softPulse 2s infinite alternate; }
         @keyframes softPulse { from { box-shadow: 0 0 0 3px #b87cff, 0 0 0 8px rgba(184, 124, 255, 0.3), 0 0 20px 8px rgba(156, 80, 255, 0.5); } to { box-shadow: 0 0 0 4px #d4a0ff, 0 0 0 12px rgba(184, 124, 255, 0.2), 0 0 25px 12px rgba(156, 80, 255, 0.4); } }
@@ -82,7 +88,14 @@
         .init-roll-btn { background: #6f4e2e; border-radius: 40px; border: none; padding: 2px 8px; color: white; cursor: pointer; }
         .hp-panel { background: rgba(12, 18, 28, 0.8); border-radius: 40px; padding: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.7rem; }
         .hp-input, .max-hp-input, .temp-input { width: 45px; background: #1a2533; border-radius: 32px; border: 1px solid #6e8b5e; text-align: center; color: #ffe0a3; }
-        .dmg-quick { width: 55px; background: #2b2535; border-radius: 40px; border: 1px solid #d9a13b; text-align: center; color: #ffeaaf; }
+        .dmg-quick {
+    width: 150px;
+    background: #2b2535;
+    border-radius: 40px;
+    border: 1px solid #ffffff;
+    text-align: center;
+    color: #ebe3e3;
+}
         .action-icon { background: none; border: none; font-size: 1rem; cursor: pointer; color: white; transition: 0.1s; }
         .action-icon:hover { transform: scale(1.1); }
         .active-conditions { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
@@ -102,10 +115,9 @@
         .modal-inner input, .modal-inner label { color: white; }
         .modal-inner input { background: #2a3a48; border: 1px solid #c9a254; color: white; }
         [data-tooltip] { position: relative; }
-        [data-tooltip]:before { content: attr(data-tooltip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1f2a2f; color: #ffefc0; padding: 6px 12px; border-radius: 32px; font-size: 0.7rem; white-space: normal; max-width: 250px; width: max-content; word-wrap: break-word; display: none; z-index: 999; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(210, 180, 100, 0.5); }
+        [data-tooltip]:before { content: attr(data-tooltip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1f2a2f; color: #ffefc0; padding: 6px 12px; border-radius: 12px; font-size: 0.7rem; white-space: normal; max-width: 320px; width: max-content; word-wrap: break-word; display: none; z-index: 5000; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(210, 180, 100, 0.5); }
         [data-tooltip]:hover:before { display: block; }
-        .toggle-fixed[data-tooltip]:before { left: auto; right: 120%; bottom: 50%; transform: translateY(50%); }
-        .spell-link { color: #ffdd99; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; transition: 0.1s; }
+                .spell-link { color: #ffdd99; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; transition: 0.1s; }
         .spell-link:hover { color: #ffffff; text-shadow: 0 0 4px #d4af37; }
         #spellDetailModal { z-index: 1050 !important; }
         .cond-unconscious { background: #4a2e5c; }
@@ -162,11 +174,13 @@
         justify-content: space-between;
         flex-wrap: wrap;
     }
-    .right-panel-links {
+        .right-panel-links {
         width: 100%;
         justify-content: space-around;
         margin-top: 6px;
     }
+    .menu-wrapper { width: 100%; }
+    .burger-menu { left: 0; right: auto; width: 100%; min-width: unset; }
 
     .top-bar .btn,
     .btn,
@@ -174,10 +188,6 @@
     .session-control {
         padding: 8px 12px;
         font-size: 0.9rem;
-    }
-
-    .toggle-fixed {
-        display: none !important;
     }
 
     .bestiary-panel {
@@ -212,62 +222,167 @@
     /* 🔧 Исправленный блок для панели инструментов */
         /* 🔧 НАДЁЖНЫЙ БЛОК — ФИКСИРОВАННАЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
         /* === Панель инструментов: sticky с динамическим top === */
-    .toolbar {
-        position: -webkit-sticky !important;
-        position: sticky !important;
-        top: 0 !important; /* JS обновит */
-        z-index: 190 !important;
-        background: rgba(12, 18, 26, 0.95) !important;
-        backdrop-filter: blur(12px) !important;
-        margin-top: 0 !important;
-        margin-bottom: 10px !important;
-        border-radius: 16px !important;
-    }
-
-    .tracker-area {
-        padding-top: 0 !important;
-        overflow: visible !important;
-    }
-	.toolbar {
-    padding: 6px 10px !important;   /* было 8px 20px */
-    gap: 6px !important;            /* было 10px */
+    .tracker-area { padding-top: 0 !important; overflow: visible !important; }
+    :root { --top-bar-offset: 0px; }
+}
+/* Подсказки в верхней панели — выпадают вниз */
+.top-bar [data-tooltip]:before {
+    bottom: auto !important;
+    top: 130% !important;
 }
 
-.toolbar .btn,
-.toolbar .json-import,
-.toolbar .session-control,
-.toolbar .session-select {
-    padding: 4px 10px !important;   /* было 8px 12px */
-    font-size: 0.8rem !important;   /* чуть уменьшим шрифт */
+/* Подсказки внутри карточек существ — смещаем вправо, чтобы не перекрывали текст */
+.combat-card [data-tooltip]:before {
+    left: 20% !important;
+    transform: translateX(-10%) !important;
+}
+/* Гарантированно поднимаем тултип бургера над всеми элементами */
+.combat-card .card-header .info-burger {
+    position: relative;
+    z-index: 10;
+}
+
+.combat-card .card-header .info-burger[data-tooltip]:before {
+    z-index: 99999 !important;
+    position: absolute !important;
+    top: 100% !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: 0 !important;
+    transform: translateY(5px) !important;
+    max-width: 220px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+/* Убираем возможное ограничение stacking context у родителя */
+.combat-card {
+    position: relative;
+    z-index: 1;
+    overflow: visible !important;
+}
+/* === Универсальные tooltip в карточках — всегда поверх === */
+.combat-card [data-tooltip] {
+    position: relative;
+}
+
+.combat-card [data-tooltip]:before {
+    z-index: 99999 !important;
+    position: absolute !important;
+    top: 100% !important;
+    bottom: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(5px) !important;
+    max-width: 220px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    background: #1f2a2f !important;
+    color: #ffefc0 !important;
+    border: 1px solid #d4af37 !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.7) !important;
+    font-size: 0.7rem;
+    line-height: 1.3;
+    padding: 6px 10px !important;
+    pointer-events: none;
+}
+
+/* Для элементов, которые справа — выравниваем tooltip по правому краю */
+.combat-card .init-roll-btn[data-tooltip]:before,
+.combat-card .random-hp[data-tooltip]:before,
+.combat-card .info-burger[data-tooltip]:before {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateX(0) translateY(5px) !important;
+}
+
+/* Для статов оставляем центрирование */
+.combat-card .stat-item[data-tooltip]:before {
+    left: 50% !important;
+    transform: translateX(-50%) translateY(5px) !important;
+}
+
+/* Убеждаемся, что ничего не обрезается */
+.combat-card,
+.card-content,
+.card-header {
+    overflow: visible !important;
+}
+/* Последняя попытка: выносим tooltip над всеми */
+.combat-card [data-tooltip] {
+    position: relative !important;
+}
+
+.combat-card [data-tooltip]:before {
+    position: absolute !important;
+    z-index: 99999999 !important;
+    top: auto !important;
+    bottom: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-5px) !important;
+    margin-bottom: 5px !important;
+    background: #1f2a2f !important;
+    border: 1px solid #d4af37 !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.8) !important;
+    color: #ffefc0 !important;
+    font-size: 0.7rem;
+    padding: 6px 10px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    max-width: 200px !important;
+    pointer-events: none;
+}
+
+/* Для кнопок справа (d20, бургер) — выравниваем по правому краю */
+.combat-card .init-roll-btn[data-tooltip]:before,
+.combat-card .random-hp[data-tooltip]:before,
+.combat-card .info-burger[data-tooltip]:before {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateX(0) translateY(-5px) !important;
 }
     </style>
 </head>
 <body>
 
-<button class="toggle-fixed toggle-top-bar-fixed" id="toggleTopBarFixedBtn" data-tooltip="Свернуть верхнюю панель">▲</button>
-<button class="toggle-fixed toggle-toolbar-fixed" id="toggleToolbarFixedBtn" data-tooltip="Свернуть панель инструментов">▲</button>
-
 <div class="top-bar" id="topBar">
     <div class="top-bar-content">
         <div class="top-bar-left">
-            <div class="round-indicator">
-                <span>🌀 Раунд</span>
+                        <div class="round-indicator">
+                <span><i class="fa-solid fa-circle-notch fa-icon"></i> Раунд</span>
                 <span id="roundNumberTop" style="background:#2f3f52; padding:2px 12px; border-radius:30px;">1</span>
-                <button class="btn" id="nextRoundBtnTop" data-tooltip="Следующий раунд">➕</button>
+                <button class="btn" id="nextRoundBtnTop" data-tooltip="Следующий раунд"><i class="fa-solid fa-plus fa-icon"></i></button>
                 <button class="btn" id="resetRoundBtnTop" data-tooltip="Сбросить раунд" style="background:#5a3e2a;">0</button>
             </div>
-            <button class="btn" id="prevTurnBtnTop" data-tooltip="Предыдущий ход">◀</button>
-            <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход">▶ Следующий ход</button>
-            <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий">📖 Бестиарий</button>
-			<a href="translator.html" class="btn" style="background:#5a3e2a;">📜 Переводчик</a>
-            <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания">🔮 Заклинания</button>
+            <button class="btn" id="prevTurnBtnTop" data-tooltip="Предыдущий ход"><i class="fa-solid fa-angle-left fa-icon"></i></button>
+            <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход"><span class="btn-label"><i class="fa-solid fa-angle-right fa-icon"></i>Следующий ход</span></button>
+            <button class="btn btn-primary" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Сортировать по иниц</span></button>
+            <button class="btn" id="rollAllInitBtn" style="background:#8a3b3b;" data-tooltip="Бросить инициативу для всех монстров (1d20 + бонус)"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
+            <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
+            <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания"><span class="btn-label"><i class="fa-solid fa-scroll fa-icon"></i>Заклинания</span></button>
+			<a href="translator.html" class="btn" style="background:#5a3e2a;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
+            <div class="menu-wrapper">
+                <button class="btn" id="burgerMenuBtn" data-tooltip="Дополнительные действия"><span class="btn-label"><i class="fa-brands fa-buffer fa-icon"></i>Меню</span></button>
+                <div class="burger-menu" id="burgerMenu">
+                    <div class="burger-grid">
+                        <button class="btn" id="addHeroBtn" data-tooltip="Добавить нового героя вручную"><span class="btn-label"><i class="fa-solid fa-square-plus fa-icon"></i>Новый герой</span></button>
+                        <button class="btn btn-danger" id="clearMonstersBtn" data-tooltip="Удалить всех монстров из боя"><span class="btn-label"><i class="fa-solid fa-broom fa-icon"></i>Очистить врагов</span></button>
+                        <button class="json-import" id="importJsonBtn" data-tooltip="Импорт персонажа из JSON (Long Story Short)"><span class="btn-label"><i class="fa-solid fa-file-import fa-icon"></i>Импорт героя (JSON)</span></button>
+                        <input type="file" id="jsonFileInput" accept=".json" style="display:none">
+                        <select id="sessionSelect" class="session-select" data-tooltip="Выбор кампании"></select>
+                        <button id="renameSessionBtn" class="btn" data-tooltip="Переименовать текущую кампанию"><span class="btn-label"><i class="fa-solid fa-arrows-turn-to-dots fa-icon"></i>Переим.</span></button>
+                        <button id="newSessionBtn" class="btn" style="background:#3a6b47;" data-tooltip="Создать новую кампанию"><span class="btn-label"><i class="fa-solid fa-user-plus fa-icon"></i>Сессия</span></button>
+                        <button id="deleteSessionBtn" class="btn" style="background:#7a3e2a;" data-tooltip="Удалить текущую кампанию"><span class="btn-label"><i class="fa-solid fa-trash-can fa-icon"></i>Удалить сессию</span></button>
+                        <button id="resetAllSessionsBtn" class="btn" style="background:#b85c5c;" data-tooltip="Сбросить все сессии и начать заново"><span class="btn-label"><i class="fa-solid fa-arrows-rotate fa-icon"></i>Сброс сессий</span></button>
+                    </div>
+                </div>
+            </div>
             <div class="right-panel-links">
                 <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank">
                     <svg class="telegram-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.02-.13-.05-.18-.07-.05-.17-.03-.25-.02-.1.01-1.7 1.08-4.8 3.17-.45.31-.86.46-1.23.45-.4-.01-1.18-.23-1.76-.42-.71-.23-1.27-.35-1.22-.74.03-.2.3-.41.83-.63 3.2-1.39 5.34-2.31 6.42-2.76 3.05-1.28 3.69-1.5 4.1-1.51.09 0 .29.02.42.13.11.09.14.22.15.32.01.13-.01.3-.03.46z"/></svg>
                     Telegram
                 </a>
-                <a href="https://pay.cloudtips.ru/p/dfc6c2f5" target="_blank">💲 Поддержать</a>
-                <button class="help-btn" id="helpBtn" data-tooltip="Открыть руководство">❓ Руководство</button>
+                <a href="https://pay.cloudtips.ru/p/dfc6c2f5" target="_blank"><i class="fa-solid fa-dollar-sign fa-icon"></i> Поддержать</a>
+                <button class="help-btn" id="helpBtn" data-tooltip="Открыть руководство"><i class="fa-solid fa-circle-question fa-icon"></i> Руководство</button>
             </div>
         </div>
     </div>
@@ -276,30 +391,17 @@
 <!-- Бестиарий (исправленная структура, убраны дубликаты) -->
 <div class="bestiary-panel" id="bestiaryPanel">
     <button class="close-bestiary-mobile" id="closeBestiaryMobileBtn">&times;</button>
-    <h2 style="margin-bottom:20px;">✨ Бестиарий</h2>
+    <h2 style="margin-bottom:20px;"><i "></i> Бестиарий</h2>
     <div class="search-row">
         <input type="text" id="searchInput" placeholder="🔍 Имя монстра...">
         <select id="crFilter"></select>
         <select id="folderSelect"></select>
     </div>
     <div id="monsterList" style="flex:1; overflow-y:auto;"></div>
-    <button id="addCustomMonsterBtn" class="btn" style="margin-top:20px; background:#3e5a48;" data-tooltip="Создать своего монстра">✨ Создать монстра</button>
+    <button id="addCustomMonsterBtn" class="btn" style="margin-top:20px; background:#3e5a48;" data-tooltip="Создать своего монстра"><i class="fa-solid fa-plus fa-icon"></i> Создать монстра</button>
 </div>
 
 <div class="tracker-area" id="trackerArea">
-    <div class="toolbar" id="mainToolbar">
-        <button class="btn" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы">⚡ Сортировать по иниц</button>
-        <button class="btn btn-primary" id="rollAllInitBtn" data-tooltip="Бросить инициативу для всех монстров (1d20 + бонус)">🎲 Инициатива монстрам</button>
-        <button class="btn" id="addHeroBtn" data-tooltip="Добавить нового героя вручную">🛡️ Новый герой</button>
-        <button class="btn btn-danger" id="clearMonstersBtn" data-tooltip="Удалить всех монстров из боя">🗑️ Очистить врагов</button>
-        <button class="json-import" id="importJsonBtn" data-tooltip="Импорт персонажа из JSON (Long Story Short)">📂 Импорт героя (JSON)</button>
-        <input type="file" id="jsonFileInput" accept=".json" style="display:none">
-        <select id="sessionSelect" class="session-select" data-tooltip="Выбор кампании"></select>
-        <button id="renameSessionBtn" class="btn" data-tooltip="Переименовать текущую кампанию">✏️ Переим.</button>
-        <button id="newSessionBtn" class="btn" style="background:#3a6b47;" data-tooltip="Создать новую кампанию">+ Сессия</button>
-        <button id="deleteSessionBtn" class="btn" style="background:#7a3e2a;" data-tooltip="Удалить текущую кампанию">🗑</button>
-        <button id="resetAllSessionsBtn" class="btn" style="background:#b85c5c;" data-tooltip="Сбросить все сессии и начать заново">🔄 Сброс сессий</button>
-    </div>
     <div id="combatantsGrid" class="combat-grid"></div>
 </div>
 
@@ -307,25 +409,24 @@
 <div id="helpModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h3>📖 Руководство по трекеру боя D&D 5e</h3>
+        <h3><i class="fa-solid fa-circle-question"></i> Руководство по трекеру боя D&D 5e</h3>
         <ul style="margin-left:20px; margin-top:10px; line-height:1.6;">
-            <li><strong>➕ Добавление участников:</strong> Нажмите <strong>«📖 Бестиарий»</strong> — откроется панель со списком монстров. Используйте фильтры по папкам и CR. Кнопка <strong>«📄 Инфо»</strong> показывает полную карточку монстра со статами, действиями и заклинаниями. <strong>«➕ Добавить»</strong> помещает монстра в бой. Героев можно добавить кнопкой <strong>«🛡️ Новый герой»</strong> (вручную) или импортировать JSON-файл персонажа (Long Story Short) через <strong>«📂 Импорт героя»</strong>.</li>
-            <li><strong>🎲 Инициатива:</strong> В карточке есть поле «Инициатива» и кнопка <strong>«🎲 d20»</strong> — бросок 1d20 + бонус инициативы. Кнопка <strong>«🎲 Инициатива монстрам»</strong> бросает инициативу всем монстрам сразу. После ввода значений нажмите <strong>«⚡ Сортировать по иниц»</strong> — порядок ходов обновится.</li>
-            <li><strong>❤️ Хиты и урон:</strong> Поле ввода для урона/лечения и кнопки: <strong>⚔️</strong> — нанести урон, <strong>½</strong> / <strong>¼</strong> / <strong>×2</strong> — модификаторы, <strong>💚</strong> — лечение. У монстров есть кнопка <strong>«❤️🎲»</strong> — перебросить ХП по формуле.</li>
-            <li><strong>📋 Состояния:</strong> Нажмите <strong>«📋 Состояния»</strong>, чтобы открыть панель выбора. Можно выбрать несколько состояний — они отобразятся цветными бейджами. Чтобы снять состояние, нажмите на его бейдж или снова выберите в панели. Кнопка <strong>«❌ Сбросить всё»</strong> убирает все состояния сразу.</li>
-            <li><strong>🔮 Заклинания:</strong> У монстров-заклинателей отображаются ячейки заклинаний (используйте +/-). В детальном окне (через <strong>«☰»</strong>) вы увидите полный список заклинаний существа, сгруппированный по уровням. Клик по названию заклинания открывает его полное описание. В тексте описания заклинания подсвечиваются и тоже кликабельны.</li>
-            <li><strong>💾 Кампании (сессии):</strong> В панели инструментов есть выпадающий список с названием текущей кампании. Вы можете переименовывать, создавать новые и удалять кампании. Всё состояние боя автоматически сохраняется в браузере. Кнопка <strong>«🔄 Сброс сессий»</strong> удаляет все данные и начинает новую чистую кампанию.</li>
-            <li><strong>⌨️ Горячие клавиши:</strong> Стрелки <strong>← / →</strong> переключают ход (предыдущий / следующий). <strong>Esc</strong> закрывает модальные окна.</li>
-            <li><strong>📱 Интерфейс:</strong> Верхнюю панель и панель инструментов можно свернуть кнопками справа (<strong>▲</strong>). Бестиарий открывается слева и сдвигает поле боя. Карточки можно перетаскивать для ручной сортировки.</li>
+            <li><strong>➕ Добавление участников:</strong> Нажмите <strong><i class="fa-solid fa-dragon"></i> Бестиарий</strong> — откроется панель со списком монстров. Используйте фильтры по папкам и CR. <strong>«<i class="fa-solid fa-plus"></i> Добавить»</strong> помещает монстра в бой. Героев можно добавить через <strong><i class="fa-brands fa-buffer"></i> Меню → <i class="fa-solid fa-square-plus"></i> Новый герой</strong> или импортировать JSON.</li>
+            <li><strong>🎲 Инициатива:</strong> В карточке есть поле «Инициатива» и кнопка <strong><i class="fa-solid fa-dice-d20"></i> d20</strong>. Кнопка <strong><i class="fa-solid fa-hand-fist"></i> Инициатива монстрам</strong> бросает инициативу всем монстрам. <strong><i class="fa-solid fa-hand-fist"></i> Сортировать по иниц</strong> упорядочивает ходы.</li>
+            <li><strong>❤️ Хиты и урон:</strong> Поле ввода урона/лечения и кнопки: <strong>⚔️</strong> — нанести урон, <strong>½ / ¼ / ×2</strong> — модификаторы, <strong>💚</strong> — лечение. У монстров есть <strong><i class="fa-solid fa-dice"></i></strong> — перебросить ХП по формуле.</li>
+            <li><strong>📋 Состояния:</strong> Нажмите <strong>«📋 Состояния»</strong> в карточке, чтобы открыть панель. Выбранные состояния отображаются цветными бейджами. Кнопка <strong>«❌ Сбросить всё»</strong> убирает все состояния.</li>
+            <li><strong>🔮 Заклинания:</strong> У заклинателей отображаются ячейки (кнопки <strong>+/-</strong>). В детальном окне (через <strong><i class="fa-brands fa-buffer"></i></strong> в карточке) показан полный список заклинаний. Клик по названию открывает описание.</li>
+            <li><strong>💾 Кампании (сессии):</strong> В <strong><i class="fa-brands fa-buffer"></i> Меню</strong> есть выбор кампании, кнопки <strong><i class="fa-solid fa-arrows-turn-to-dots"></i> Переим.</strong>, <strong><i class="fa-solid fa-user-plus"></i> Сессия</strong>, <strong><i class="fa-solid fa-trash-can"></i> Удалить сессию</strong>. Состояние боя сохраняется автоматически.</li>
+            <li><strong>⌨️ Горячие клавиши:</strong> Стрелки <strong>← / →</strong> — предыдущий/следующий ход. <strong>Esc</strong> закрывает модальные окна.</li>
+            <li><strong>📱 Интерфейс:</strong> Бестиарий открывается слева. Карточки можно перетаскивать для ручной сортировки.</li>
         </ul>
         <hr style="margin:20px 0; border-color:#d4af37;">
-        <p>🌐 <strong>Telegram-канал:</strong> <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank" style="color:#ffdd99;">https://t.me/dnd_ekb_ekaterinburg</a> — присоединяйтесь, задавайте вопросы, делитесь идеями!</p>
+        <p>🌐 <strong>Telegram-канал:</strong> <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank" style="color:#ffdd99;">https://t.me/dnd_ekb_ekaterinburg</a></p>
         <p>💲 <strong>Поддержать автора:</strong> <a href="https://pay.cloudtips.ru/p/dfc6c2f5" target="_blank" style="color:#ffdd99;">CloudTips</a></p>
         <p style="margin-top:15px; text-align:right;"><em>Приятной игры! 🐉</em></p>
     </div>
 </div>
-<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;"><span><strong>КД</strong> <span id="detailAC"></span></span><span><strong>Хиты</strong> <span id="detailHP"></span></span><span><strong>CR</strong> <span id="detailCR"></span></span><span><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong> <span id="detailStats"></span></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><div><strong>Действия:</strong></div><ul id="detailActions"></ul><div><strong>Особенности:</strong></div><ul id="detailFeatures"></ul><div><strong>Описание:</strong></div><div id="detailDescription"></div><hr><h3>🔮 Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div>
-<div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
+<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;"><span><strong>КД</strong> <span id="detailAC"></span></span><span><strong>Хиты</strong> <span id="detailHP"></span></span><span><strong>CR</strong> <span id="detailCR"></span></span><span><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong> <span id="detailStats"></span></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><div><strong>Действия:</strong></div><ul id="detailActions"></ul><div><strong>Особенности:</strong></div><ul id="detailFeatures"></ul><div><strong>Легендарные действия:</strong></div><ul id="detailLegendary"></ul><div><strong>Бонусные действия:</strong></div><ul id="detailBonusActions"></ul><div><strong>Реакции:</strong></div><ul id="detailReactions"></ul><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
 <div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><input type="text" id="spellSearchInput" placeholder="🔍 Поиск..." style="width:100%; padding:8px 16px; border-radius:60px; margin-bottom:16px; background:#1e2838; border:1px solid #b38f48; color:white;"><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
 <div id="heroDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="heroDetailName"></h2><img id="heroDetailAvatar" style="max-width:150px; border-radius:20px; margin:0 auto; display:block;"><div><strong>Раса:</strong> <span id="heroDetailRace"></span> | <strong>Класс:</strong> <span id="heroDetailClass"></span> | <strong>Уровень:</strong> <span id="heroDetailLevel"></span></div><div><strong>Мировоззрение:</strong> <span id="heroDetailAlignment"></span> | <strong>Опыт:</strong> <span id="heroDetailXP"></span></div><hr><div><strong>Характеристики:</strong> <span id="heroDetailStats"></span></div><div><strong>Спасброски:</strong> <span id="heroDetailSaves"></span></div><div><strong>Навыки:</strong> <span id="heroDetailSkills"></span></div><hr><div><strong>Снаряжение:</strong> <span id="heroDetailEquipment"></span></div><div><strong>Оружие:</strong> <span id="heroDetailWeapons"></span></div><div><strong>Владение:</strong> <span id="heroDetailProficiencies"></span></div><div><strong>Особенности (features):</strong> <span id="heroDetailFeatures"></span></div><div><strong>Черты (traits):</strong> <span id="heroDetailTraits"></span></div><div><strong>Идеалы:</strong> <span id="heroDetailIdeals"></span></div><div><strong>Привязанности:</strong> <span id="heroDetailBonds"></span></div><div><strong>Слабости:</strong> <span id="heroDetailFlaws"></span></div><div><strong>Внешность:</strong> <span id="heroDetailAppearance"></span></div><div><strong>Союзники:</strong> <span id="heroDetailAllies"></span></div><div><strong>Заметки:</strong> <span id="heroDetailNotes"></span></div><hr><div><strong>Заклинания:</strong> <div id="heroDetailSpells"></div></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
@@ -339,9 +440,19 @@
     let currentRound = 1;
     const CONDITIONS = ["Бессознательный","Испуганный","Истощённый","Невидимый","Недееспособный","Оглохший","Окаменевший","Опутанный","Ослеплённый","Отравленный","Очарованный","Ошеломлённый","Парализованный","Сбитый с ног","Схваченный","Концентрация"];
     let monstersLibrary = [];
-    let fullMonstersMap = new Map();
-    let allSpellsList = [];          // полные заклинания (spells_full.json)
+    let fullMonstersMap = new Map();window.fullMonstersMap = fullMonstersMap; // для отладки
+    let primaryMonstersMap = new Map();
+    let exportMonstersMap = new Map();    let allSpellsList = [];          // полные заклинания (spells_full.json)
     let npcSpellsMap = new Map();    // связь "рус. имя NPC" -> Set(названий заклинаний) из spells.json
+		let uuidMap = {}; // словарь ID -> название из actor-items-full.json
+async function loadUuidMap() {
+    try {
+        const res = await fetch('actor-items-full.json');
+        if (res.ok) uuidMap = await res.json();
+        uuidMap = Object.fromEntries(Object.entries(uuidMap || {}).map(([k, v]) => [String(k).trim(), v]));
+        console.log('UUID-словарь загружен, ключей:', Object.keys(uuidMap).length);
+    } catch(e) { console.warn('actor-items-full.json не загружен'); }
+}
 
     // Словари переводов
     const translations = {
@@ -557,9 +668,9 @@
             let html = '';
             filtered.forEach(m => {
                 html += `<div class="monster-item">
-                            <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} 🎲+${m.initBonus} | CR ${m.cr}</span></div>
-                            <button class="info-btn" data-name="${escapeHtml(m.name)}" data-tooltip="Подробная информация">📄 Инфо</button>
-                            <button class="add-btn" data-name="${escapeHtml(m.name)}" data-ac="${m.ac}" data-hpformula="${m.hpFormula}" data-init="${m.initBonus}" data-tooltip="Добавить в бой">➕ Добавить</button>
+                            <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} <i class="fa-solid fa-dice-d20"></i>+${m.initBonus} | CR ${m.cr}</span></div>
+                            <button class="info-btn" data-name="${escapeHtml(m.name)}" data-tooltip="Подробная информация"><i class="fa-thin fa-dragon fa-icon"></i> Инфо</button>
+                            <button class="add-btn" data-name="${escapeHtml(m.name)}" data-ac="${m.ac}" data-hpformula="${m.hpFormula}" data-init="${m.initBonus}" data-tooltip="Добавить в бой"><i class="fa-solid fa-plus fa-icon"></i> Добавить</button>
                          </div>`;
             });
             container.innerHTML = html || '<div style="padding:20px">Нет существ</div>';
@@ -573,9 +684,9 @@
                 html += `<div class="folder-content collapsed" id="${folderId}">`;
                 groups[f].forEach(m => {
                     html += `<div class="monster-item">
-                                <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} 🎲+${m.initBonus} | CR ${m.cr}</span></div>
-                                <button class="info-btn" data-name="${escapeHtml(m.name)}" data-tooltip="Подробная информация">📄 Инфо</button>
-                                <button class="add-btn" data-name="${escapeHtml(m.name)}" data-ac="${m.ac}" data-hpformula="${m.hpFormula}" data-init="${m.initBonus}" data-tooltip="Добавить в бой">➕ Добавить</button>
+                                <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} <i class="fa-solid fa-dice-d20"></i>+${m.initBonus} | CR ${m.cr}</span></div>
+                                <button class="info-btn" data-name="${escapeHtml(m.name)}" data-tooltip="Подробная информация"><i class="fa-thin fa-dragon fa-icon"></i> Инфо</button>
+                                <button class="add-btn" data-name="${escapeHtml(m.name)}" data-ac="${m.ac}" data-hpformula="${m.hpFormula}" data-init="${m.initBonus}" data-tooltip="Добавить в бой"><i class="fa-solid fa-plus fa-icon"></i> Добавить</button>
                              </div>`;
                 });
                 html += `</div>`;
@@ -607,15 +718,44 @@
     }
 
     // ========== Загрузка полных данных монстров ==========
+    async function fetchJsonWithFallback(paths) {
+        for (const path of paths) {
+            try {
+                const response = await fetch(path);
+                if (response.ok) return await response.json();
+            } catch (e) {}
+        }
+        throw new Error(`Не удалось загрузить: ${paths.join(', ')}`);
+    }
+    function normalizeMonsterName(name) {
+        return (name || '').toString().trim().toLowerCase();
+    }
+    function fillMissingFields(base = {}, fallback = {}) {
+        const merged = structuredClone(base);
+        for (const [key, value] of Object.entries(fallback)) {
+            const baseVal = merged[key];
+            const isEmptyBase = baseVal === undefined || baseVal === null || baseVal === '' || (Array.isArray(baseVal) && baseVal.length === 0);
+            if (isEmptyBase) merged[key] = value;
+        }
+        return merged;
+    }
     async function loadFullMonstersJSON() {
         try {
-            const response = await fetch('monsters_full.json');
-            if (!response.ok) throw new Error('monsters_full.json не найден');
-            const data = await response.json();
+            const primaryData = await fetchJsonWithFallback(['monsters-full.json', 'monsters_full.json']);
+            const exportData = await fetchJsonWithFallback(['monster-full-export.json', 'monsters_full_export.json']);
+            primaryMonstersMap = new Map();
+            exportMonstersMap = new Map();
             fullMonstersMap.clear();
-            for (let m of data) if (m.name) fullMonstersMap.set(m.name.toLowerCase(), m);
-            console.log(`Загружено ${fullMonstersMap.size} монстров для деталей`);
-        } catch(e) { console.warn('monsters_full.json не загружен', e); }
+            for (let m of primaryData || []) if (m?.name) primaryMonstersMap.set(normalizeMonsterName(m.name), m);
+            for (let m of exportData || []) if (m?.name) exportMonstersMap.set(normalizeMonsterName(m.name), m);
+            const allNames = new Set([...primaryMonstersMap.keys(), ...exportMonstersMap.keys()]);
+            allNames.forEach(name => {
+                const primary = primaryMonstersMap.get(name) || {};
+                const fallback = exportMonstersMap.get(name) || {};
+                fullMonstersMap.set(name, fillMissingFields(primary, fallback));
+            });
+            console.log(`Загружено ${fullMonstersMap.size} монстров (primary + fallback export)`);
+        } catch(e) { console.warn('Файлы монстров не загружены', e); }
     }
 
     // ========== Загрузка spells.json ==========
@@ -673,38 +813,42 @@
     }
 
     // ========== Очистка текста ==========
-    function cleanText(str) {
-    if (!str) return '';
-    let cleaned = String(str);
-    // Заменяем броски урона и проверки
-    cleaned = cleaned.replace(/\[\[\/r\s+([^\]]+)\]\]/g, '$1'); // [[/r 1d20+5]] -> 1d20+5
-    cleaned = cleaned.replace(/\[\[\/damage\s+([^\]]+)\]\]/g, (match, formula) => {
-        // formula может содержать type=...
-        let typeMatch = formula.match(/type=([a-zA-Z]+)/);
-        let diceFormula = formula.replace(/\s*type=[a-zA-Z]+\s*/, '').trim();
-        if (typeMatch) {
-            let typeRus = translations.damage[typeMatch[1].toLowerCase()] || typeMatch[1];
-            return `${diceFormula} (${typeRus})`;
-        }
-        return diceFormula;
-    });
-    // Удаляем прочие теги
-    cleaned = cleaned.replace(/@UUID\[[^\]]+\]/g, '');
-    cleaned = cleaned.replace(/@Compendium\[[^\]]+\]/g, '');
-    cleaned = cleaned.replace(/&reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
-    cleaned = cleaned.replace(/&Reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
-    cleaned = cleaned.replace(/&reference\[[^\]]+\]/g, '');
-    cleaned = cleaned.replace(/&Reference\[[^\]]+\]/g, '');
-    cleaned = cleaned.replace(/reference\[[^\]]+\]/gi, '');
-    cleaned = cleaned.replace(/&[a-zA-Z]+;/g, '');
-    cleaned = cleaned.replace(/\{@[^}]+\}/g, '');
-    cleaned = cleaned.replace(/\(\)/g, '');
-    cleaned = cleaned.replace(/\(\s*\)/g, '');
-    cleaned = cleaned.replace(/\(\s*\+\d+\s*\)/g, '');
-    cleaned = cleaned.replace(/[\[\]\(\)]/g, ' ');
-    cleaned = cleaned.replace(/\s+/g, ' ').trim();
-    return cleaned || '—';
-}
+        function cleanText(str) {
+        if (!str) return '';
+        let cleaned = String(str);
+        // Заменяем броски урона и проверки
+        cleaned = cleaned.replace(/\[\[\/r\s+([^\]]+)\]\]/g, '$1');
+        cleaned = cleaned.replace(/\[\[\/damage\s+([^\]]+)\]\]/g, (match, formula) => {
+            let typeMatch = formula.match(/type=([a-zA-Z]+)/);
+            let diceFormula = formula.replace(/\s*type=[a-zA-Z]+\s*/, '').trim();
+            if (typeMatch) {
+                let typeRus = translations.damage[typeMatch[1].toLowerCase()] || typeMatch[1];
+                return `${diceFormula} (${typeRus})`;
+            }
+            return diceFormula;
+        });
+        // Удаляем прочие теги
+		cleaned = cleaned.replace(/@Compendium\[[^\]]*?actions[^\]]*?\]\{([^}]+)\}/gi, '$1');
+        cleaned = cleaned.replace(/@UUID\[[^\]]+\]/g, '');
+        cleaned = cleaned.replace(/@Compendium\[[^\]]+\]/g, '');
+        cleaned = cleaned.replace(/&reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
+        cleaned = cleaned.replace(/&Reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
+        cleaned = cleaned.replace(/&reference\[[^\]]+\]/g, '');
+        cleaned = cleaned.replace(/&Reference\[[^\]]+\]/g, '');
+        cleaned = cleaned.replace(/reference\[[^\]]+\]/gi, '');
+        cleaned = cleaned.replace(/&[a-zA-Z]+;/g, '');
+        cleaned = cleaned.replace(/\{@[^}]+\}/g, '');
+        cleaned = cleaned.replace(/\(\)/g, '');
+        cleaned = cleaned.replace(/\(\s*\)/g, '');
+        cleaned = cleaned.replace(/\(\s*\+\d+\s*\)/g, '');
+        cleaned = cleaned.replace(/[\[\]\(\)]/g, ' ');
+        // Убираем мусор Foundry
+        cleaned = cleaned.replace(/\[\[lookup\s+@name(?:\s+capitalize)?\]\]/gi, '');
+        cleaned = cleaned.replace(/lookup\s+@name(?:\s+capitalize)?/gi, '');
+        cleaned = cleaned.replace(/^Примечание\s*[—–-]\s*/i, '');
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        return cleaned || '—';
+    }
     function extractString(value) {
         if (!value) return '';
         if (typeof value === 'string') return cleanText(value);
@@ -749,69 +893,149 @@
             return rusPart === lower || fullName === lower;
         });
     }
-
-    // ========== Извлечение заклинаний из текста ==========
-    function extractSpellsFromDescription(desc) {
-        if (!desc) return [];
-        const foundSpells = new Set();
-        
-        // Ищем прямо в оригинальном тексте названия в фигурных скобках после @Compendium
-        const compendiumRegex = /@Compendium\[[^\]]*?spells[^\]]*?\]\{([^}]+)\}/gi;
-        let match;
-        while ((match = compendiumRegex.exec(desc)) !== null) {
-            foundSpells.add(match[1].trim());
-        }
-        
-        // После очистки текста ищем вхождения известных названий заклинаний
-        const cleaned = cleanText(desc);
-        allSpellsList.forEach(spell => {
-            const rusName = spell.spellName.split('/')[0].trim();
-            if (cleaned.includes(rusName)) {
-                foundSpells.add(rusName);
-            }
-        });
-        
-        return Array.from(foundSpells);
+function resolveUuid(id) {
+    if (!id) return null;
+    const cleanId = String(id).trim().split('.').pop();
+    return uuidMap[cleanId] || uuidMap[id] || null;
+}
+function findSpellById(id) {
+    if (!id) return null;
+    const nameFromUuid = resolveUuid(id);
+    if (nameFromUuid) return findSpellByName(nameFromUuid);
+    const cleanId = String(id).trim().split('.').pop();
+    return allSpellsList.find(s => s._id === cleanId || s.id === cleanId || s._id === id || s.id === id) || null;
+}
+                   function extractSpellsFromDescription(desc) {
+    if (!desc) return [];
+    const foundSpells = new Set();
+    
+    function normalizeName(name) {
+        return name.split('/')[0].trim().toLowerCase();
     }
+    
+    // 1. @Compendium[...]{Название}
+    const compendiumRegex = /@Compendium\[[^\]]*?spells[^\]]*?\]\{([^}]+)\}/gi;
+    let match;
+    while ((match = compendiumRegex.exec(desc)) !== null) {
+        const norm = normalizeName(match[1]);
+        const spell = allSpellsList.find(s => normalizeName(s.spellName) === norm);
+        if (spell) foundSpells.add(spell.spellName);
+    }
+    
+    // 2. @UUID[...]{Название}
+    const uuidWithNameRegex = /@UUID\[[^\]]*?\]\{([^}]+)\}/gi;
+    while ((match = uuidWithNameRegex.exec(desc)) !== null) {
+        const norm = normalizeName(match[1]);
+        const spell = allSpellsList.find(s => normalizeName(s.spellName) === norm);
+        if (spell) foundSpells.add(spell.spellName);
+    }
+    
+    // 3. @UUID[...] без скобок — используем resolveUuid
+     const uuidIdRegex = /@UUID\[([^\]]+)\]/gi;
+    while ((match = uuidIdRegex.exec(desc)) !== null) {
+        const spell = findSpellById(match[1].trim());
+        if (spell) foundSpells.add(spell.spellName);
+    }
+    
+    // 4. Обычные списки
+    const listPattern = /(?:Неограниченно|(?:\d+\/день(?:\s+каждое)?)|Заговоры)\s*[:;]?\s*([^\.]+?)(?=\s*(?:\.|$|\d\/|Неограниченно|Описание|$))/gi;
+    const cleanedDesc = cleanText(desc);
+    let listMatch;
+    while ((listMatch = listPattern.exec(cleanedDesc)) !== null) {
+        const segment = listMatch[1].trim();
+        const parts = segment.split(/[\s,;]+/);
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            if (part.length < 3) continue;
+            const norm = normalizeName(part);
+            let spell = allSpellsList.find(s => normalizeName(s.spellName) === norm);
+            if (!spell && i + 1 < parts.length) {
+                const twoWords = part + ' ' + parts[i+1];
+                const norm2 = normalizeName(twoWords);
+                spell = allSpellsList.find(s => normalizeName(s.spellName) === norm2);
+                if (spell) i++;
+            }
+            if (!spell && i + 2 < parts.length) {
+                const threeWords = part + ' ' + parts[i+1] + ' ' + parts[i+2];
+                const norm3 = normalizeName(threeWords);
+                spell = allSpellsList.find(s => normalizeName(s.spellName) === norm3);
+                if (spell) i += 2;
+            }
+            if (spell) foundSpells.add(spell.spellName);
+        }
+    }
+    
+    return Array.from(foundSpells);
+}
 
     // ========== Подсветка заклинаний в тексте ==========
-    function highlightSpellsInText(text) {
+           function highlightSpellsInText(text) {
         if (!text) return text;
-        let result = cleanText(text);
-        result = result.replace(/\{([^}]+)\}/g, (match, spellName) => {
-            const trimmed = spellName.trim();
-            const found = findSpellByName(trimmed);
-            if (found) return `<span class="spell-link" data-spell="${found.spellName}">${trimmed}</span>`;
+        
+        let cleaned = text;
+        
+        // Заменяем @UUID[.id] на название, если есть в uuidMap
+        cleaned = cleaned.replace(/@UUID\[\.([^\]]+)\]/gi, (match, id) => {
+            const name = resolveUuid(id);
+            return name ? name : match;
+        });
+        
+        // 1. Обрабатываем Foundry-ссылки
+        cleaned = cleaned.replace(/@Compendium\[[^\]]*?spells[^\]]*?\]\{([^}]+)\}/gi, (match, spellName) => {
+            const found = findSpellByName(spellName.trim());
+            if (found) return `<span class="spell-link" data-spell="${found.spellName}"><i class="fa-solid fa-hat-wizard"></i> ${spellName.trim()}</span>`;
             return match;
         });
-        const words = result.split(/(\s+|[.,!?;:—])/);
-        return words.map(part => {
-            const trimmed = part.trim();
-            if (!trimmed) return part;
-            if (part.includes('spell-link')) return part;
-            const found = findSpellByName(trimmed);
-            if (found) return `<span class="spell-link" data-spell="${found.spellName}">${trimmed}</span>`;
-            return part;
-        }).join('');
+        cleaned = cleaned.replace(/@UUID\[[^\]]*?\]\{([^}]+)\}/gi, (match, spellName) => {
+            const found = findSpellByName(spellName.trim());
+            if (found) return `<span class="spell-link" data-spell="${found.spellName}"><i class="fa-solid fa-hat-wizard"></i> ${spellName.trim()}</span>`;
+            return match;
+        });
+        
+        // 2. Очищаем текст
+        cleaned = cleanText(cleaned);
+        
+        // 3. Сортируем заклинания от длинных к коротким
+        const sortedSpells = [...allSpellsList].sort((a, b) => {
+            const aName = a.spellName.split('/')[0].trim();
+            const bName = b.spellName.split('/')[0].trim();
+            return bName.length - aName.length;
+        });
+        
+        // 4. Проходим по каждому заклинанию
+        for (let spell of sortedSpells) {
+            const rusName = spell.spellName.split('/')[0].trim();
+            if (rusName.length < 3) continue;
+            
+            const escaped = rusName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp('(^|\\s|>|\\b|[;:])(' + escaped + ')(?=\\s|,|;|\\.|$|<|\\b)', 'gi');
+            
+            cleaned = cleaned.replace(regex, (match, p1, p2) => {
+                const pos = cleaned.indexOf(match);
+                const before = cleaned.substring(0, pos);
+                if (before.lastIndexOf('<span class="spell-link"') > before.lastIndexOf('</span>')) {
+                    return match;
+                }
+                return p1 + `<span class="spell-link" data-spell="${spell.spellName}">${p2}</span>`;
+            });
+        }
+        
+        return cleaned;
     }
 
-    // ========== Детали монстра ==========
+        // ========== Детали монстра ==========
     function showMonsterDetails(monsterName) {
         const full = fullMonstersMap.get(monsterName.toLowerCase());
         if (!full) { alert(`Нет подробных данных для ${monsterName}`); return; }
         document.getElementById('detailName').innerText = full.name || monsterName;
-                const img = document.getElementById('detailImage');
+        const img = document.getElementById('detailImage');
         if (full.image) {
-            img.src = 'images/' + full.image;
-            img.onerror = function() {
-                // если в папке images нет, пробуем без папки (на случай старых путей)
-                this.src = full.image;
-            };
+            img.src = full.image; // предполагается, что путь уже полный (или с images/)
+            img.onerror = function() { this.src = full.image; };
             img.style.display = 'block';
         } else {
             img.style.display = 'none';
         }
-        if (full.image) { img.src = full.image; img.style.display = 'block'; } else img.style.display = 'none';
         document.getElementById('detailAC').innerText = full.ac ?? '?';
         document.getElementById('detailHP').innerText = full.hp ?? '?';
         document.getElementById('detailCR').innerText = full.cr ?? '?';
@@ -830,66 +1054,211 @@
         document.getElementById('detailResist').innerText = translateList(extractString(full.damage_resistances), 'damage') || '—';
         document.getElementById('detailImmun').innerText = translateList(extractString(full.damage_immunities), 'damage') || '—';
         document.getElementById('detailCondImmun').innerText = translateList(extractString(full.condition_immunities), 'conditions') || '—';
-        const actionsList = document.getElementById('detailActions');
-        actionsList.innerHTML = '';
-        if (full.actions && full.actions.length) {
-            full.actions.forEach(a => { 
-                const li = document.createElement('li'); 
-                li.innerHTML = `<strong>${cleanText(a.name)}</strong> — ${highlightSpellsInText(cleanText(a.damage) + ' ' + cleanText(a.description))}`; 
-                actionsList.appendChild(li); 
-            });
-        } else actionsList.innerHTML = '<li>—</li>';
-        const featuresList = document.getElementById('detailFeatures');
-        featuresList.innerHTML = '';
-        if (full.features && full.features.length) {
-            full.features.forEach(f => {
-                const li = document.createElement('li');
-                li.innerHTML = `<strong>${cleanText(f.name)}</strong> — ${highlightSpellsInText(f.description)}`;
-                featuresList.appendChild(li);
-            });
-        } else featuresList.innerHTML = '<li>—</li>';
-        document.getElementById('detailDescription').innerHTML = highlightSpellsInText(full.description) || '—';
         
-        // === Сбор заклинаний ===
-        const npcKey = monsterName.toLowerCase();
-        const spellNameSet = new Set(npcSpellsMap.get(npcKey) || []);
-        if (full.features) {
-            full.features.forEach(f => {
-                extractSpellsFromDescription(f.description).forEach(name => spellNameSet.add(name));
+        // Функция для рендеринга списка действий/особенностей
+        function getRenderableItems(items) {
+            if (!Array.isArray(items)) return [];
+            return items.filter(item => {
+                const name = cleanText(item?.name || '').trim();
+                const description = cleanText(item?.description || '').trim();
+                const isDashName = name === '—' || name === '-' || name === '';
+                const isDashDescription = description === '—' || description === '-' || description === '';
+                return !(isDashName && isDashDescription);
             });
         }
-        if (full.actions) {
-            full.actions.forEach(a => {
-                extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
-            });
+
+        function toggleSectionByList(container, visible) {
+            if (!container) return;
+            container.style.display = visible ? '' : 'none';
+            const title = container.previousElementSibling;
+            if (title) title.style.display = visible ? '' : 'none';
         }
-        const spells = [];
-        spellNameSet.forEach(name => {
-            const fullSpell = findSpellByName(name);
-            if (fullSpell) spells.push(fullSpell);
-        });
+
+        function renderList(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const filteredItems = getRenderableItems(items);
+            if (filteredItems.length) {
+                filteredItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    container.appendChild(li);
+                });
+                toggleSectionByList(container, true);
+            } else {
+                toggleSectionByList(container, false);
+            }
+        }
         
+        renderList('detailActions', full.actions);
+        renderList('detailFeatures', full.features);
+        
+        // Легендарные действия
+        const legendaryContainer = document.getElementById('detailLegendary');
+        if (legendaryContainer) {
+            legendaryContainer.innerHTML = '';
+            const legendaryItems = getRenderableItems(full.legendary_actions);
+            if (legendaryItems.length) {
+                legendaryItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    legendaryContainer.appendChild(li);
+                });
+                toggleSectionByList(legendaryContainer, true);
+            } else {
+                toggleSectionByList(legendaryContainer, false);
+            }
+        }
+        
+        // Бонусные действия
+        const bonusContainer = document.getElementById('detailBonusActions');
+        if (bonusContainer) {
+            bonusContainer.innerHTML = '';
+            const bonusItems = getRenderableItems(full.bonus_actions);
+            if (bonusItems.length) {
+                bonusItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    bonusContainer.appendChild(li);
+                });
+                toggleSectionByList(bonusContainer, true);
+            } else {
+                toggleSectionByList(bonusContainer, false);
+            }
+        }
+        
+        // Реакции
+        const reactionsContainer = document.getElementById('detailReactions');
+        if (reactionsContainer) {
+            reactionsContainer.innerHTML = '';
+            const reactionItems = getRenderableItems(full.reactions);
+            if (reactionItems.length) {
+                reactionItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    reactionsContainer.appendChild(li);
+                });
+                toggleSectionByList(reactionsContainer, true);
+            } else {
+                toggleSectionByList(reactionsContainer, false);
+            }
+        }
+        
+        // Описание (сворачиваемое)
+        const descDiv = document.getElementById('detailDescription');
+        const descText = full.description ? highlightSpellsInText(full.description) : '—';
+        descDiv.innerHTML = `
+            <button type="button" class="btn" id="toggleMonsterDescriptionBtn" aria-expanded="false" style="margin-top:10px;">
+                <span class="btn-label"><i class="fa-thin fa-dragon fa-icon"></i>Описание монстра</span>
+            </button>
+            <div id="monsterDescriptionContent" class="folder-content collapsed" style="margin-top: 8px;">
+                ${descText}
+            </div>
+        `;
+        const toggleDescriptionBtn = document.getElementById('toggleMonsterDescriptionBtn');
+        const descContent = document.getElementById('monsterDescriptionContent');
+        if (toggleDescriptionBtn && descContent) {
+            toggleDescriptionBtn.onclick = () => {
+                const opened = !descContent.classList.contains('collapsed');
+                descContent.classList.toggle('collapsed', opened);
+                toggleDescriptionBtn.setAttribute('aria-expanded', String(!opened));
+            };
+        }
+        // Заклинания
         const spellsContainer = document.getElementById('spellsContainer');
-        if (spells.length === 0) spellsContainer.innerHTML = '<div style="padding:12px;">✨ Заклинаний не найдено.</div>';
-        else {
-            spellsContainer.innerHTML = '';
-            const byLevel = {};
-            spells.forEach(s => { if(!byLevel[s.level]) byLevel[s.level]=[]; byLevel[s.level].push(s); });
-            for(let lvl=0; lvl<=9; lvl++) {
-                if(byLevel[lvl]) {
-                    const div = document.createElement('div');
-                    div.innerHTML = `<strong>${lvl===0?'Заговоры':lvl+' уровень'}</strong>`;
-                    spellsContainer.appendChild(div);
-                    byLevel[lvl].forEach(spell => {
-                        const item = document.createElement('div'); item.className = 'spell-item';
-                        const displayName = spell.spellName.split('/')[0].trim();
-                        item.innerHTML = `<span class="spell-name">${cleanText(displayName)}</span><span class="spell-level">${spell.level===0?'Заговор':spell.level+' ур'}</span>`;
-                        item.onclick = (e) => { e.stopPropagation(); showSpellDetail(spell); };
-                        spellsContainer.appendChild(item);
-                    });
+        let isCaster = false;
+        const slots = parseSpellSlots(full.description || '');
+        if (Object.keys(slots).length > 0) {
+            isCaster = true;
+        } else {
+            if (full.features) {
+                for (let f of full.features) {
+                    const name = (f.name || '').toLowerCase();
+                    if (name.includes('заклинания') || name.includes('spellcasting') || name.includes('врождённое колдовство') || name.includes('использование заклинаний')) {
+                        const desc = (f.description || '').toLowerCase();
+                        if (desc.includes('ячейк') || desc.includes('заговоры') || desc.includes('@compendium') || desc.includes('@uuid') || desc.includes('круг') || desc.includes('заклинание')) {
+                            isCaster = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
+        
+        if (!isCaster) {
+            spellsContainer.innerHTML = '<div style="padding:12px;"><i class="fa-solid fa-scroll"></i> Это существо не является заклинателем.</div>';
+        } else {
+            const npcKey = monsterName.toLowerCase().split('/')[0].trim();
+            const spellNameSet = new Set(npcSpellsMap.get(npcKey) || []);
+            if (full.features) {
+                full.features.forEach(f => {
+                    extractSpellsFromDescription(f.description).forEach(name => spellNameSet.add(name));
+                });
+            }
+            if (full.actions) {
+                full.actions.forEach(a => {
+                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                });
+            }
+            if (full.legendary_actions) {
+                full.legendary_actions.forEach(a => {
+                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                });
+            }
+            if (full.bonus_actions) {
+                full.bonus_actions.forEach(a => {
+                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                });
+            }
+            if (full.reactions) {
+                full.reactions.forEach(a => {
+                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                });
+            }
+            if (Array.isArray(full.spells)) {
+                full.spells.forEach(id => {
+                    const spell = findSpellById(id);
+                    if (spell) spellNameSet.add(spell.spellName);
+                });
+            }
+            extractSpellsFromDescription(full.description || '').forEach(name => spellNameSet.add(name));
+            
+            const spells = [];
+            const seen = new Set();
+            spellNameSet.forEach(name => {
+                const fullSpell = findSpellByName(name);
+                if (fullSpell) {
+                    const norm = fullSpell.spellName.split('/')[0].trim().toLowerCase();
+                    if (!seen.has(norm)) {
+                        seen.add(norm);
+                        spells.push(fullSpell);
+                    }
+                }
+            });
+            
+            if (spells.length === 0) {
+                spellsContainer.innerHTML = '<div style="padding:12px;"><i class="fa-solid fa-scroll"></i> Заклинаний не найдено.</div>';
+            } else {
+                spellsContainer.innerHTML = '';
+                const byLevel = {};
+                spells.forEach(s => { if(!byLevel[s.level]) byLevel[s.level]=[]; byLevel[s.level].push(s); });
+                for(let lvl=0; lvl<=9; lvl++) {
+                    if(byLevel[lvl]) {
+                        const div = document.createElement('div');
+                        div.innerHTML = `<strong>${lvl===0?'Заговоры':lvl+' уровень'}</strong>`;
+                        spellsContainer.appendChild(div);
+                        byLevel[lvl].forEach(spell => {
+                            const item = document.createElement('div'); item.className = 'spell-item';
+                            const displayName = spell.spellName.split('/')[0].trim();
+                            item.innerHTML = `<span class="spell-name">${cleanText(displayName)}</span><span class="spell-level">${spell.level===0?'Заговор':spell.level+' ур'}</span>`;
+                            item.onclick = (e) => { e.stopPropagation(); showSpellDetail(spell); };
+                            spellsContainer.appendChild(item);
+                        });
+                    }
+                }
+            }
+        }
+        
         document.querySelectorAll('.spell-link').forEach(link => {
             link.onclick = (e) => {
                 e.stopPropagation();
@@ -1013,9 +1382,10 @@
     }
 
     // ========== Парсинг ячеек ==========
-    function parseSpellSlots(description) {
+           function parseSpellSlots(description) {
         const slots = {};
-        const regex = /(\d+)-[йя]\s+круг\s*\((\d+)\s+ячейк[а-я]*\)/gi;
+        // Поддержка "2-й круг", "2 круг", "2-го круга", "2 круга" и т.д.
+        const regex = /(\d+)(?:-й|-го)?\s*круг[а]?\s*\((\d+)\s*ячейк[а-я]*\)/gi;
         let match;
         while ((match = regex.exec(description)) !== null) {
             const level = parseInt(match[1]);
@@ -1029,21 +1399,23 @@
     function addCombatant(data) {
         let hpResult = data.isMonster ? rollHP(data.hpFormula) : { total: data.maxHp || 30, rolls: [], formula: data.hpFormula };
         let hp = hpResult.total;
-        let spellSlots = {};
+                let spellSlots = {};
         if (data.isMonster && data.name) {
-            const full = fullMonstersMap.get(data.name.toLowerCase());
-            if (full) {
-                if (full.description) spellSlots = parseSpellSlots(full.description);
-                if (full.features) {
-                    for (let f of full.features) {
-                        if (f.name === "Заклинания" || f.name.toLowerCase().includes("заклинания")) {
-                            const slotsFromFeature = parseSpellSlots(f.description);
-                            Object.assign(spellSlots, slotsFromFeature);
-                        }
-                    }
+    const full = fullMonstersMap.get(data.name.toLowerCase());
+    if (full) {
+        if (full.description) spellSlots = parseSpellSlots(full.description);
+        if (full.features) {
+            for (let f of full.features) {
+                const name = (f.name || '').toLowerCase();
+                // Расширяем список ключевых слов для заклинательных особенностей
+                if (name.includes('заклинания') || name.includes('spellcasting') || name.includes('врождённое колдовство') || name.includes('использование заклинаний')) {
+                    const slotsFromFeature = parseSpellSlots(f.description);
+                    Object.assign(spellSlots, slotsFromFeature);
                 }
             }
         }
+    }
+}
         let newChar = {
             id: nextId++, name: data.name || "Существо", race: data.race || "", class: data.class || "", ac: data.ac || 12,
             maxHp: hp, currentHp: hp, tempHp: 0, hpFormula: data.hpFormula || null,
@@ -1066,7 +1438,7 @@
     function addHero() { 
         addCombatant({ name: `Герой ${nextId}`, race: "", class: "", ac: 14, hpFormula: "5d8+10", initBonus: 2, isMonster: false, maxHp: 30, stats: { str:{score:10,mod:0}, dex:{score:10,mod:0}, con:{score:10,mod:0}, int:{score:10,mod:0}, wis:{score:10,mod:0}, cha:{score:10,mod:0} } }); 
     }
-    function applyDamage(c, dmg) { let remaining = dmg; if (c.tempHp > 0) { let absorb = Math.min(c.tempHp, remaining); c.tempHp -= absorb; remaining -= absorb; addLog(c, `🛡️ Врем.ХП поглотило ${absorb}`); } if (remaining > 0) { c.currentHp = Math.max(0, c.currentHp - remaining); addLog(c, `⚔️ Урон ${dmg} → ❤️ ${c.currentHp}/${c.maxHp}`); } renderCombat(); saveCurrentStateToSession(); }
+    function applyDamage(c, dmg) { let remaining = dmg; if (c.tempHp > 0) { let absorb = Math.min(c.tempHp, remaining); c.tempHp -= absorb; remaining -= absorb; addLog(c, `🛡️ Врем.ХП поглотило ${absorb}`); } if (remaining > 0) { c.currentHp = Math.max(0, c.currentHp - remaining); addLog(c, `Урон ${dmg} → ❤️ ${c.currentHp}/${c.maxHp}`); } renderCombat(); saveCurrentStateToSession(); }
     function applyHeal(c, amount) { c.currentHp = Math.min(c.maxHp, c.currentHp + amount); addLog(c, `💚 Лечение +${amount} → ${c.currentHp}/${c.maxHp}`); renderCombat(); saveCurrentStateToSession(); }
     function randomizeHealth(c) { 
         if (!c.isMonster || !c.hpFormula) return; 
@@ -1129,43 +1501,94 @@
     }
 
     function importFromJSON(jsonData) {
-        try {
-            let data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
-            if(data.data) data = JSON.parse(data.data);
-            const name = data.name?.value || "Импортный герой";
-            let ac = data.vitality?.ac?.value || 14;
-            if (data.vitality?.shield?.value === true) ac += 2;
-            const maxHp = data.vitality?.["hp-max"]?.value || 30;
-            const currentHp = data.vitality?.["hp-current"]?.value || maxHp;
-            const race = data.info?.race?.value || "";
-            const charClass = data.info?.charClass?.value || "";
-            let dexMod = 0;
-            if (data.stats?.dex?.score) dexMod = Math.floor((data.stats.dex.score - 10) / 2);
-            let avatar = null;
-            if (data.avatar && (data.avatar.jpeg || data.avatar.webp)) avatar = data.avatar.jpeg || data.avatar.webp;
-            let level = parseInt(data.info?.level?.value) || 1;
-            let profBonus = 2; if (level>=5) profBonus=3; if (level>=9) profBonus=4; if (level>=13) profBonus=5; if (level>=17) profBonus=6;
-            let wisMod = Math.floor((data.stats?.wis?.score - 10)/2) || 0;
-            let spellSaveDC = 8 + profBonus + wisMod;
-            let spellAttack = profBonus + wisMod;
-            let stats = { 
-                str: { score: data.stats?.str?.score || 10, mod: Math.floor((data.stats?.str?.score - 10)/2) || 0 }, 
-                dex: { score: data.stats?.dex?.score || 10, mod: Math.floor((data.stats?.dex?.score - 10)/2) || 0 }, 
-                con: { score: data.stats?.con?.score || 10, mod: Math.floor((data.stats?.con?.score - 10)/2) || 0 }, 
-                int: { score: data.stats?.int?.score || 10, mod: Math.floor((data.stats?.int?.score - 10)/2) || 0 }, 
-                wis: { score: data.stats?.wis?.score || 10, mod: wisMod }, 
-                cha: { score: data.stats?.cha?.score || 10, mod: Math.floor((data.stats?.cha?.score - 10)/2) || 0 } 
-            };
-            const newHero = { 
-                id: nextId++, name, race, class: charClass, ac, maxHp, currentHp, tempHp:0, hpFormula:"5d8+10", 
-                initBonus: dexMod, initiative:0, conditions: new Set(), exhaustion:0, isMonster: false, log: [], 
-                avatar, spellSaveDC, spellAttack, stats, heroData: data, spellSlots: {} 
-            };
-            combatants.push(newHero);
-            addLog(newHero, `📜 Импорт персонажа ${name}`);
-            renderCombat(); saveCurrentStateToSession();
-        } catch(e) { alert("Ошибка разбора JSON: " + e.message); }
+    try {
+        let data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+        if(data.data) data = JSON.parse(data.data);
+        
+        const name = data.name?.value || "Импортный герой";
+        let ac = data.vitality?.ac?.value || 14;
+        if (data.vitality?.shield?.value === true) ac += 2;
+        const maxHp = data.vitality?.["hp-max"]?.value || 30;
+        const currentHp = data.vitality?.["hp-current"]?.value || maxHp;
+        const race = data.info?.race?.value || "";
+        const charClass = data.info?.charClass?.value || "";
+        
+        let dexMod = 0;
+        if (data.stats?.dex?.score) dexMod = Math.floor((data.stats.dex.score - 10) / 2);
+        
+        let avatar = null;
+        if (data.avatar && (data.avatar.jpeg || data.avatar.webp)) avatar = data.avatar.jpeg || data.avatar.webp;
+        
+        let level = parseInt(data.info?.level?.value) || 1;
+        const explicitProficiency = Number(data.proficiency?.value ?? data.proficiency);
+        let profBonus = Number.isFinite(explicitProficiency) && explicitProficiency > 0 ? explicitProficiency : 2;
+        if (!(Number.isFinite(explicitProficiency) && explicitProficiency > 0)) {
+            if (level >= 5) profBonus = 3;
+            if (level >= 9) profBonus = 4;
+            if (level >= 13) profBonus = 5;
+            if (level >= 17) profBonus = 6;
+        }
+        
+        // Определяем базовую характеристику заклинателя
+        let spellAbility = "cha"; // по умолчанию Харизма
+        if (data.spellsInfo && data.spellsInfo.base) {
+            if (data.spellsInfo.base.code) spellAbility = data.spellsInfo.base.code.toLowerCase();
+            else if (data.spellsInfo.base.value) spellAbility = data.spellsInfo.base.value.toLowerCase();
+        }
+        
+        // Получаем модификатор этой характеристики
+        let spellMod = 0;
+        const stats = data.stats || {};
+        if (stats[spellAbility] && stats[spellAbility].score) {
+            spellMod = Math.floor((stats[spellAbility].score - 10) / 2);
+        }
+        
+        const spellSaveDC = Number(data.spellsInfo?.save?.value) || (8 + profBonus + spellMod);
+        const spellAttack = Number(data.spellsInfo?.mod?.value) || (profBonus + spellMod);
+        
+        // Собираем статы для карточки
+        const heroStats = { 
+            str: { score: stats.str?.score || 10, mod: Math.floor((stats.str?.score - 10)/2) || 0 }, 
+            dex: { score: stats.dex?.score || 10, mod: Math.floor((stats.dex?.score - 10)/2) || 0 }, 
+            con: { score: stats.con?.score || 10, mod: Math.floor((stats.con?.score - 10)/2) || 0 }, 
+            int: { score: stats.int?.score || 10, mod: Math.floor((stats.int?.score - 10)/2) || 0 }, 
+            wis: { score: stats.wis?.score || 10, mod: Math.floor((stats.wis?.score - 10)/2) || 0 }, 
+            cha: { score: stats.cha?.score || 10, mod: Math.floor((stats.cha?.score - 10)/2) || 0 } 
+        };
+        
+        const newHero = { 
+            id: nextId++, 
+            name, 
+            race, 
+            class: charClass, 
+            ac, 
+            maxHp, 
+            currentHp, 
+            tempHp: 0, 
+            hpFormula: "5d8+10", 
+            initBonus: dexMod, 
+            initiative: 0, 
+            conditions: new Set(), 
+            exhaustion: 0, 
+            isMonster: false, 
+            log: [], 
+            avatar, 
+            spellSaveDC, 
+            spellAttack, 
+            proficiency: profBonus,
+            stats: heroStats, 
+            heroData: data, 
+            spellSlots: {} 
+        };
+        
+        combatants.push(newHero);
+        addLog(newHero, `📜 Импорт персонажа ${name}`);
+        renderCombat(); 
+        saveCurrentStateToSession();
+    } catch(e) { 
+        alert("Ошибка разбора JSON: " + e.message); 
     }
+}
 
     function showHeroDetails(hero) {
         const data = hero.heroData;
@@ -1188,13 +1611,14 @@
                 `👄 Харизма ${hero.stats.cha.score} (${hero.stats.cha.mod>=0?'+'+hero.stats.cha.mod:hero.stats.cha.mod})`;
         }
         const saves = data.saves; let savesHtml = ''; 
-        if (saves) for (let [stat, val] of Object.entries(saves)) if (val.isProf) savesHtml += `${saveTranslations[stat] || stat.toUpperCase()}: +${(hero.stats[stat]?.mod||0)+(data.proficiency||2)} `;
+        const proficiencyBonus = Number(hero.proficiency ?? data.proficiency?.value ?? data.proficiency ?? 2) || 2;
+        if (saves) for (let [stat, val] of Object.entries(saves)) if (val.isProf) savesHtml += `${saveTranslations[stat] || stat.toUpperCase()}: +${(hero.stats[stat]?.mod||0)+proficiencyBonus} `;
         document.getElementById('heroDetailSaves').innerHTML = savesHtml || '—';
         const skills = data.skills; let skillsHtml = ''; 
         if (skills) for (let [skill, val] of Object.entries(skills)) {
             if (val.isProf) {
-                let bonus = (hero.stats[val.baseStat]?.mod||0) + (data.proficiency||2);
-                if (val.isProf === 2) bonus += (data.proficiency||2);
+                let bonus = (hero.stats[val.baseStat]?.mod||0) + proficiencyBonus;
+                if (val.isProf === 2) bonus += proficiencyBonus;
                 skillsHtml += `${skillTranslations[skill] || skill}: +${bonus} `;
             }
         }
@@ -1262,13 +1686,13 @@
 
     function renderCombat() {
         const grid = document.getElementById('combatantsGrid');
-        if (!combatants.length) { grid.innerHTML = '<div style="padding:60px;text-align:center;">⚔️ Добавьте героев или монстров из бестиария</div>'; return; }
+        if (!combatants.length) { grid.innerHTML = '<div style="padding:60px;text-align:center;"><i class="fa-solid fa-user-plus"></i> Добавьте героев или монстров из бестиария</div>'; return; }
         let html = '';
         combatants.forEach((c, idx) => {
             const isCurrent = idx === currentTurnIndex;
             let turnClass = isCurrent ? (c.isMonster ? 'current-turn-monster' : 'current-turn-hero') : '';
             const activeConds = c.conditions.size + (c.exhaustion > 0 ? 1 : 0);
-            const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<div class="race-class" data-tooltip="Раса: ${c.race || '?'} | Класс: ${c.class || '?'}">${c.race ? `🧬 ${escapeHtml(c.race)}` : ''} ${c.class ? `⚔️ ${escapeHtml(c.class)}` : ''}</div>` : '';
+            const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<div class="race-class" data-tooltip="Раса: ${c.race || '?'} | Класс: ${c.class || '?'}">${c.race ? `<i class="fa-brands fa-critical-role"></i> ${escapeHtml(c.race)}` : ''} ${c.class ? `<i class="fa-solid fa-user-plus"></i> ${escapeHtml(c.class)}` : ''}</div>` : '';
             let statsHtml = '';
             if (!c.isMonster && c.stats) {
                 statsHtml = `<div class="stats-row">
@@ -1281,7 +1705,7 @@
                 </div>`;
             }
             let spellHtml = '';
-            if (!c.isMonster && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний">✨ Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями">🎯 Атк +${c.spellAttack}</span></div>`;
+            if (!c.isMonster && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний"><i class="fa-solid fa-dice-d6"></i> Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями"><i class="fa-solid fa-wand-sparkles"></i> Атк +${c.spellAttack}</span></div>`;
             let activeConditionsHtml = '';
             c.conditions.forEach(cond => { 
                 let display = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond; 
@@ -1305,21 +1729,21 @@
             html += `<div class="combat-card ${c.isMonster ? 'monster-card' : 'hero-card'} ${turnClass}" data-combat-id="${c.id}">
                 ${c.avatar ? `<div class="card-bg" style="${bgStyle}"></div><div class="card-overlay"></div>` : ''}
                 <div class="card-content">
-                    <input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}">
+                    <input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)">
                     <div class="card-header">
-                        <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе">☰</button>
+                        <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе"><i class="fa-brands fa-buffer"></i></button>
                     </div>
                     <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; margin-top:4px;">
-                        <div class="ac-badge" data-tooltip="Класс Доспеха">🛡️ <input class="ac-edit" data-id="${c.id}" value="${c.ac}"></div>
-                        <div style="display:flex; gap:2px;"><input class="init-input" data-id="${c.id}" value="${c.initiative}" data-tooltip="Инициатива"><button class="init-roll-btn" data-id="${c.id}" data-tooltip="Бросить 1d20 + бонус">🎲 d20</button></div>
+                        <div class="ac-badge" data-tooltip="Класс Доспеха"><i class="fa-solid fa-shield"></i> <input class="ac-edit" data-id="${c.id}" value="${c.ac}"></div>
+                        <div style="display:flex; gap:2px;"><input class="init-input" data-id="${c.id}" value="${c.initiative}" data-tooltip="Инициатива"><button class="init-roll-btn" data-id="${c.id}" data-tooltip="Бросить 1d20 + бонус"><i class="fa-solid fa-dice-d20"></i> d20</button></div>
                     </div>
                     ${raceClassHtml}${statsHtml}${spellHtml}
                     <div class="active-conditions">${activeConditionsHtml}</div>
                     <div class="hp-panel">
-                        <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}">❤️🎲</button>` : ''}</div>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}"><i class="fa-solid fa-dice"></i></button>` : ''}</div>
                         <div><span>❤️ </span><input class="hp-input" data-id="${c.id}" value="${c.currentHp}" data-tooltip="Текущие хиты">/<input class="max-hp-input" data-id="${c.id}" value="${c.maxHp}" data-tooltip="Максимум хитов"></div>
-                        <div><span>🛡️Врем </span><input class="temp-input" data-id="${c.id}" value="${c.tempHp}" data-tooltip="Временные хиты"></div>
-                        <button class="remove-btn" data-id="${c.id}" data-tooltip="Удалить персонажа">🗑️</button>
+                        <div><span><i class="fa-solid fa-heart-circle-plus"></i> Врем </span><input class="temp-input" data-id="${c.id}" value="${c.tempHp}" data-tooltip="Временные хиты"></div>
+                        <button class="remove-btn" data-id="${c.id}" data-tooltip="Удалить персонажа"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     ${slotsHtml}
                     <div class="conditions-header" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
@@ -1336,7 +1760,11 @@
             if (burger) burger.onclick = (e) => { e.stopPropagation(); if (c.isMonster) showMonsterDetails(c.name); else showHeroDetails(c); };
             document.querySelectorAll(`.name-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.name = e.target.value; renderCombat(); saveCurrentStateToSession(); });
             document.querySelectorAll(`.ac-edit[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.ac = parseInt(e.target.value) || 10; saveCurrentStateToSession(); });
-            document.querySelectorAll(`.init-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.initiative = parseInt(e.target.value) || 0; sortByInitiative(); saveCurrentStateToSession(); });
+            document.querySelectorAll(`.init-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => {
+                c.initiative = parseInt(e.target.value) || 0;
+                renderCombat();
+                saveCurrentStateToSession();
+            });
             document.querySelectorAll(`.init-roll-btn[data-id="${c.id}"]`).forEach(btn => btn.onclick = () => rollInitiative(c));
             document.querySelectorAll(`.hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.currentHp = Math.min(c.maxHp, Math.max(0, parseInt(e.target.value)||0)); renderCombat(); saveCurrentStateToSession(); });
             document.querySelectorAll(`.max-hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.maxHp = parseInt(e.target.value)||0; if(c.currentHp > c.maxHp) c.currentHp = c.maxHp; renderCombat(); saveCurrentStateToSession(); });
@@ -1409,30 +1837,26 @@
     document.getElementById('jsonFileInput').onchange = e => { if(e.target.files[0]){ const reader = new FileReader(); reader.onload = ev => importFromJSON(ev.target.result); reader.readAsText(e.target.files[0]); } e.target.value=''; };
     document.getElementById('sessionSelect').onchange = (e) => loadSession(e.target.value);
     document.getElementById('renameSessionBtn').onclick = renameCurrentSession;
-    document.getElementById('newSessionBtn').onclick = newSession;
+     document.getElementById('newSessionBtn').onclick = newSession;
     document.getElementById('deleteSessionBtn').onclick = deleteCurrentSession;
     document.getElementById('resetAllSessionsBtn').onclick = resetAllSessions;
-
-    const topBar = document.getElementById('topBar');
-const toggleTopBarFixed = document.getElementById('toggleTopBarFixedBtn');
-if (toggleTopBarFixed && topBar) {
-    toggleTopBarFixed.onclick = () => {
-        const isCollapsed = topBar.classList.toggle('collapsed');
-        toggleTopBarFixed.innerHTML = isCollapsed ? '▼' : '▲';
-        toggleTopBarFixed.title = isCollapsed ? 'Показать верхнюю панель' : 'Свернуть верхнюю панель';
-        setTimeout(adjustMobileSticky, 50);
-    };
-}
-    const toolbar = document.getElementById('mainToolbar');
-    const toggleToolbarFixed = document.getElementById('toggleToolbarFixedBtn');
-    if (toggleToolbarFixed && toolbar) {
-        toggleToolbarFixed.onclick = () => {
-            const isCollapsed = toolbar.classList.toggle('collapsed');
-            toggleToolbarFixed.innerHTML = isCollapsed ? '▼' : '▲';
-            toggleToolbarFixed.title = isCollapsed ? 'Показать панель инструментов' : 'Свернуть панель инструментов';
+    const burgerMenuBtn = document.getElementById('burgerMenuBtn');
+    const burgerMenu = document.getElementById('burgerMenu');
+    if (burgerMenuBtn && burgerMenu) {
+        burgerMenuBtn.onclick = (e) => {
+            e.stopPropagation();
+            burgerMenu.classList.toggle('open');
         };
+        burgerMenu.addEventListener('click', (e) => e.stopPropagation());
     }
 
+    function adjustTopBarOffset() {
+        const topBar = document.getElementById('topBar');
+        const trackerArea = document.getElementById('trackerArea');
+        if (!topBar || !trackerArea) return;
+        const offset = window.innerWidth <= 768 ? 0 : Math.ceil(topBar.getBoundingClientRect().height) + 12;
+        document.documentElement.style.setProperty('--top-bar-offset', `${offset}px`);
+    }
     function closeAllModals() {
         const modals = ['helpModal', 'detailModal', 'spellDetailModal', 'allSpellsModal', 'heroDetailModal', 'customModal'];
         modals.forEach(id => { const m = document.getElementById(id); if(m) m.style.display = 'none'; });
@@ -1446,6 +1870,7 @@ if (toggleTopBarFixed && topBar) {
         if (e.target.classList.contains('modal')) e.target.style.display = 'none';
         const panel = document.getElementById('bestiaryPanel');
         const toggleBtn = document.getElementById('toggleBtn');
+        if (burgerMenu && !e.target.closest('#burgerMenuBtn') && !e.target.closest('#burgerMenu')) burgerMenu.classList.remove('open');
         if (panel && panel.classList.contains('open') && !panel.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
             panel.classList.remove('open');
             document.getElementById('trackerArea').classList.remove('shifted');
@@ -1467,34 +1892,26 @@ if (toggleTopBarFixed && topBar) {
     };
             // ========== Функция для коррекции sticky-позиции toolbar ==========
     function adjustMobileSticky() {
-    if (window.innerWidth <= 768) {
-        const topBar = document.getElementById('topBar');
-        const toolbar = document.getElementById('mainToolbar');
-        if (topBar && toolbar) {
-            const topBarHeight = topBar.classList.contains('collapsed') ? 0 : topBar.getBoundingClientRect().height;
-            toolbar.style.top = topBarHeight + 'px';
-        }
-    } else {
-        const toolbar = document.getElementById('mainToolbar');
-        if (toolbar) toolbar.style.top = '';
+        if (window.innerWidth <= 768) document.body.style.paddingTop = '0px';
+        adjustTopBarOffset();
     }
-}
 
     window.addEventListener('load', adjustMobileSticky);
     window.addEventListener('resize', adjustMobileSticky);
 
     // Обновляем обработчик сворачивания верхней панели
    
-    Promise.all([
+      Promise.all([
         loadBestiaryFromFile(),
         loadFullMonstersJSON(),
         loadNPCSpells(),
-        loadSpells()
-    ]).then(() => {
+        loadSpells(),
+        loadUuidMap()   // <-- обязательно!
+     ]).then(() => {
         initSessions();
         adjustMobileSticky();
+        adjustTopBarOffset();
     });
-
 })();
 </script>
 </body>
