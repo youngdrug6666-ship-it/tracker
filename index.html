@@ -145,97 +145,80 @@
         }
 
         /* === Адаптация для мобильных устройств (Android, iPhone) === */
-        /* Улучшенная мобильная адаптация */
-@media (max-width: 768px) {
-    /* Верхняя панель — делаем компактнее */
+        @media (max-width: 768px) {
+    body {
+        padding: 0px 8px 8px 8px;
+    }
+
+    .top-bar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 200 !important;
+        width: 100%;
+        margin-bottom: 8px;
+        transform: none !important;
+    }
+    .top-bar.collapsed {
+        transform: translateY(-100%) !important;
+    }
     .top-bar-content {
         padding: 6px 8px;
-        gap: 6px;
+        flex-wrap: wrap;
     }
     .top-bar-left {
+        flex-wrap: wrap;
         gap: 6px;
+        width: 100%;
     }
-    .top-bar .btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-    }
-    /* Скрываем текстовые подписи у некоторых кнопок, оставляя только иконки */
-    .top-bar .btn .btn-label span:not(.fa-icon) {
-        display: none;
-    }
-    /* Показываем текст только для самых важных кнопок (можно настроить) */
-    #nextTurnBtnTop .btn-label span,
-    #sortInitBtn .btn-label span,
-    #rollAllInitBtn .btn-label span,
-    #toggleBtn .btn-label span,
-    #toggleSpellsBtn .btn-label span {
-        display: inline;
-    }
-    /* Уменьшаем отступы в индикаторе раунда */
     .round-indicator {
-        padding: 2px 10px;
-        gap: 6px;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
     }
-    /* Бестиарий — занимает всю ширину, но с отступами */
-    .bestiary-panel {
-        width: 100vw;
-        padding: 70px 16px 16px;
-        border-radius: 0;
+        .right-panel-links {
+        width: 100%;
+        justify-content: space-around;
+        margin-top: 6px;
     }
-    /* Карточки существ — убираем лишние тени и увеличиваем читаемость */
-    .combat-card {
-        min-height: auto;
-        padding: 6px;
-    }
-    /* Поля ввода и кнопки делаем крупнее для тач-управления */
-    .hp-input, .max-hp-input, .temp-input, .init-input, .dmg-quick {
-        width: 60px;
-        padding: 6px 4px;
+    .menu-wrapper { width: 100%; }
+    .burger-menu { left: 0; right: auto; width: 100%; min-width: unset; }
+
+    .top-bar .btn,
+    .btn,
+    .json-import,
+    .session-control {
+        padding: 8px 12px;
         font-size: 0.9rem;
     }
-    .action-icon {
-        font-size: 1.2rem;
-        padding: 4px;
+
+    .bestiary-panel {
+        width: 100vw;
+        padding: 20px 16px;
+        border-radius: 0;
+        z-index: 500;
+        background: rgba(16, 22, 32, 0.98);
     }
-    /* Подсказки (tooltip) на мобильных отключаем полностью — они только мешают */
-    [data-tooltip]:before {
-        display: none !important;
-    }
-    /* Панель заклинаний в деталях монстра — делаем прокручиваемой */
-    .spell-list {
-        max-height: 250px;
-    }
-    /* Модальные окна — на всю ширину с минимальными отступами */
-    .modal-content {
-        padding: 16px;
-        width: 95%;
-        border-radius: 24px;
-    }
-    /* Уменьшаем размер заголовков в модалках */
-    .modal-content h2, .modal-content h3 {
-        font-size: 1.2rem;
-    }
-    /* Сетка карточек — одна колонка, но с адаптивной шириной */
-    .combat-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px;
-    }
-    /* Убираем фиксированную ширину у полей ввода в карточке */
-    .ac-badge input {
-        width: 50px;
-    }
-    /* Кнопка закрытия бестиария всегда видна */
+
     .close-bestiary-mobile {
         display: block !important;
-        font-size: 28px;
-        top: 12px;
-        right: 12px;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 32px;
+        color: #d4af37;
+        background: transparent;
+        border: none;
+        z-index: 600;
+        cursor: pointer;
     }
-    /* Убираем сдвиг трекера при открытом бестиарии — он всё равно на весь экран */
+
+    .bestiary-panel h2 {
+        margin-top: 30px;
+    }
+
     .tracker-area.shifted {
         margin-left: 0 !important;
     }
-}
 
     /* 🔧 Исправленный блок для панели инструментов */
         /* 🔧 НАДЁЖНЫЙ БЛОК — ФИКСИРОВАННАЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
