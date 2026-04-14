@@ -147,67 +147,90 @@
         /* === Адаптация для мобильных устройств (Android, iPhone) === */
         /* Улучшенная мобильная адаптация */
 /* === Улучшенная мобильная версия === */
-/* Компактная мобильная панель с группировкой кнопок */
 @media (max-width: 768px) {
+    /* Верхняя панель — все элементы в одну строку с горизонтальной прокруткой */
+    .top-bar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 200 !important;
+        margin-bottom: 8px;
+    }
     .top-bar-content {
-        flex-wrap: wrap !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
         padding: 6px 8px;
-        gap: 4px 6px;
+        gap: 6px;
     }
-
     .top-bar-left {
-        display: contents; /* Позволяет элементам внутри участвовать в общем flex-потоке */
-    }
-
-    /* Индикатор раунда — в первую строку, занимает минимум места */
-    .round-indicator {
-        order: 1;
+        flex-wrap: nowrap !important;
+        gap: 6px;
         width: auto;
-        margin-right: auto;
     }
-
-    /* Стрелки хода */
-    #prevTurnBtnTop { order: 2; }
-    #nextTurnBtnTop { order: 3; }
-
-    /* Переводчик — в первую строку, уменьшенный */
-    a.btn[href="translator.html"] {
-        order: 4;
-        padding: 4px 10px;
-        font-size: 0.75rem;
+    /* Индикатор раунда — оставляем только число и кнопки +/0 */
+    .round-indicator {
+        width: auto;
+        flex-wrap: nowrap;
+        padding: 2px 8px;
     }
-
-    /* Кнопки второго ряда */
-    #sortInitBtn { order: 5; }
-    #rollAllInitBtn { order: 6; }
-    #toggleBtn { order: 7; }
-    #toggleSpellsBtn { order: 8; }
-
-    /* Меню */
-    .menu-wrapper { order: 9; }
-
-    /* Правые ссылки — третий ряд, выравнивание вправо */
-    .right-panel-links {
-        order: 10;
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: 4px;
+    .round-indicator span:first-child {
+        display: none; /* Скрываем слово "Раунд" */
     }
-
-    /* Уменьшаем кнопки для экономии места */
+    /* Кнопки — уменьшаем отступы, скрываем текст, оставляем иконки */
     .top-bar .btn {
-        padding: 4px 10px;
+        padding: 6px 10px;
         font-size: 0.75rem;
+        white-space: nowrap;
     }
-
-    /* Бестиарий и карточки — остальные стили без изменений */
-    .bestiary-panel { width: 100vw; padding: 70px 16px 16px; border-radius: 0; }
-    .combat-card { min-height: auto; padding: 6px; }
-    .hp-input, .max-hp-input, .temp-input, .init-input, .dmg-quick { width: 60px; padding: 6px 4px; font-size: 0.9rem; }
-    .action-icon { font-size: 1.2rem; padding: 4px; }
-    [data-tooltip]:before { display: none !important; }
-    .combat-grid { grid-template-columns: 1fr !important; gap: 12px; }
-    .tracker-area.shifted { margin-left: 0 !important; }
+    .top-bar .btn .btn-label span:not(.fa-icon) {
+        display: none;
+    }
+    /* Исключения: для кнопок "Следующий ход" и "Предыдущий ход" можно оставить текст (опционально) */
+    #nextTurnBtnTop .btn-label span,
+    #prevTurnBtnTop .btn-label span {
+        display: inline;
+    }
+    /* Правую группу ссылок (Telegram, Поддержать, Руководство) убираем — они не нужны в постоянном доступе */
+    .right-panel-links {
+        display: none !important;
+    }
+    /* Бургер-меню */
+    .menu-wrapper {
+        width: auto;
+    }
+    /* Бестиарий — на всю ширину */
+    .bestiary-panel {
+        width: 100vw;
+        padding: 70px 16px 16px;
+        border-radius: 0;
+    }
+    /* Карточки существ */
+    .combat-card {
+        min-height: auto;
+        padding: 6px;
+    }
+    .hp-input, .max-hp-input, .temp-input, .init-input, .dmg-quick {
+        width: 60px;
+        padding: 6px 4px;
+        font-size: 0.9rem;
+    }
+    .action-icon {
+        font-size: 1.2rem;
+        padding: 4px;
+    }
+    /* Отключаем всплывающие подсказки на мобильных */
+    [data-tooltip]:before {
+        display: none !important;
+    }
+    /* Сетка карточек в одну колонку */
+    .combat-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+    /* Убираем сдвиг трекера при открытом бестиарии */
+    .tracker-area.shifted {
+        margin-left: 0 !important;
+    }
 }
 
     /* 🔧 Исправленный блок для панели инструментов */
