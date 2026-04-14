@@ -146,95 +146,68 @@
 
         /* === Адаптация для мобильных устройств (Android, iPhone) === */
         /* Улучшенная мобильная адаптация */
+/* === Улучшенная мобильная версия === */
+/* Компактная мобильная панель с группировкой кнопок */
 @media (max-width: 768px) {
-    /* Верхняя панель — делаем компактнее */
     .top-bar-content {
+        flex-wrap: wrap !important;
         padding: 6px 8px;
-        gap: 6px;
+        gap: 4px 6px;
     }
+
     .top-bar-left {
-        gap: 6px;
+        display: contents; /* Позволяет элементам внутри участвовать в общем flex-потоке */
     }
-    .top-bar .btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-    }
-    /* Скрываем текстовые подписи у некоторых кнопок, оставляя только иконки */
-    .top-bar .btn .btn-label span:not(.fa-icon) {
-        display: none;
-    }
-    /* Показываем текст только для самых важных кнопок (можно настроить) */
-    #nextTurnBtnTop .btn-label span,
-    #sortInitBtn .btn-label span,
-    #rollAllInitBtn .btn-label span,
-    #toggleBtn .btn-label span,
-    #toggleSpellsBtn .btn-label span {
-        display: inline;
-    }
-    /* Уменьшаем отступы в индикаторе раунда */
+
+    /* Индикатор раунда — в первую строку, занимает минимум места */
     .round-indicator {
-        padding: 2px 10px;
-        gap: 6px;
+        order: 1;
+        width: auto;
+        margin-right: auto;
     }
-    /* Бестиарий — занимает всю ширину, но с отступами */
-    .bestiary-panel {
-        width: 100vw;
-        padding: 70px 16px 16px;
-        border-radius: 0;
+
+    /* Стрелки хода */
+    #prevTurnBtnTop { order: 2; }
+    #nextTurnBtnTop { order: 3; }
+
+    /* Переводчик — в первую строку, уменьшенный */
+    a.btn[href="translator.html"] {
+        order: 4;
+        padding: 4px 10px;
+        font-size: 0.75rem;
     }
-    /* Карточки существ — убираем лишние тени и увеличиваем читаемость */
-    .combat-card {
-        min-height: auto;
-        padding: 6px;
+
+    /* Кнопки второго ряда */
+    #sortInitBtn { order: 5; }
+    #rollAllInitBtn { order: 6; }
+    #toggleBtn { order: 7; }
+    #toggleSpellsBtn { order: 8; }
+
+    /* Меню */
+    .menu-wrapper { order: 9; }
+
+    /* Правые ссылки — третий ряд, выравнивание вправо */
+    .right-panel-links {
+        order: 10;
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 4px;
     }
-    /* Поля ввода и кнопки делаем крупнее для тач-управления */
-    .hp-input, .max-hp-input, .temp-input, .init-input, .dmg-quick {
-        width: 60px;
-        padding: 6px 4px;
-        font-size: 0.9rem;
+
+    /* Уменьшаем кнопки для экономии места */
+    .top-bar .btn {
+        padding: 4px 10px;
+        font-size: 0.75rem;
     }
-    .action-icon {
-        font-size: 1.2rem;
-        padding: 4px;
-    }
-    /* Подсказки (tooltip) на мобильных отключаем полностью — они только мешают */
-    [data-tooltip]:before {
-        display: none !important;
-    }
-    /* Панель заклинаний в деталях монстра — делаем прокручиваемой */
-    .spell-list {
-        max-height: 250px;
-    }
-    /* Модальные окна — на всю ширину с минимальными отступами */
-    .modal-content {
-        padding: 16px;
-        width: 95%;
-        border-radius: 24px;
-    }
-    /* Уменьшаем размер заголовков в модалках */
-    .modal-content h2, .modal-content h3 {
-        font-size: 1.2rem;
-    }
-    /* Сетка карточек — одна колонка, но с адаптивной шириной */
-    .combat-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px;
-    }
-    /* Убираем фиксированную ширину у полей ввода в карточке */
-    .ac-badge input {
-        width: 50px;
-    }
-    /* Кнопка закрытия бестиария всегда видна */
-    .close-bestiary-mobile {
-        display: block !important;
-        font-size: 28px;
-        top: 12px;
-        right: 12px;
-    }
-    /* Убираем сдвиг трекера при открытом бестиарии — он всё равно на весь экран */
-    .tracker-area.shifted {
-        margin-left: 0 !important;
-    }
+
+    /* Бестиарий и карточки — остальные стили без изменений */
+    .bestiary-panel { width: 100vw; padding: 70px 16px 16px; border-radius: 0; }
+    .combat-card { min-height: auto; padding: 6px; }
+    .hp-input, .max-hp-input, .temp-input, .init-input, .dmg-quick { width: 60px; padding: 6px 4px; font-size: 0.9rem; }
+    .action-icon { font-size: 1.2rem; padding: 4px; }
+    [data-tooltip]:before { display: none !important; }
+    .combat-grid { grid-template-columns: 1fr !important; gap: 12px; }
+    .tracker-area.shifted { margin-left: 0 !important; }
 }
 
     /* 🔧 Исправленный блок для панели инструментов */
