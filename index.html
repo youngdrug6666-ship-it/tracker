@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Мастер D&D 5e — Эпический трекер боя</title>
+	<link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
+    <link rel="apple-touch-icon" href="favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 	
@@ -13,12 +15,12 @@
         body { min-height: 100vh; background: url('fon.jpg') center/cover fixed no-repeat; color: #f0ede8; padding: 0px 24px 24px 24px; position: relative; overflow-y: auto; }
         :root { --top-bar-offset: 76px; }
         body::before { display: none; }
-        .top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: rgba(12, 18, 26, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(210, 180, 100, 0.5); transition: transform 0.3s ease; }
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: rgba(12, 18, 26, 0); backdrop-filter: blur(9px); border-bottom: 1px solid rgb(23 56 90); transition: transform 0.3s ease; }
         .top-bar.collapsed { transform: translateY(-100%); }
         .top-bar-content { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; flex-wrap: wrap; gap: 10px; }
         .top-bar-left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .top-bar .btn { background: #2d3a48; border: none; border-radius: 60px; padding: 6px 18px; color: white; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
-        .top-bar .btn-primary { background: #3a6b47; }
+        .top-bar .btn-primary { background: #345a8b;; }
         .btn-label { display: inline-flex; gap: 6px; align-items: center; }
         .fa-icon { width: 14px; height: 14px; }
         .round-indicator { background: #1f2937; border-radius: 48px; padding: 4px 14px; display: flex; gap: 10px; align-items: center; }
@@ -36,20 +38,20 @@
         .tracker-area { transition: margin-left 0.3s; padding-top: var(--top-bar-offset); }
         .tracker-area.shifted { margin-left: 540px; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
-        .modal-content { background: rgba(20,15,10,0.95); border: 2px solid #d4af37; border-radius: 32px; padding: 20px 25px; max-width: 900px; width: 90%; color: #e4c7a2; box-shadow: 0 0 30px rgba(0,0,0,0.5); position: relative; max-height: 85vh; overflow-y: auto; }
+        .modal-content { background: rgba(20,15,10,0.95); border: 2px solid #757575; border-radius: 32px; padding: 20px 25px; max-width: 900px; width: 90%; color: #ffffff; box-shadow: 0 0 30px rgba(0,0,0,0.5); position: relative; max-height: 85vh; overflow-y: auto; }
         .modal-content::-webkit-scrollbar { width: 8px; }
         .modal-content::-webkit-scrollbar-track { background: #2c2a24; border-radius: 10px; }
-        .modal-content::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
-        .close-modal { position: absolute; top: 12px; right: 18px; font-size: 28px; cursor: pointer; color: #d4af37; }
+        .modal-content::-webkit-scrollbar-thumb { background: #6a6969; border-radius: 10px; }
+        .close-modal { position: absolute; top: 12px; right: 18px; font-size: 28px; cursor: pointer; color: #ffffff; }
         .close-modal:hover { color: #ffdd99; }
         .spell-list { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; max-height: 400px; overflow-y: auto; overflow-x: hidden; }
-        .spell-item { background: rgba(0,0,0,0.5); border-radius: 60px; padding: 8px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d4af37; transition: 0.1s; }
+        .spell-item { background: rgba(0,0,0,0.5); border-radius: 60px; padding: 8px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f97373; transition: 0.1s; }
         .spell-item:hover { background: #3a2a1a; transform: scale(1.01); }
         .spell-name { font-weight: bold; font-size: 1rem; }
         .spell-level { font-size: 0.8rem; background: #2c3e4e; border-radius: 30px; padding: 2px 12px; }
         .search-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-        .search-row input, .search-row select { background: #1e2838; border: 1px solid #b38f48; border-radius: 48px; padding: 10px 18px; color: #f7e9d3; }
-        .folder-header { background: rgba(30, 40, 55, 0.7); border-radius: 40px; padding: 8px 20px; margin: 12px 0 6px; font-weight: bold; cursor: pointer; }
+        .search-row input, .search-row select { background: #1e2838; border: 1px solid #345a8b; border-radius: 48px; padding: 10px 18px; color: #f7e9d3; }
+        .folder-header { background: rgba(30, 40, 55, 0.7); border-radius: 40px; padding: 8px 20px; margin: 12px 0 6px; font-weight: bold; cursor: pointer;    border: 1px solid #0db9e7; }
         .folder-content { margin-left: 0; }
         .folder-content.collapsed { display: none; }
         .monster-item { background: rgba(15, 22, 30, 0.8); border-radius: 32px; margin: 8px 0; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -60,10 +62,10 @@
         .add-btn:hover { background: #3e9642; }
         .toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; margin-top: 10px; background: rgba(12, 18, 26, 0.6); backdrop-filter: blur(8px); padding: 8px 20px; border-radius: 60px; border: 1px solid #826e46; transition: all 0.3s ease; }
         .toolbar.collapsed { display: none; }
-        .btn, .json-import, .session-control { background: #2d3a48; border: none; border-radius: 60px !important; padding: 6px 18px; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+        .btn, .json-import, .session-control { background: #6b0101; border: none; border-radius: 60px !important; padding: 6px 18px; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
         .btn-primary { background: #3a6b47; }
         .btn-danger { background: #7a3e2a; }
-        .session-select { background: #2d3a48; border: none; border-radius: 60px; padding: 6px 18px; color: white; font-weight: 600; cursor: pointer; }
+        .session-select { background: #248975; border: none; border-radius: 60px; padding: 6px 18px; color: white; font-weight: 600; cursor: pointer; }
         .combat-grid { display: grid; grid-template-columns: repeat(4, minmax(260px, 1fr)); gap: 14px; padding: 2px; }
         @media (max-width: 1300px) { .combat-grid { grid-template-columns: repeat(3, minmax(260px, 1fr)); } }
         @media (max-width: 1000px) { .combat-grid { grid-template-columns: repeat(2, minmax(260px, 1fr)); } }
@@ -87,13 +89,13 @@
         .ac-badge input { width: 40px; background: #e9eef3; border-radius: 32px; padding: 2px 4px; text-align: center; font-weight: bold; }
         .init-input { width: 50px; background: #232d3c; border-radius: 32px; border: 1px solid #dba451; text-align: center; padding: 2px 4px; color: white; }
         .init-roll-btn { background: #6f4e2e; border-radius: 40px; border: none; padding: 2px 8px; color: white; cursor: pointer; }
-        .hp-panel { background: rgba(12, 18, 28, 0.8); border-radius: 40px; padding: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.7rem; }
+        .hp-panel {  background: rgb(0 0 0 / 56%); border-radius: 40px; padding: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.7rem; }
         .hp-input, .max-hp-input, .temp-input { width: 45px; background: #1a2533; border-radius: 32px; border: 1px solid #6e8b5e; text-align: center; color: #ffe0a3; }
         .dmg-quick {
     width: 150px;
     background: #2b2535;
     border-radius: 40px;
-    border: 1px solid #ffffff;
+    border: 3px solid #640101;
     text-align: center;
     color: #ebe3e3;
 }
@@ -118,7 +120,7 @@
         [data-tooltip] { position: relative; }
         [data-tooltip]:before { content: attr(data-tooltip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1f2a2f; color: #ffefc0; padding: 6px 12px; border-radius: 12px; font-size: 0.7rem; white-space: normal; max-width: 320px; width: max-content; word-wrap: break-word; display: none; z-index: 5000; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(210, 180, 100, 0.5); }
         [data-tooltip]:hover:before { display: block; }
-                .spell-link { color: #ffdd99; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; transition: 0.1s; }
+                .spell-link { color: #73edcc; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; transition: 0.1s; }
         .spell-link:hover { color: #ffffff; text-shadow: 0 0 4px #d4af37; }
         #spellDetailModal { z-index: 1050 !important; }
         .cond-unconscious { background: #4a2e5c; }
@@ -226,47 +228,10 @@
     .tracker-area { padding-top: 0 !important; overflow: visible !important; }
     :root { --top-bar-offset: 0px; }
 }
-/* Подсказки в верхней панели — выпадают вниз */
-.top-bar [data-tooltip]:before {
-    bottom: auto !important;
-    top: 130% !important;
-}
-
-/* Подсказки внутри карточек существ — смещаем вправо, чтобы не перекрывали текст */
-.combat-card [data-tooltip]:before {
-    left: 20% !important;
-    transform: translateX(-10%) !important;
-}
-/* Гарантированно поднимаем тултип бургера над всеми элементами */
-.combat-card .card-header .info-burger {
-    position: relative;
-    z-index: 10;
-}
-
-.combat-card .card-header .info-burger[data-tooltip]:before {
-    z-index: 99999 !important;
-    position: absolute !important;
-    top: 100% !important;
-    bottom: auto !important;
-    left: auto !important;
-    right: 0 !important;
-    transform: translateY(5px) !important;
-    max-width: 220px;
-    white-space: normal;
-    word-wrap: break-word;
-}
-
-/* Убираем возможное ограничение stacking context у родителя */
-.combat-card {
-    position: relative;
-    z-index: 1;
-    overflow: visible !important;
-}
-/* === Универсальные tooltip в карточках — всегда поверх === */
+/* === Универсальные tooltip (без изменений) === */
 .combat-card [data-tooltip] {
     position: relative;
 }
-
 .combat-card [data-tooltip]:before {
     z-index: 99999 !important;
     position: absolute !important;
@@ -286,8 +251,6 @@
     padding: 6px 10px !important;
     pointer-events: none;
 }
-
-/* Для элементов, которые справа — выравниваем tooltip по правому краю */
 .combat-card .init-roll-btn[data-tooltip]:before,
 .combat-card .random-hp[data-tooltip]:before,
 .combat-card .info-burger[data-tooltip]:before {
@@ -295,24 +258,18 @@
     right: 0 !important;
     transform: translateX(0) translateY(5px) !important;
 }
-
-/* Для статов оставляем центрирование */
 .combat-card .stat-item[data-tooltip]:before {
     left: 50% !important;
     transform: translateX(-50%) translateY(5px) !important;
 }
-
-/* Убеждаемся, что ничего не обрезается */
 .combat-card,
 .card-content,
 .card-header {
     overflow: visible !important;
 }
-/* Последняя попытка: выносим tooltip над всеми */
 .combat-card [data-tooltip] {
     position: relative !important;
 }
-
 .combat-card [data-tooltip]:before {
     position: absolute !important;
     z-index: 99999999 !important;
@@ -332,8 +289,6 @@
     max-width: 200px !important;
     pointer-events: none;
 }
-
-/* Для кнопок справа (d20, бургер) — выравниваем по правому краю */
 .combat-card .init-roll-btn[data-tooltip]:before,
 .combat-card .random-hp[data-tooltip]:before,
 .combat-card .info-burger[data-tooltip]:before {
@@ -341,7 +296,312 @@
     right: 0 !important;
     transform: translateX(0) translateY(-5px) !important;
 }
-    </style>
+
+/* ========== ФИНАЛЬНЫЙ СТИЛЬ КНОПОК ========== */
+
+/* 1. Базовый синий фон для всех кнопок верхней панели (без рамки) */
+.top-bar .btn,
+.top-bar .json-import,
+.top-bar .session-control {
+    border: none !important;
+    background: #345a8b !important;
+    color: white !important;
+    transition: background 0.2s ease;
+}
+
+/* 2. Серые кнопки (Предыдущий ход, Следующий раунд, Сброс раунда) */
+#prevTurnBtnTop,
+#nextRoundBtnTop,
+#resetRoundBtnTop {
+    background: #2f3f52 !important;
+}
+#prevTurnBtnTop:hover,
+#nextRoundBtnTop:hover,
+#resetRoundBtnTop:hover {
+    background: #3a4d63 !important;
+}
+
+a.btn[href="translator.html"] {
+    background: #5a3e2a !important; /* коричневый, можно менять */
+}
+a.btn[href="translator.html"]:hover {
+    background: #7a4e2a !important;
+}
+
+#burgerMenuBtn {
+    background: #3a4a5a !important; /* тёмный серо-синий, можно менять */
+}
+#burgerMenuBtn:hover {
+    background: #4e6275 !important;
+}
+
+/* 4. Уникальные цвета при наведении для остальных кнопок (оставьте свои предыдущие, например: */
+#nextTurnBtnTop:hover { background: #3a7a3a !important; }
+#sortInitBtn:hover { background: #3a6a8a !important; }
+#rollAllInitBtn:hover { background: #a54a4a !important; }
+#toggleBtn:hover { background: #6b3e7a !important; }
+#toggleSpellsBtn:hover { background: #3e6b5a !important; }
+/* Добавьте остальные ID, которые вы стилизовали ранее */
+
+/* 5. Кнопки внутри бургер-меню — цвет как у кнопки "Меню" (#3a4a5a) */
+.burger-grid .btn,
+.burger-grid .json-import {
+    border: none !important;
+    background: #3a4a5a !important;
+    color: white !important;
+    transition: background 0.2s ease;
+}
+
+/* При наведении — уникальные цвета для каждой кнопки в меню */
+#addHeroBtn:hover { background: #4e7a72 !important; }
+#clearMonstersBtn:hover { background: #9e4e3a !important; }
+#importJsonBtn:hover { background: #5e6f82 !important; }
+#renameSessionBtn:hover { background: #7a7a4a !important; }
+#newSessionBtn:hover { background: #4e8a5a !important; }
+#deleteSessionBtn:hover { background: #9e4e3a !important; }
+#resetAllSessionsBtn:hover { background: #cc6a6a !important; }
+
+/* Селект выбора сессии */
+#sessionSelect {
+    background: #3a4a5a !important;
+    color: white !important;
+    border: none !important;
+}
+#sessionSelect:hover {
+    background: #4e6275 !important;
+}
+
+/* ========== ТУЛТИПЫ ВЫПАДАЮТ ВНИЗ ========== */
+[data-tooltip]:before {
+    top: 100% !important;
+    bottom: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(8px) !important;
+    margin: 0 !important;
+    z-index: 999999 !important;
+    background: #1f2a2f !important;
+    border: 1px solid #d4af37 !important;
+    color: #ffefc0 !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5) !important;
+    font-size: 0.7rem;
+    padding: 6px 10px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    max-width: 200px !important;
+    pointer-events: none;
+}
+
+/* Тултипы для кнопок справа — выравниваем по правому краю */
+.init-roll-btn[data-tooltip]:before,
+.random-hp[data-tooltip]:before,
+.info-burger[data-tooltip]:before {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateX(0) translateY(8px) !important;
+}
+
+/* Тултипы для характеристик — по центру */
+.stat-item[data-tooltip]:before {
+    left: 50% !important;
+    transform: translateX(-50%) translateY(8px) !important;
+}
+/* ========== ГЛОБАЛЬНЫЕ КАСТОМНЫЕ СКРОЛЛБАРЫ ========== */
+
+/* 1. Бестиарий */
+.bestiary-panel {
+    overflow: hidden !important;
+}
+
+#monsterList {
+    padding-right: 12px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #9d9d9d #1e2838;
+    box-sizing: border-box !important;
+}
+
+/* 2. Список заклинаний в модалках (Все заклинания / Заклинания монстра) */
+.spell-list {
+    padding-right: 8px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #9d9d9d #2c2a24;  /* здесь цвет дорожки как в модалке */
+    box-sizing: border-box !important;
+}
+
+/* 3. Контент модальных окон (на случай, если там появляется скролл) */
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #9d9d9d #2c2a24;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+}
+
+/* === WebKit-стилизация (Chrome, Edge, Safari) === */
+
+/* Бестиарий */
+#monsterList::-webkit-scrollbar {
+    width: 8px;
+}
+#monsterList::-webkit-scrollbar-track {
+    background: #1e2838;
+    border-radius: 10px;
+    margin-block: 4px;
+}
+#monsterList::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 10px;
+}
+#monsterList::-webkit-scrollbar-thumb:hover {
+    background: #e5c44e;
+}
+
+/* Списки заклинаний */
+.spell-list::-webkit-scrollbar {
+    width: 8px;
+}
+.spell-list::-webkit-scrollbar-track {
+    background: #2c2a24;
+    border-radius: 10px;
+    margin-block: 4px;
+}
+.spell-list::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 10px;
+}
+.spell-list::-webkit-scrollbar-thumb:hover {
+    background: #e5c44e;
+}
+
+/* Модальный контент */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+    background: #2c2a24;
+    border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #e5c44e;
+}
+
+/* ========== МОДАЛЬНЫЕ ОКНА: РАЗМЫТЫЙ ФОН ========== */
+/* Убираем конкурирующие фоны */
+#detailModal.modal,
+#allSpellsModal.modal,
+#heroDetailModal.modal,
+#spellDetailModal.modal,
+#helpModal.modal,
+#customModal.modal {
+    background-color: rgba(20, 15, 10, 0.4) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Сам контент модалки остаётся тёмным, но без размытия */
+.modal-content {
+    background: rgba(20, 15, 10, 0.95) !important;
+    backdrop-filter: none !important;
+}
+/* Цвета рамок для школ заклинаний */
+.spell-item.spell-school-Ограждение { border-color: #6a9ec0 !important; }
+.spell-item.spell-school-Вызов { border-color: #b58d3d !important; }
+.spell-item.spell-school-Прорицание { border-color: #b0b0b0 !important; }
+.spell-item.spell-school-Очарование { border-color: #c085b3 !important; }
+.spell-item.spell-school-Воплощение { border-color: #c05a5a !important; }
+.spell-item.spell-school-Иллюзия { border-color: #7a6a9e !important; }
+.spell-item.spell-school-Некромантия { border-color: #5a9e6a !important; }
+.spell-item.spell-school-Преобразование { border-color: #b5783d !important; }
+/* Единый hover-эффект для всех заклинаний */
+.spell-item {
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.spell-item:hover {
+    background: #3a4a5a !important; /* единый цвет фона при наведении */
+    border-color: #d4af37 !important; /* золотистая рамка при наведении */
+    transform: scale(1.01);
+}
+/* Единый hover-эффект для папок (бестиарий и заклинания) */
+.folder-header {
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.folder-header:hover {
+    background: #2c4a6e !important;   /* цвет при наведении — можно заменить */
+    border-color: #d4af37 !important;
+    transform: scale(1.005);
+}
+/* ====================== МОБИЛЬНАЯ ВЕРСИЯ (только для телефонов) ====================== */
+@media (max-width: 768px) {
+
+    /* 1. Верхняя панель — компактная и всегда сверху */
+    .top-bar {
+        position: sticky !important;
+        top: 0;
+        z-index: 999;
+        background: rgba(12, 18, 26, 0.98) !important;
+        backdrop-filter: blur(12px);
+        padding: 6px 8px !important;
+        border-bottom: 2px solid #345a8b;
+    }
+
+    .top-bar-content {
+        padding: 4px 0;
+        gap: 5px;
+    }
+
+    /* 2. Кнопки в одну строку с горизонтальным скроллом (чтобы всё влезло) */
+    .top-bar-left {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+    }
+    .top-bar-left::-webkit-scrollbar { display: none; }
+
+    .btn, .btn-primary, .json-import, .session-control {
+        padding: 8px 14px !important;
+        font-size: 0.82rem !important;
+        min-height: 38px;
+        white-space: nowrap;
+    }
+
+    .round-indicator {
+        width: auto;
+        min-width: 140px;
+    }
+
+    /* 3. Карточки боя не залезают под шапку */
+    .tracker-area {
+        padding-top: 58px !important;   /* ← главное, чтобы не было перекрытия */
+    }
+
+    /* 4. Бестиарий на весь экран и удобно */
+    .bestiary-panel {
+        width: 100vw !important;
+        padding-top: 65px !important;
+        border-radius: 0 !important;
+    }
+
+    /* 5. Чуть меньше карточки на телефоне (чтобы больше влезало) */
+    .combat-card {
+        min-height: 240px;
+    }
+
+    /* 6. Убираем лишние отступы */
+    body {
+        padding: 0 !important;
+    }
+}
+</style>
 </head>
 <body>
 
@@ -357,10 +617,10 @@
             <button class="btn" id="prevTurnBtnTop" data-tooltip="Предыдущий ход"><i class="fa-solid fa-angle-left fa-icon"></i></button>
             <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход"><span class="btn-label"><i class="fa-solid fa-angle-right fa-icon"></i>Следующий ход</span></button>
             <button class="btn btn-primary" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Сортировать по иниц</span></button>
-            <button class="btn" id="rollAllInitBtn" style="background:#8a3b3b;" data-tooltip="Бросить инициативу для всех монстров (1d20 + бонус)"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
+            <button class="btn" id="rollAllInitBtn" style="background:#91220b;" data-tooltip="Бросить инициативу для всех монстров (1d20 + бонус)"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
             <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
             <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания"><span class="btn-label"><i class="fa-solid fa-scroll fa-icon"></i>Заклинания</span></button>
-			<a href="translator.html" class="btn" style="background:#5a3e2a;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
+			<a href="translator.html" class="btn" style="background:#004687;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
             <div class="menu-wrapper">
                 <button class="btn" id="burgerMenuBtn" data-tooltip="Дополнительные действия"><span class="btn-label"><i class="fa-brands fa-buffer fa-icon"></i>Меню</span></button>
                 <div class="burger-menu" id="burgerMenu">
@@ -412,14 +672,14 @@
         <span class="close-modal">&times;</span>
         <h3><i class="fa-solid fa-circle-question"></i> Руководство по трекеру боя D&D 5e</h3>
         <ul style="margin-left:20px; margin-top:10px; line-height:1.6;">
-            <li><strong>➕ Добавление участников:</strong> Нажмите <strong><i class="fa-solid fa-dragon"></i> Бестиарий</strong> — откроется панель со списком монстров. Используйте фильтры по папкам и CR. <strong>«<i class="fa-solid fa-plus"></i> Добавить»</strong> помещает монстра в бой. Героев можно добавить через <strong><i class="fa-brands fa-buffer"></i> Меню → <i class="fa-solid fa-square-plus"></i> Новый герой</strong> или импортировать JSON.</li>
-            <li><strong>🎲 Инициатива:</strong> В карточке есть поле «Инициатива» и кнопка <strong><i class="fa-solid fa-dice-d20"></i> d20</strong>. Кнопка <strong><i class="fa-solid fa-hand-fist"></i> Инициатива монстрам</strong> бросает инициативу всем монстрам. <strong><i class="fa-solid fa-hand-fist"></i> Сортировать по иниц</strong> упорядочивает ходы.</li>
-            <li><strong>❤️ Хиты и урон:</strong> Поле ввода урона/лечения и кнопки: <strong>⚔️</strong> — нанести урон, <strong>½ / ¼ / ×2</strong> — модификаторы, <strong>💚</strong> — лечение. У монстров есть <strong><i class="fa-solid fa-dice"></i></strong> — перебросить ХП по формуле.</li>
-            <li><strong>📋 Состояния:</strong> Нажмите <strong>«📋 Состояния»</strong> в карточке, чтобы открыть панель. Выбранные состояния отображаются цветными бейджами. Кнопка <strong>«❌ Сбросить всё»</strong> убирает все состояния.</li>
-            <li><strong>🔮 Заклинания:</strong> У заклинателей отображаются ячейки (кнопки <strong>+/-</strong>). В детальном окне (через <strong><i class="fa-brands fa-buffer"></i></strong> в карточке) показан полный список заклинаний. Клик по названию открывает описание.</li>
-            <li><strong>💾 Кампании (сессии):</strong> В <strong><i class="fa-brands fa-buffer"></i> Меню</strong> есть выбор кампании, кнопки <strong><i class="fa-solid fa-arrows-turn-to-dots"></i> Переим.</strong>, <strong><i class="fa-solid fa-user-plus"></i> Сессия</strong>, <strong><i class="fa-solid fa-trash-can"></i> Удалить сессию</strong>. Состояние боя сохраняется автоматически.</li>
+            <li><strong>➕ Добавление участников:</strong> Нажмите <strong><i class="fa-solid fa-dragon"></i> Бестиарий</strong> — откроется панель со списком монстров. Используйте фильтры по папкам (иконки) и CR. Кнопка <strong>«<i class="fa-solid fa-plus"></i> Добавить»</strong> помещает существо в бой. Героев добавляйте через <strong><i class="fa-brands fa-buffer"></i> Меню → <i class="fa-solid fa-square-plus"></i> Новый герой</strong> или импорт JSON.</li>
+            <li><strong>🎲 Инициатива:</strong> В карточке есть поле «Инициатива» и кнопка <strong><i class="fa-solid fa-dice-d20"></i> d20</strong> (бросок 1d20 + бонус). Кнопка <strong><i class="fa-solid fa-hand-fist"></i> Инициатива монстрам</strong> бросает инициативу всем монстрам. <strong><i class="fa-solid fa-hand-fist"></i> Сортировать по иниц</strong> упорядочивает очередь ходов.</li>
+            <li><strong>❤️ Хиты и урон:</strong> Введите число в поле «урон», затем используйте кнопки: <strong>⚔️</strong> — нанести урон, <strong>½ / ¼ / ×2</strong> — модификаторы, <strong>💚</strong> — лечение. У монстров есть <strong><i class="fa-solid fa-dice"></i></strong> — перебросить ХП по формуле.</li>
+            <li><strong>📋 Состояния:</strong> Нажмите <strong>«📋 Состояния»</strong> в карточке, чтобы открыть панель. Выбранные состояния отображаются цветными бейджами. Чтобы снять состояние, нажмите на его бейдж или снова выберите в панели. Кнопка <strong>«❌ Сбросить всё»</strong> убирает все состояния сразу.</li>
+            <li><strong>🔮 Заклинания:</strong> У заклинателей отображаются ячейки (кнопки <strong>+/-</strong>). В детальном окне (через <strong><i class="fa-brands fa-buffer"></i></strong> в карточке) показан полный список заклинаний, сгруппированный по уровням. Каждое заклинание подсвечивается цветом своей школы (Ограждение, Воплощение, Некромантия и т.д.). Клик по названию открывает полное описание.</li>
+            <li><strong>💾 Кампании (сессии):</strong> В <strong><i class="fa-brands fa-buffer"></i> Меню</strong> есть выпадающий список кампаний, а также кнопки: <strong><i class="fa-solid fa-arrows-turn-to-dots"></i> Переим.</strong>, <strong><i class="fa-solid fa-user-plus"></i> Сессия</strong>, <strong><i class="fa-solid fa-trash-can"></i> Удалить сессию</strong>. Состояние боя автоматически сохраняется в браузере. <strong><i class="fa-solid fa-arrows-rotate"></i> Сброс сессий</strong> удаляет все данные и начинает новую чистую кампанию.</li>
             <li><strong>⌨️ Горячие клавиши:</strong> Стрелки <strong>← / →</strong> — предыдущий/следующий ход. <strong>Esc</strong> закрывает модальные окна.</li>
-            <li><strong>📱 Интерфейс:</strong> Бестиарий открывается слева. Карточки можно перетаскивать для ручной сортировки.</li>
+            
         </ul>
         <hr style="margin:20px 0; border-color:#d4af37;">
         <p>🌐 <strong>Telegram-канал:</strong> <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank" style="color:#ffdd99;">https://t.me/dnd_ekb_ekaterinburg</a></p>
@@ -428,7 +688,7 @@
     </div>
 </div>
 <div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;"><span><strong>КД</strong> <span id="detailAC"></span></span><span><strong>Хиты</strong> <span id="detailHP"></span></span><span><strong>CR</strong> <span id="detailCR"></span></span><span><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong> <span id="detailStats"></span></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><div><strong>Действия:</strong></div><ul id="detailActions"></ul><div><strong>Особенности:</strong></div><ul id="detailFeatures"></ul><div><strong>Легендарные действия:</strong></div><ul id="detailLegendary"></ul><div><strong>Бонусные действия:</strong></div><ul id="detailBonusActions"></ul><div><strong>Реакции:</strong></div><ul id="detailReactions"></ul><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
-<div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><input type="text" id="spellSearchInput" placeholder="🔍 Поиск..." style="width:100%; padding:8px 16px; border-radius:60px; margin-bottom:16px; background:#1e2838; border:1px solid #b38f48; color:white;"><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
+<div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><input type="text" id="spellSearchInput" placeholder="🔍 Поиск..." style="width:100%; padding:8px 16px; border-radius:60px; margin-bottom:16px; background:#1e2838; border:1px solid #0db9e7; color:white;"><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
 <div id="heroDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="heroDetailName"></h2><img id="heroDetailAvatar" style="max-width:150px; border-radius:20px; margin:0 auto; display:block;"><div><strong>Раса:</strong> <span id="heroDetailRace"></span> | <strong>Класс:</strong> <span id="heroDetailClass"></span> | <strong>Уровень:</strong> <span id="heroDetailLevel"></span></div><div><strong>Мировоззрение:</strong> <span id="heroDetailAlignment"></span> | <strong>Опыт:</strong> <span id="heroDetailXP"></span></div><hr><div><strong>Характеристики:</strong> <span id="heroDetailStats"></span></div><div><strong>Спасброски:</strong> <span id="heroDetailSaves"></span></div><div><strong>Навыки:</strong> <span id="heroDetailSkills"></span></div><hr><div><strong>Снаряжение:</strong> <span id="heroDetailEquipment"></span></div><div><strong>Оружие:</strong> <span id="heroDetailWeapons"></span></div><div><strong>Владение:</strong> <span id="heroDetailProficiencies"></span></div><div><strong>Особенности (features):</strong> <span id="heroDetailFeatures"></span></div><div><strong>Черты (traits):</strong> <span id="heroDetailTraits"></span></div><div><strong>Идеалы:</strong> <span id="heroDetailIdeals"></span></div><div><strong>Привязанности:</strong> <span id="heroDetailBonds"></span></div><div><strong>Слабости:</strong> <span id="heroDetailFlaws"></span></div><div><strong>Внешность:</strong> <span id="heroDetailAppearance"></span></div><div><strong>Союзники:</strong> <span id="heroDetailAllies"></span></div><div><strong>Заметки:</strong> <span id="heroDetailNotes"></span></div><hr><div><strong>Заклинания:</strong> <div id="heroDetailSpells"></div></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
@@ -594,13 +854,59 @@ async function loadUuidMap() {
         }
         return { total, rolls, formula };
     }
+       // ========== ПАПКИ БЕСТИАРИЯ (ИСПРАВЛЕННЫЙ ВАРИАНТ) ==========
     const typeToFolder = {
-        "humanoid": "🧍 Гуманоиды", "beast": "🐺 Звери", "dragon": "🐉 Драконы", "plant": "🌿 Растения",
-        "giant": "🧌 Великаны", "undead": "💀 Нежить", "fiend": "👹 Исчадия", "celestial": "😇 Небожители",
-        "aberration": "👁️ Ужасы", "monstrosity": "🐉 Чудовища", "elemental": "🌪️ Элементали",
-        "fey": "🧚 Феи", "ooze": "💧 Слизи", "construct": "⚙️ Конструкты"
+	    "celestial": '<i class="fa-brands fa-skyatlas"></i> Небожители',
+        "humanoid": '<i class="fas fa-user"></i> Гуманоиды',
+        "beast": '<i class="fas fa-paw"></i> Звери',
+        "dragon": '<i class="fas fa-dragon"></i> Драконы',
+        "plant": '<i class="fas fa-leaf"></i> Растения',
+        "giant": '<i class="fas fa-mountain"></i> Великаны',
+        "undead": '<i class="fas fa-skull"></i> Нежить',
+        "fiend": '<i class="fas fa-dragon"></i> Исчадия',
+        "aberration": '<i class="fas fa-eye"></i> Ужасы',
+        "monstrosity": '<i class="fas fa-dragon"></i> Чудовища',
+        "elemental": '<i class="fas fa-atom"></i> Элементали',
+        "fey": '<i class="fas fa-feather"></i> Феи',
+        "ooze": '<i class="fas fa-droplet"></i> Слизи',
+        "construct": '<i class="fas fa-robot"></i> Конструкты'
+		
     };
-    function getFolderFromType(type) { return typeToFolder[type.toLowerCase()] || `📁 ${type}`; }
+
+    const typeToFolderPlain = {
+        "humanoid": "Гуманоиды",
+        "beast": "Звери",
+        "dragon": "Драконы",
+        "plant": "Растения",
+        "giant": "Великаны",
+        "undead": "Нежить",
+        "fiend": "Исчадия",
+        "celestial": "Небожители",
+        "aberration": "Ужасы",
+        "monstrosity": "Чудовища",
+        "elemental": "Элементали",
+        "fey": "Феи",
+        "ooze": "Слизи",
+        "construct": "Конструкты"
+    };
+
+    const plainToFolderHtml = {};
+    Object.keys(typeToFolderPlain).forEach(key => {
+        plainToFolderHtml[typeToFolderPlain[key]] = typeToFolder[key];
+    });
+
+    function getFolderFromType(type) {
+        return typeToFolder[type.toLowerCase()] || `<i class="fas fa-folder"></i> ${type}`;
+    }
+
+function getFolderPlainName(type) {
+    const html = getFolderFromType(type);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || type;
+}
+
+
 
     async function loadBestiaryFromFile() {
         try {
@@ -620,34 +926,41 @@ async function loadUuidMap() {
                     const cr = parseFloat(parts[4]) || 0;
                     const initBonus = parseInt(parts[5]) || 0;
                     const type = parts[7].trim();
-                    const folder = getFolderFromType(type);
+                    const folder = typeToFolderPlain[type.toLowerCase()] || type;
                     const hpAvg = avgFromFormula(hpFormula);
                     monstersLibrary.push({ name, ac, hpFormula, hpAvg, initBonus, folder, cr });
                 }
             }
             console.log(`Бестиарий загружен: ${monstersLibrary.length} монстров`);
         } catch(e) {
-            console.warn('Ошибка загрузки mobs_full.txt, fallback:', e);
-            monstersLibrary = [
-                { name:"Гоблин-разведчик", ac:15, hpFormula:"2d6+2", hpAvg:9, initBonus:2, folder:"🧍 Гуманоиды", cr:0.5 },
-                { name:"Хобгоблин-капитан", ac:17, hpFormula:"6d8+12", hpAvg:39, initBonus:1, folder:"🧍 Гуманоиды", cr:2 }
+    console.warn('Ошибка загрузки mobs_full.txt, fallback:', e);
+              monstersLibrary = [
+                { name: "Гоблин-разведчик", ac: 15, hpFormula: "2d6+2", hpAvg: 9, initBonus: 2, folder: "Гуманоиды", cr: 0.5 },
+                { name: "Хобгоблин-капитан", ac: 17, hpFormula: "6d8+12", hpAvg: 39, initBonus: 1, folder: "Гуманоиды", cr: 2 }
             ];
-        }
+}
         initFilters();
         renderBestiary();
     }
 
     function initFilters() {
-        const folders = [...new Set(monstersLibrary.map(m => m.folder))];
-        const sel = document.getElementById('folderSelect');
-        sel.innerHTML = '<option value="all">📁 Все папки</option>' + folders.map(f => `<option value="${f}">${f}</option>`).join('');
-        const crSel = document.getElementById('crFilter');
-        const uniqueCrs = [...new Set(monstersLibrary.map(m => m.cr))].sort((a,b)=>a-b);
-        crSel.innerHTML = '<option value="all">Все CR</option>' + uniqueCrs.map(cr => `<option value="${cr}">CR ${cr}</option>`).join('');
-        document.getElementById('searchInput').oninput = () => renderBestiary();
-        sel.onchange = () => renderBestiary();
-        crSel.onchange = () => renderBestiary();
-    }
+    const folders = [...new Set(monstersLibrary.map(m => m.folder))];
+
+    const sel = document.getElementById('folderSelect');
+    const folderOptions = folders.map(f => {
+        return `<option value="${f}">${f}</option>`;   // ← чисто и без HTML
+    }).join('');
+
+    sel.innerHTML = '<option value="all">Все папки</option>' + folderOptions;
+
+    const crSel = document.getElementById('crFilter');
+    const uniqueCrs = [...new Set(monstersLibrary.map(m => m.cr))].sort((a,b)=>a-b);
+    crSel.innerHTML = '<option value="all">Все CR</option>' + uniqueCrs.map(cr => `<option value="${cr}">CR ${cr}</option>`).join('');
+
+    document.getElementById('searchInput').oninput = () => renderBestiary();
+    sel.onchange = () => renderBestiary();
+    crSel.onchange = () => renderBestiary();
+}
 
     function makeFolderId(name) {
         return name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_');
@@ -681,7 +994,8 @@ async function loadUuidMap() {
             let html = '';
             for(let f of Object.keys(groups)) {
                 const folderId = makeFolderId(f);
-                html += `<div class="folder-header" data-folder-id="${folderId}">📂 ${f} (${groups[f].length})</div>`;
+                const headerWithIcon = plainToFolderHtml[f] || f;
+                html += `<div class="folder-header" data-folder-id="${folderId}">${headerWithIcon} (${groups[f].length})</div>`;
                 html += `<div class="folder-content collapsed" id="${folderId}">`;
                 groups[f].forEach(m => {
                     html += `<div class="monster-item">
@@ -1150,7 +1464,7 @@ function findSpellById(id) {
         const descText = full.description ? highlightSpellsInText(full.description) : '—';
         descDiv.innerHTML = `
             <button type="button" class="btn" id="toggleMonsterDescriptionBtn" aria-expanded="false" style="margin-top:10px;">
-                <span class="btn-label"><i class="fa-thin fa-dragon fa-icon"></i>Описание монстра</span>
+                <span class="btn-label"><i class="fa-solid fa-skull"></i>Описание монстра</span>
             </button>
             <div id="monsterDescriptionContent" class="folder-content collapsed" style="margin-top: 8px;">
                 ${descText}
@@ -1249,7 +1563,7 @@ function findSpellById(id) {
                         div.innerHTML = `<strong>${lvl===0?'Заговоры':lvl+' уровень'}</strong>`;
                         spellsContainer.appendChild(div);
                         byLevel[lvl].forEach(spell => {
-                            const item = document.createElement('div'); item.className = 'spell-item';
+                            const item = document.createElement('div'); item.className = `spell-item spell-school-${spell.school}`;
                             const displayName = spell.spellName.split('/')[0].trim();
                             item.innerHTML = `<span class="spell-name">${cleanText(displayName)}</span><span class="spell-level">${spell.level===0?'Заговор':spell.level+' ур'}</span>`;
                             item.onclick = (e) => { e.stopPropagation(); showSpellDetail(spell); };
@@ -1331,7 +1645,7 @@ function findSpellById(id) {
             if (filter.trim() !== '') {
                 filtered.forEach(spell => {
                     const div = document.createElement('div');
-                    div.className = 'spell-item';
+                    div.className = `spell-item spell-school-${spell.school}`;
                     div.innerHTML = `<span class="spell-name">${cleanText(spell.spellName)}</span><span class="spell-level">${spell.level===0?'Заговор':spell.level+' ур'}</span>`;
                     div.onclick = () => showSpellDetail(spell);
                     container.appendChild(div);
@@ -1360,7 +1674,7 @@ function findSpellById(id) {
                         schoolContent.id = `spell-school-${lvl}-${school.replace(/\s+/g, '_')}`;
                         bySchool[school].forEach(spell => {
                             const div = document.createElement('div');
-                            div.className = 'spell-item';
+                            div.className = `spell-item spell-school-${spell.school}`;
                             div.innerHTML = `<span class="spell-name">${cleanText(spell.spellName)}</span><span class="spell-level">${spell.level===0?'Заговор':spell.level+' ур'}</span>`;
                             div.onclick = () => showSpellDetail(spell);
                             schoolContent.appendChild(div);
