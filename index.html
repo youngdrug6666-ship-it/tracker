@@ -147,7 +147,7 @@
         }
 
         /* === Адаптация для мобильных устройств (Android, iPhone) === */
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
     body {
         padding: 0px 8px 8px 8px;
     }
@@ -163,36 +163,89 @@
     .top-bar.collapsed {
         transform: translateY(-100%) !important;
     }
+
     .top-bar-content {
-        padding: 6px 8px;
-        flex-wrap: wrap;
+        padding: 4px 6px !important;
+        gap: 4px !important;
     }
+
     .top-bar-left {
-        flex-wrap: wrap;
-        gap: 6px;
-        width: 100%;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 4px !important;
+        width: 100% !important;
     }
+
+    /* ----- СТРОКА 1: РАУНД + СТРЕЛКИ СЛЕВА, МЕНЮ СПРАВА ----- */
     .round-indicator {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
+        order: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 2px 6px !important;
+        margin: 0 !important;
+        background: #1f2937 !important;
+        border-radius: 40px !important;
+        gap: 2px !important;
+        flex: 0 1 auto !important;
     }
-        .right-panel-links {
-        width: 100%;
-        justify-content: space-around;
-        margin-top: 6px;
+    #prevTurnBtnTop {
+        order: 2 !important;
+        margin-left: 2px !important;
     }
-    .menu-wrapper { width: 100%; }
-    .burger-menu { left: 0; right: auto; width: 100%; min-width: unset; }
+    #nextTurnBtnTop {
+        order: 3 !important;
+    }
+    /* Оборачиваем меню в контейнер, который будет растягиваться */
+    .menu-wrapper {
+        order: 4 !important;
+        margin-left: auto !important;   /* прижимаем весь блок меню вправо */
+        display: flex !important;
+    }
+    #burgerMenuBtn {
+        width: 100% !important;        /* на всякий случай */
+    }
 
-    .top-bar .btn,
-    .btn,
-    .json-import,
-    .session-control {
-        padding: 8px 12px;
-        font-size: 0.9rem;
+    /* ----- СТРОКА 2: СОРТИРОВАТЬ + ИНИЦИАТИВА МОНСТРАМ ----- */
+    #sortInitBtn {
+        order: 5 !important;
+    }
+    #rollAllInitBtn {
+        order: 6 !important;
     }
 
+    /* ----- СТРОКА 3: БЕСТИАРИЙ + ЗАКЛИНАНИЯ + ПЕРЕВОДЧИК ----- */
+    #toggleBtn {
+        order: 7 !important;
+    }
+    #toggleSpellsBtn {
+        order: 8 !important;
+    }
+    a.btn[href="translator.html"] {
+        order: 9 !important;
+    }
+
+    /* ----- СТРОКА 4: TELEGRAM, ПОДДЕРЖАТЬ, РУКОВОДСТВО ----- */
+    .right-panel-links {
+        order: 10 !important;
+        width: 100% !important;
+        justify-content: space-around !important;
+        margin-top: 4px !important;
+    }
+
+    /* ----- КОМПАКТНЫЕ КНОПКИ (ЧТОБЫ ВСЁ ВЛЕЗЛО) ----- */
+    .top-bar .btn {
+        padding: 3px 14px !important;
+        font-size: 0.6rem !important;
+        white-space: nowrap !important;
+        flex: 0 1 auto !important;
+    }
+    .round-indicator .btn {
+        padding: 2px 4px !important;
+        font-size: 0.6rem !important;
+    }
+
+    /* ----- ОСТАЛЬНЫЕ МОБИЛЬНЫЕ СТИЛИ (БЕСТИАРИЙ И Т.Д.) ----- */
     .bestiary-panel {
         width: 100vw;
         padding: 20px 16px;
@@ -200,7 +253,6 @@
         z-index: 500;
         background: rgba(16, 22, 32, 0.98);
     }
-
     .close-bestiary-mobile {
         display: block !important;
         position: absolute;
@@ -213,14 +265,20 @@
         z-index: 600;
         cursor: pointer;
     }
-
     .bestiary-panel h2 {
         margin-top: 30px;
     }
-
     .tracker-area.shifted {
         margin-left: 0 !important;
     }
+    .tracker-area {
+        padding-top: 0 !important;
+        overflow: visible !important;
+    }
+    :root {
+        --top-bar-offset: 0px;
+    }
+}
 
     /* 🔧 Исправленный блок для панели инструментов */
         /* 🔧 НАДЁЖНЫЙ БЛОК — ФИКСИРОВАННАЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
