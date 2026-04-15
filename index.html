@@ -146,58 +146,81 @@
             display: none;
         }
 
-        /* ====================== МОБИЛЬНАЯ ВЕРСИЯ — БЕЗ ЛИСТАНИЯ ====================== */
-@media (max-width: 768px) {
+        /* === Адаптация для мобильных устройств (Android, iPhone) === */
+        @media (max-width: 768px) {
+    body {
+        padding: 0px 8px 8px 8px;
+    }
 
     .top-bar {
         position: sticky !important;
-        top: 0;
-        z-index: 999;
-        background: rgba(12, 18, 26, 0.98) !important;
-        backdrop-filter: blur(12px);
-        padding: 6px 8px !important;
-        border-bottom: 2px solid #345a8b;
-    }
-
-    .top-bar-content {
-        padding: 4px 0;
-        gap: 6px;
-        flex-wrap: wrap;           /* ← разрешаем перенос на 2 строки */
-        justify-content: center;
-    }
-
-    .top-bar-left {
+        top: 0 !important;
+        z-index: 200 !important;
         width: 100%;
-        flex-wrap: wrap;           /* ← главное — переносим кнопки */
+        margin-bottom: 8px;
+        transform: none !important;
+    }
+    .top-bar.collapsed {
+        transform: translateY(-100%) !important;
+    }
+    .top-bar-content {
+        padding: 6px 8px;
+        flex-wrap: wrap;
+    }
+    .top-bar-left {
+        flex-wrap: wrap;
         gap: 6px;
-        justify-content: center;
-        overflow-x: hidden;        /* убираем листание */
+        width: 100%;
     }
-
-    /* Кнопки становятся меньше и компактнее */
-    .btn, .btn-primary, .json-import, .session-control {
-        padding: 7px 10px !important;
-        font-size: 0.78rem !important;
-        min-height: 36px;
-        white-space: nowrap;
-    }
-
     .round-indicator {
-        min-width: 130px;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+        .right-panel-links {
+        width: 100%;
+        justify-content: space-around;
+        margin-top: 6px;
+    }
+    .menu-wrapper { width: 100%; }
+    .burger-menu { left: 0; right: auto; width: 100%; min-width: unset; }
+
+    .top-bar .btn,
+    .btn,
+    .json-import,
+    .session-control {
+        padding: 8px 12px;
         font-size: 0.9rem;
     }
 
-    /* Карточки не залезают под панель */
-    .tracker-area {
-        padding-top: 68px !important;
+    .bestiary-panel {
+        width: 100vw;
+        padding: 20px 16px;
+        border-radius: 0;
+        z-index: 500;
+        background: rgba(16, 22, 32, 0.98);
     }
 
-    /* Бестиарий на весь экран */
-    .bestiary-panel {
-        width: 100vw !important;
-        padding-top: 70px !important;
+    .close-bestiary-mobile {
+        display: block !important;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 32px;
+        color: #d4af37;
+        background: transparent;
+        border: none;
+        z-index: 600;
+        cursor: pointer;
     }
-}
+
+    .bestiary-panel h2 {
+        margin-top: 30px;
+    }
+
+    .tracker-area.shifted {
+        margin-left: 0 !important;
+    }
 
     /* 🔧 Исправленный блок для панели инструментов */
         /* 🔧 НАДЁЖНЫЙ БЛОК — ФИКСИРОВАННАЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
@@ -514,69 +537,6 @@ a.btn[href="translator.html"]:hover {
     background: #2c4a6e !important;   /* цвет при наведении — можно заменить */
     border-color: #d4af37 !important;
     transform: scale(1.005);
-}
-/* ====================== МОБИЛЬНАЯ ВЕРСИЯ (только для телефонов) ====================== */
-@media (max-width: 768px) {
-
-    /* 1. Верхняя панель — компактная и всегда сверху */
-    .top-bar {
-        position: sticky !important;
-        top: 0;
-        z-index: 999;
-        background: rgba(12, 18, 26, 0.98) !important;
-        backdrop-filter: blur(12px);
-        padding: 6px 8px !important;
-        border-bottom: 2px solid #345a8b;
-    }
-
-    .top-bar-content {
-        padding: 4px 0;
-        gap: 5px;
-    }
-
-    /* 2. Кнопки в одну строку с горизонтальным скроллом (чтобы всё влезло) */
-    .top-bar-left {
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: 4px;
-    }
-    .top-bar-left::-webkit-scrollbar { display: none; }
-
-    .btn, .btn-primary, .json-import, .session-control {
-        padding: 8px 14px !important;
-        font-size: 0.82rem !important;
-        min-height: 38px;
-        white-space: nowrap;
-    }
-
-    .round-indicator {
-        width: auto;
-        min-width: 140px;
-    }
-
-    /* 3. Карточки боя не залезают под шапку */
-    .tracker-area {
-        padding-top: 58px !important;   /* ← главное, чтобы не было перекрытия */
-    }
-
-    /* 4. Бестиарий на весь экран и удобно */
-    .bestiary-panel {
-        width: 100vw !important;
-        padding-top: 65px !important;
-        border-radius: 0 !important;
-    }
-
-    /* 5. Чуть меньше карточки на телефоне (чтобы больше влезало) */
-    .combat-card {
-        min-height: 240px;
-    }
-
-    /* 6. Убираем лишние отступы */
-    body {
-        padding: 0 !important;
-    }
 }
 </style>
 </head>
