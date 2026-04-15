@@ -146,81 +146,58 @@
             display: none;
         }
 
-        /* === Адаптация для мобильных устройств (Android, iPhone) === */
-        @media (max-width: 768px) {
-    body {
-        padding: 0px 8px 8px 8px;
-    }
+        /* ====================== МОБИЛЬНАЯ ВЕРСИЯ — БЕЗ ЛИСТАНИЯ ====================== */
+@media (max-width: 768px) {
 
     .top-bar {
         position: sticky !important;
-        top: 0 !important;
-        z-index: 200 !important;
-        width: 100%;
-        margin-bottom: 8px;
-        transform: none !important;
+        top: 0;
+        z-index: 999;
+        background: rgba(12, 18, 26, 0.98) !important;
+        backdrop-filter: blur(12px);
+        padding: 6px 8px !important;
+        border-bottom: 2px solid #345a8b;
     }
-    .top-bar.collapsed {
-        transform: translateY(-100%) !important;
-    }
-    .top-bar-content {
-        padding: 6px 8px;
-        flex-wrap: wrap;
-    }
-    .top-bar-left {
-        flex-wrap: wrap;
-        gap: 6px;
-        width: 100%;
-    }
-    .round-indicator {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-        .right-panel-links {
-        width: 100%;
-        justify-content: space-around;
-        margin-top: 6px;
-    }
-    .menu-wrapper { width: 100%; }
-    .burger-menu { left: 0; right: auto; width: 100%; min-width: unset; }
 
-    .top-bar .btn,
-    .btn,
-    .json-import,
-    .session-control {
-        padding: 8px 12px;
+    .top-bar-content {
+        padding: 4px 0;
+        gap: 6px;
+        flex-wrap: wrap;           /* ← разрешаем перенос на 2 строки */
+        justify-content: center;
+    }
+
+    .top-bar-left {
+        width: 100%;
+        flex-wrap: wrap;           /* ← главное — переносим кнопки */
+        gap: 6px;
+        justify-content: center;
+        overflow-x: hidden;        /* убираем листание */
+    }
+
+    /* Кнопки становятся меньше и компактнее */
+    .btn, .btn-primary, .json-import, .session-control {
+        padding: 7px 10px !important;
+        font-size: 0.78rem !important;
+        min-height: 36px;
+        white-space: nowrap;
+    }
+
+    .round-indicator {
+        min-width: 130px;
         font-size: 0.9rem;
     }
 
+    /* Карточки не залезают под панель */
+    .tracker-area {
+        padding-top: 68px !important;
+    }
+
+    /* Бестиарий на весь экран */
     .bestiary-panel {
-        width: 100vw;
-        padding: 20px 16px;
-        border-radius: 0;
-        z-index: 500;
-        background: rgba(16, 22, 32, 0.98);
+        width: 100vw !important;
+        padding-top: 70px !important;
     }
-
-    .close-bestiary-mobile {
-        display: block !important;
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 32px;
-        color: #d4af37;
-        background: transparent;
-        border: none;
-        z-index: 600;
-        cursor: pointer;
-    }
-
-    .bestiary-panel h2 {
-        margin-top: 30px;
-    }
-
-    .tracker-area.shifted {
-        margin-left: 0 !important;
-    }
+}
 
     /* 🔧 Исправленный блок для панели инструментов */
         /* 🔧 НАДЁЖНЫЙ БЛОК — ФИКСИРОВАННАЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
