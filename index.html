@@ -405,6 +405,26 @@
         gap: 4px !important;
     }
 }
+/* Фикс боковой панели для старых Android (Honor 8, Android 7) */
+@media (max-width: 400px) {
+    .burger-menu {
+        width: 100% !important;
+        max-width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-sizing: border-box !important;
+        position: fixed !important;
+        top: 60px !important; /* отступ под верхнюю панель */
+        z-index: 9999 !important;
+    }
+    
+    /* Запрещаем горизонтальный скролл */
+    body, html {
+        overflow-x: hidden !important;
+    }
+}
 
         /* === Универсальные tooltip (без изменений) === */
         .combat-card [data-tooltip] {
@@ -720,6 +740,7 @@ a.btn[href="translator.html"]:hover {
     border-color: #d4af37 !important;
     transform: scale(1.005);
 }
+
 </style>
 </head>
 <body>
