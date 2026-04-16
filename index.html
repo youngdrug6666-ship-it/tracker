@@ -362,6 +362,49 @@
                 padding: 1px 2px !important;
             }
         }
+/* === Сверхкомпактная адаптация для экранов 320–380px === */
+@media (max-width: 380px) and (min-width: 320px) {
+    .top-bar-content {
+        padding: 2px 2px !important;
+        gap: 1px !important;
+    }
+    .top-bar-left {
+        gap: 1px !important;
+    }
+    .top-bar .btn {
+        padding: 2px 4px !important;
+        font-size: 0.5rem !important;
+    }
+    .round-indicator {
+        padding: 1px 2px !important;
+        gap: 1px !important;
+    }
+    .round-indicator .btn {
+        padding: 1px 2px !important;
+        font-size: 0.45rem !important;
+    }
+    /* Скрываем весь текст у кнопок, оставляем только иконки */
+    .top-bar .btn .btn-label span:not(.fa-icon) {
+        display: none;
+    }
+    /* Но для счётчика раунда и стрелок можно оставить текст (если нужно) */
+    #prevTurnBtnTop .btn-label span:not(.fa-icon),
+    #nextTurnBtnTop .btn-label span:not(.fa-icon) {
+        display: inline; /* или none, если не помещается */
+    }
+    /* Меню оставляем только иконку */
+    #burgerMenuBtn .btn-label span:not(.fa-icon) {
+        display: none;
+    }
+    /* Ссылки в правой панели делаем ещё меньше */
+    .right-panel-links a, .right-panel-links .help-btn {
+        font-size: 0.6rem !important;
+        gap: 2px !important;
+    }
+    .right-panel-links {
+        gap: 4px !important;
+    }
+}
 
         /* === Универсальные tooltip (без изменений) === */
         .combat-card [data-tooltip] {
