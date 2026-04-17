@@ -2426,13 +2426,17 @@ function findSpellById(id) {
         document.getElementById('heroDetailAlignment').innerText = data.info?.alignment?.value || '—';
         document.getElementById('heroDetailXP').innerText = data.info?.experience?.value || '—';
         if (hero.stats) {
-            document.getElementById('heroDetailStats').innerHTML = 
-                `💪 Сила ${hero.stats.str.score} (${hero.stats.str.mod>=0?'+'+hero.stats.str.mod:hero.stats.str.mod}) | ` +
-                `🤸 Ловкость ${hero.stats.dex.score} (${hero.stats.dex.mod>=0?'+'+hero.stats.dex.mod:hero.stats.dex.mod}) | ` +
-                `❤️ Телосложение ${hero.stats.con.score} (${hero.stats.con.mod>=0?'+'+hero.stats.con.mod:hero.stats.con.mod}) | ` +
-                `🧠 Интеллект ${hero.stats.int.score} (${hero.stats.int.mod>=0?'+'+hero.stats.int.mod:hero.stats.int.mod}) | ` +
-                `🕯️ Мудрость ${hero.stats.wis.score} (${hero.stats.wis.mod>=0?'+'+hero.stats.wis.mod:hero.stats.wis.mod}) | ` +
-                `👄 Харизма ${hero.stats.cha.score} (${hero.stats.cha.mod>=0?'+'+hero.stats.cha.mod:hero.stats.cha.mod})`;
+            const s = hero.stats;
+const labels = { str:'СИЛ', dex:'ЛОВ', con:'ТЕЛ', int:'ИНТ', wis:'МДР', cha:'ХАР' };
+document.getElementById('heroDetailStats').innerHTML = `
+    <div class="monster-stats-grid" style="margin-top:0;">
+        ${['str','dex','con','int','wis','cha'].map(key => {
+            const score = s[key]?.score ?? 10;
+            const mod = s[key]?.mod ?? Math.floor((score - 10) / 2);
+            return `<div class="monster-stat-cell"><span class="lbl">${labels[key]}</span><span class="val">${score} (${mod >= 0 ? '+' : ''}${mod})</span></div>`;
+        }).join('')}
+    </div>
+`;
         }
         const saves = data.saves; let savesHtml = ''; 
         const proficiencyBonus = Number(hero.proficiency ?? data.proficiency?.value ?? data.proficiency ?? 2) || 2;
@@ -2519,15 +2523,18 @@ function findSpellById(id) {
             const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<div class="race-class" data-tooltip="Раса: ${c.race || '?'} | Класс: ${c.class || '?'}">${c.race ? `<i class="fa-brands fa-critical-role"></i> ${escapeHtml(c.race)}` : ''} ${c.class ? `<i class="fa-solid fa-user-plus"></i> ${escapeHtml(c.class)}` : ''}</div>` : '';
             let statsHtml = '';
             if (!c.isMonster && c.stats) {
-                statsHtml = `<div class="stats-row">
-                    <span class="stat-item" data-tooltip="Сила: ${c.stats.str.score} (${c.stats.str.mod>=0?'+'+c.stats.str.mod:c.stats.str.mod})">💪${c.stats.str.mod>=0?'+'+c.stats.str.mod:c.stats.str.mod}</span>
-                    <span class="stat-item" data-tooltip="Ловкость: ${c.stats.dex.score} (${c.stats.dex.mod>=0?'+'+c.stats.dex.mod:c.stats.dex.mod})">🤸${c.stats.dex.mod>=0?'+'+c.stats.dex.mod:c.stats.dex.mod}</span>
-                    <span class="stat-item" data-tooltip="Телосложение: ${c.stats.con.score} (${c.stats.con.mod>=0?'+'+c.stats.con.mod:c.stats.con.mod})">❤️${c.stats.con.mod>=0?'+'+c.stats.con.mod:c.stats.con.mod}</span>
-                    <span class="stat-item" data-tooltip="Интеллект: ${c.stats.int.score} (${c.stats.int.mod>=0?'+'+c.stats.int.mod:c.stats.int.mod})">🧠${c.stats.int.mod>=0?'+'+c.stats.int.mod:c.stats.int.mod}</span>
-                    <span class="stat-item" data-tooltip="Мудрость: ${c.stats.wis.score} (${c.stats.wis.mod>=0?'+'+c.stats.wis.mod:c.stats.wis.mod})">🕯️${c.stats.wis.mod>=0?'+'+c.stats.wis.mod:c.stats.wis.mod}</span>
-                    <span class="stat-item" data-tooltip="Харизма: ${c.stats.cha.score} (${c.stats.cha.mod>=0?'+'+c.stats.cha.mod:c.stats.cha.mod})">👄${c.stats.cha.mod>=0?'+'+c.stats.cha.mod:c.stats.cha.mod}</span>
-                </div>`;
-            }
+    const s = c.stats;
+    statsHtml = `
+        <div class="monster-stats-grid" style="grid-template-columns:repeat(6,1fr); gap:3px; font-size:0.6rem; background:rgba(0,0,0,0.4); border-radius:6px; padding:3px; margin:3px 0;">
+            <div style="text-align:center;"><span style="color:#b7c2d3;">СИЛ</span><br><strong>${s.str.score} (${s.str.mod>=0?'+'+s.str.mod:s.str.mod})</strong></div>
+            <div style="text-align:center;"><span style="color:#b7c2d3;">ЛОВ</span><br><strong>${s.dex.score} (${s.dex.mod>=0?'+'+s.dex.mod:s.dex.mod})</strong></div>
+            <div style="text-align:center;"><span style="color:#b7c2d3;">ТЕЛ</span><br><strong>${s.con.score} (${s.con.mod>=0?'+'+s.con.mod:s.con.mod})</strong></div>
+            <div style="text-align:center;"><span style="color:#b7c2d3;">ИНТ</span><br><strong>${s.int.score} (${s.int.mod>=0?'+'+s.int.mod:s.int.mod})</strong></div>
+            <div style="text-align:center;"><span style="color:#b7c2d3;">МДР</span><br><strong>${s.wis.score} (${s.wis.mod>=0?'+'+s.wis.mod:s.wis.mod})</strong></div>
+            <div style="text-align:center;"><span style="color:#b7c2d3;">ХАР</span><br><strong>${s.cha.score} (${s.cha.mod>=0?'+'+s.cha.mod:s.cha.mod})</strong></div>
+        </div>
+    `;
+}
             let spellHtml = '';
             if (!c.isMonster && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний"><i class="fa-solid fa-dice-d6"></i> Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями"><i class="fa-solid fa-wand-sparkles"></i> Атк +${c.spellAttack}</span></div>`;
             let activeConditionsHtml = '';
