@@ -63,11 +63,26 @@
   for(const record of records){const bytes=encoder.encode(JSON.stringify(record)).length;if(chunk.length && size+bytes>limit){chunks.push(chunk);chunk=[];size=0;}chunk.push(record);size+=bytes;}
   if(chunk.length)chunks.push(chunk);
   const stamp=manifest.exportedAt.replace(/[:.]/g,'-');
-  for(let i=0;i<chunks.length;i++){
-    const payload={...manifest,part:i+1,parts:chunks.length,records:chunks[i]};
-    const blob=new Blob([JSON.stringify(payload)],{type:'application/json'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');
-    anchor.href=url;anchor.download='tracker-foundry-full-'+stamp+(chunks.length>1?'-part-'+(i+1):'')+'.json';document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  }
+  const files=chunks.map((records,i)=>({
+    name:'tracker-foundry-full-'+stamp+(chunks.length>1?'-part-'+(i+1):'')+'.json',
+    data:JSON.stringify({...manifest,part:i+1,parts:chunks.length,records})
+  }));
+  // Retain completed files for retry without reading the compendiums again.
+  globalThis.trackerFoundryExportFiles=files;
+  const saveFile=file=>{
+    const save=globalThis.foundry?.utils?.saveDataToFile ?? globalThis.saveDataToFile;
+    if(save)return save(file.data,'application/json',file.name);
+    const blob=new Blob([file.data],{type:'application/json'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');
+    anchor.href=url;anchor.download=file.name;document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  };
+  // Explicit clicks avoid automatic multi-download blocking and provide retry.
+  const result=document.createElement('dialog');
+  result.style.cssText='width:min(650px,90vw);max-height:85vh;padding:24px;background:#18212c;color:#eee;border:1px solid #7e8b98;border-radius:12px;overflow:auto';
+  result.innerHTML='<h2>\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0441\u043e\u0431\u0440\u0430\u043d</h2><p>\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u043a\u0430\u0436\u0434\u0443\u044e \u043a\u043d\u043e\u043f\u043a\u0443 \u0438 \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043c\u0435\u0441\u0442\u043e \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f. \u0415\u0441\u043b\u0438 \u0444\u0430\u0439\u043b \u043d\u0435 \u043f\u043e\u044f\u0432\u0438\u043b\u0441\u044f, \u043a\u043d\u043e\u043f\u043a\u0443 \u043c\u043e\u0436\u043d\u043e \u043d\u0430\u0436\u0430\u0442\u044c \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e.</p>'+files.map((f,i)=>'<p><button type="button" data-file="'+i+'">\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0447\u0430\u0441\u0442\u044c '+(i+1)+' \u0438\u0437 '+files.length+'</button> <small>'+Math.ceil(new TextEncoder().encode(f.data).length/1024/1024)+' \u041c\u0411</small></p>').join('')+'<button type="button" data-close>\u0417\u0430\u043a\u0440\u044b\u0442\u044c</button>';
+  document.body.appendChild(result);
+  files.forEach((file,i)=>{result.querySelector('[data-file="'+i+'"]').onclick=()=>{try{saveFile(file);}catch(error){ui.notifications.error(String(error.message||error));console.error(error);}};});
+  result.querySelector('[data-close]').onclick=()=>{result.close();result.remove();};
+  result.showModal();
   console.info('Tracker export manifest',manifest);
   const summary='\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0433\u043e\u0442\u043e\u0432: '+manifest.coverage.actors+' \u043c\u043e\u043d\u0441\u0442\u0440\u043e\u0432, '+manifest.coverage.items+' \u043f\u0440\u0435\u0434\u043c\u0435\u0442\u043e\u0432; \u0444\u0430\u0439\u043b\u043e\u0432: '+chunks.length+'.';
   if(manifest.errors.length)ui.notifications.warn(summary+' \u041d\u0435 \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u043d\u044b \u0441\u0431\u043e\u0440\u043d\u0438\u043a\u0438: '+manifest.errors.map(e=>e.pack).join(', '));else ui.notifications.info(summary);
