@@ -12,5 +12,6 @@ const drow=monster('Drow Matron Mother');assert.equal(drow.bonus_actions.length,
 const web=data.spells.find(s=>s.name.endsWith('/ Web'));const sp=F.applySpell({subclasses:[]},web);assert.equal(sp.range,'60 ft');assert.equal(sp.duration,'1 hour');assert(sp.concentration);assert(sp.components.material);assert.equal(sp.components.materialDesc,'обрывок паутины');assert(sp.subclasses.every(s=>!/[a-z]+\)$/.test(s)));
 assert.equal(B.organize(F.applyMonster({ac:14,image:'token.webp',_sectionRules:[{name:'Мультиатака',section:'features',attack:false}]},vecna)).ac,18);
 assert.equal(F.applyMonster({ac:14},{name:'test'}).ac,14);
+assert.equal(F.applyMonster({ac:14},{name:'test',ac:0}).ac,14);
 for(const m of data.monsters){assert(m.source);for(const key of ['features','actions','bonus_actions','reactions','legendary_actions','lair_actions','regional_effects']){assert(Array.isArray(m[key]));for(const i of m[key])assert(i._rawSection);}}
 console.log('PASS full dataset integrity, version-specific Vecna, Strahd action costs/lair/passive regeneration, Drow bonus actions, authoritative spell parameters, subclass labels and all sections');

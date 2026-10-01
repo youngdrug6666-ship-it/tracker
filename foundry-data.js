@@ -13,6 +13,7 @@ async function load(){
 }
 function applyMonster(base,raw){
  const m={...base,...raw,image:base.image||null,description:base.description||''};
+ if(raw.ac!==undefined && !(Number(raw.ac)>0))m.ac=base.ac;
  // Previous guessed sections must not overwrite explicit raw/source sections.
  delete m._sectionRules;delete m._sourceLegendaryCount;delete m._regularActionNames;
  m._sourceLegendaryCount=raw.legendaryCount;
