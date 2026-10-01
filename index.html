@@ -836,11 +836,13 @@ a.btn[href="translator.html"]:hover {
         <p style="margin-top:15px; text-align:right;"><em>Приятной игры! 🐉</em></p>
     </div>
 </div>
-<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><div><strong>Действия:</strong></div><ul id="detailActions"></ul><div><strong>Особенности:</strong></div><ul id="detailFeatures"></ul><div><strong>Легендарные действия:</strong></div><ul id="detailLegendary"></ul><div><strong>Бонусные действия:</strong></div><ul id="detailBonusActions"></ul><div><strong>Реакции:</strong></div><ul id="detailReactions"></ul><div><strong>Действия логова:</strong></div><ul id="detailLairActions"></ul><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
+<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><section class="bestiary-section"><h3>Особенности</h3><ul id="detailFeatures"></ul></section><section class="bestiary-section"><h3>Действия</h3><ul id="detailActions"></ul></section><section class="bestiary-section"><h3>Бонусные действия</h3><ul id="detailBonusActions"></ul></section><section class="bestiary-section"><h3>Реакции</h3><ul id="detailReactions"></ul></section><section class="bestiary-section"><h3>Легендарные действия</h3><ul id="detailLegendary"></ul></section><section class="bestiary-section"><h3>Действия логова</h3><ul id="detailLairActions"></ul></section><section class="bestiary-section"><h3>Местные эффекты</h3><ul id="detailRegionalEffects"></ul></section><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
 <div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><input type="text" id="spellSearchInput" placeholder="🔍 Поиск..." style="width:100%; padding:8px 16px; border-radius:60px; margin-bottom:16px; background:#1e2838; border:1px solid #0db9e7; color:white;"><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
+<link rel="stylesheet" href="bestiary.css?v=1">
+<script src="bestiary.js?v=1"></script>
 <script src="lss-engine.js?v=1"></script>
 <script src="hero-card.js?v=3"></script>
 <script>
@@ -1295,32 +1297,13 @@ function getFolderPlainName(type) {
                 const baseName = normalizeMonsterName(base?.name || key);
                 if (!baseName) continue;
                 const baseParts = baseName.split('/').map(p => p.trim()).filter(Boolean);
-                if (baseParts.includes(customName) || baseName.includes(customName) || customName.includes(baseName)) return key;
+                if (baseParts.includes(customName)) return key;
             }
         }
-        const customDesc = normalizeMonsterDescriptionForMatch(custom.description);
-        if (customDesc && customDesc.length > 30) {
-            let best = null;
-            let bestScore = 0;
-            for (const [key, base] of fullMonstersMap.entries()) {
-                const baseDesc = normalizeMonsterDescriptionForMatch(base.description);
-                if (!baseDesc) continue;
-                let score = 0;
-                if (baseDesc.includes(customDesc) || customDesc.includes(baseDesc)) score += 200;
-                const customSlice = customDesc.slice(0, 220);
-                if (customSlice && baseDesc.includes(customSlice)) score += 120;
-                score += similarityScore(custom, base);
-                if (score > bestScore) { bestScore = score; best = key; }
-            }
-            if (best && bestScore >= 120) return best;
-        }
-        const fp = monsterFingerprint(custom);
-        if (fp) {
-            for (const [k, v] of fullMonstersMap.entries()) {
-                if (monsterFingerprint(v) === fp) return k;
-            }
-        }
-        return customName || null;
+        // Slugs in the TXT are matched to an exact English alias; never guess from stats.
+        const slug = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        const candidates = [...fullMonstersMap].filter(([key,base]) => (base.name || '').split('/').some(part => slug(part) && slug(part) === slug(custom.name)));
+        return candidates.length === 1 ? candidates[0][0] : null;
     }
     function getMonsterProfBonus(monster = {}) {
         const explicit = Number(monster.profBonus ?? monster.proficiency?.value ?? monster.proficiency);
@@ -1346,13 +1329,9 @@ function getFolderPlainName(type) {
         const nameMatch = line.match(/^имя:\s*(.+)$/i);
         if (nameMatch) { monster.name = deepClean(nameMatch[1]); continue; }
         
-        if (/^действия\b/i.test(lower)) { mode = 'actions'; continue; }
-        if (/^описание\b/i.test(lower)) { mode = 'description'; continue; }
-        if (/^бонусные действия\b/i.test(lower)) { mode = 'bonus_actions'; if (!monster.bonus_actions) monster.bonus_actions = []; continue; }
-        if (/^реакции\b/i.test(lower)) { mode = 'reactions'; if (!monster.reactions) monster.reactions = []; continue; }
-        if (/^действия логова\b/i.test(lower)) { mode = 'lair_actions'; if (!monster.lair_actions) monster.lair_actions = []; continue; }
-        if (/^легендарные действия\b/i.test(lower)) { mode = 'legendary_actions'; if (!monster.legendary_actions) monster.legendary_actions = []; continue; }
-        
+        const heading = lower.replace(/[:.]$/, '').trim();
+        const sectionNames = {'действия логова':'lair_actions','легендарные действия':'legendary_actions','бонусные действия':'bonus_actions','реакции':'reactions','действия':'actions','особенности':'features','местные эффекты':'regional_effects','эффекты местности':'regional_effects','описание':'description'};
+        if (sectionNames[heading]) { mode = sectionNames[heading]; if (mode !== 'description') monster[mode] ||= []; continue; }
         const acMatch = line.match(/^класс доспеха\s+(\d+)/i);
         if (acMatch) { monster.ac = Number(acMatch[1]); continue; }
         
@@ -1403,7 +1382,7 @@ function getFolderPlainName(type) {
             continue;
         }
         
-        if (mode === 'actions' || mode === 'bonus_actions' || mode === 'reactions' || mode === 'lair_actions' || mode === 'legendary_actions') {
+        if (mode === 'actions' || mode === 'bonus_actions' || mode === 'reactions' || mode === 'lair_actions' || mode === 'legendary_actions' || mode === 'regional_effects') {
             const actionMatch = line.match(/^([^\.]+)\.\s*(.+)$/);
             let name = actionMatch ? deepClean(actionMatch[1]) : '—';
             let desc = actionMatch ? deepClean(actionMatch[2]) : deepClean(line);
@@ -1503,12 +1482,25 @@ async function loadCustomMonstersTXT() {
                 });
             }
 
-            const overrideSections = ['features','actions','bonus_actions','reactions','lair_actions','legendary_actions'];
+            const overrideSections = ['features','actions','bonus_actions','reactions','lair_actions','legendary_actions','regional_effects'];
             overrideSections.forEach(section => {
-                finalMonster[section] = dedupeRenderableItems(Array.isArray(custom[section]) ? custom[section] : []);
+                if (Array.isArray(custom[section])) finalMonster[section] = dedupeRenderableItems(custom[section]);
             });
             finalMonster.profBonus = getMonsterProfBonus(finalMonster);
             fullMonstersMap.set(targetKey, finalMonster);
+        }
+        const srdData = await fetchJsonWithFallback(['bestiary-srd.json']).catch(()=>[]);
+        const srdMap = new Map((srdData || []).map(m=>[m.name.toLowerCase(),m]));
+        for (const [key,entry] of fullMonstersMap) {
+            const m = {...entry};
+            const matched = Bestiary.enrich(m,srdMap.get(Bestiary.srdKey(m)));
+            if (!matched && /^истинное зрение 120 фт\.?$/i.test(m.senses || '') && m.senses === exportMonstersMap.get(key)?.senses) {
+                m.senses = Number.isFinite(Number(m.passivePerception)) ? `Пассивное восприятие ${m.passivePerception}` : '';
+                m._sensesUnverified = true;
+            }
+            // Empty export language fields must not erase the original language list.
+            if (!m.languages || m.languages === '—') m.languages = primaryMonstersMap.get(key)?.languages || '';
+            fullMonstersMap.set(key,Bestiary.organize(m));
         }
         console.log(`Полная база: ${fullMonstersMap.size}`);
     } catch(e) { console.warn('Ошибка загрузки монстров', e); }
@@ -1570,40 +1562,7 @@ async function loadCustomMonstersTXT() {
 
     // ========== Очистка текста ==========
         function cleanText(str) {
-        if (!str) return '';
-        let cleaned = String(str);
-        // Заменяем броски урона и проверки
-        cleaned = cleaned.replace(/\[\[\/r\s+([^\]]+)\]\]/g, '$1');
-        cleaned = cleaned.replace(/\[\[\/damage\s+([^\]]+)\]\]/g, (match, formula) => {
-            let typeMatch = formula.match(/type=([a-zA-Z]+)/);
-            let diceFormula = formula.replace(/\s*type=[a-zA-Z]+\s*/, '').trim();
-            if (typeMatch) {
-                let typeRus = translations.damage[typeMatch[1].toLowerCase()] || typeMatch[1];
-                return `${diceFormula} (${typeRus})`;
-            }
-            return diceFormula;
-        });
-        // Удаляем прочие теги
-        cleaned = cleaned.replace(/@(?:UUID|Compendium)\[[^\]]*?\]\{([^}]+)\}/gi, '$1');
-        cleaned = cleaned.replace(/@(?:UUID|Compendium)\[[^\]]+\]/gi, '');
-        cleaned = cleaned.replace(/&reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
-        cleaned = cleaned.replace(/&Reference\[[^\]]+\]\{([^}]+)\}/gi, '$1');
-        cleaned = cleaned.replace(/&reference\[[^\]]+\]/g, '');
-        cleaned = cleaned.replace(/&Reference\[[^\]]+\]/g, '');
-        cleaned = cleaned.replace(/\s*\[[a-z][a-z0-9\s'_-]*\]/gi, '');
-        cleaned = cleaned.replace(/reference\[[^\]]+\]/gi, '');
-        cleaned = cleaned.replace(/&[a-zA-Z]+;/g, '');
-        cleaned = cleaned.replace(/\{@[^}]+\}/g, '');
-        cleaned = cleaned.replace(/\(\)/g, '');
-        cleaned = cleaned.replace(/\(\s*\)/g, '');
-        cleaned = cleaned.replace(/\(\s*\+\d+\s*\)/g, '');
-        cleaned = cleaned.replace(/[\[\]\(\)]/g, ' ');
-        // Убираем мусор Foundry
-        cleaned = cleaned.replace(/\[\[lookup\s+@name(?:\s+capitalize)?\]\]/gi, '');
-        cleaned = cleaned.replace(/lookup\s+@name(?:\s+capitalize)?/gi, '');
-        cleaned = cleaned.replace(/^Примечание\s*[—–-]\s*/i, '');
-         cleaned = cleaned.replace(/\s+/g, ' ').trim();
-        return cleaned || '—';
+        return Bestiary.clean(str);
     }
     function normalizeShortCodes(str) {
         if (!str) return '';
@@ -1864,15 +1823,15 @@ function findSpellById(id) {
             img.style.display = 'none';
         }
          document.getElementById('detailAC').innerText = full.ac ?? '?';
-        document.getElementById('detailSpeed').innerText = normalizeMonsterInlineText(full.speed) || '—';
+        document.getElementById('detailSpeed').innerHTML = Bestiary.chips(full.speed);
         document.getElementById('detailHP').innerText = full.hp ?? '?';
         document.getElementById('detailCR').innerText = full.cr ?? '?';
         document.getElementById('detailType').innerText = normalizeMonsterInlineText(full.type) || '?';
         document.getElementById('detailSizeAlign').innerText = `${translateSize(full.size)} / ${translateAlignment(full.alignment)}`;
-        document.getElementById('detailSenses').innerText = normalizeMonsterInlineText(full.senses) || '—';
+        document.getElementById('detailSenses').innerHTML = Bestiary.chips(full.senses) + (full._sensesUnverified ? '<small class="bestiary-data-note">Особые чувства отсутствуют в надёжном источнике</small>' : '');
         document.getElementById('detailLanguages').innerText = normalizeMonsterListField(full.languages, 'languages') || '—';
-        document.getElementById('detailSaves').innerText = normalizeMonsterInlineText(full.saves) || '—';
-        document.getElementById('detailSkills').innerText = normalizeMonsterInlineText(full.skills) || '—';
+        document.getElementById('detailSaves').innerHTML = Bestiary.chips(full.saves);
+        document.getElementById('detailSkills').innerHTML = Bestiary.chips(full.skills);
         const profBonus = getMonsterProfBonus(full);
         document.getElementById('detailProfBonus').innerText = Number.isFinite(profBonus) ? `+${profBonus}` : '—';
         document.getElementById('detailXP').innerText = full.xp ?? '—';
@@ -1904,6 +1863,7 @@ function findSpellById(id) {
         function toggleSectionByList(container, visible) {
             if (!container) return;
             container.style.display = visible ? '' : 'none';
+            if (container.parentElement?.classList.contains('bestiary-section')) container.parentElement.style.display = visible ? '' : 'none';
             const title = container.previousElementSibling;
             if (title) title.style.display = visible ? '' : 'none';
         }
@@ -1915,7 +1875,7 @@ function findSpellById(id) {
             if (filteredItems.length) {
                 filteredItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
                     container.appendChild(li);
                 });
                 toggleSectionByList(container, true);
@@ -1926,6 +1886,7 @@ function findSpellById(id) {
         
         renderList('detailActions', full.actions);
         renderList('detailFeatures', full.features);
+        renderList('detailRegionalEffects', full.regional_effects);
         
         // Легендарные действия
         const legendaryContainer = document.getElementById('detailLegendary');
@@ -1935,7 +1896,7 @@ function findSpellById(id) {
             if (legendaryItems.length) {
                 legendaryItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
                     legendaryContainer.appendChild(li);
                 });
                 toggleSectionByList(legendaryContainer, true);
@@ -1952,7 +1913,7 @@ function findSpellById(id) {
             if (bonusItems.length) {
                 bonusItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
                     bonusContainer.appendChild(li);
                 });
                 toggleSectionByList(bonusContainer, true);
@@ -1969,7 +1930,7 @@ function findSpellById(id) {
             if (reactionItems.length) {
                 reactionItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
                     reactionsContainer.appendChild(li);
                 });
                 toggleSectionByList(reactionsContainer, true);
@@ -1985,7 +1946,7 @@ function findSpellById(id) {
             if (lairItems.length) {
                 lairItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${cleanText(item.name)}</strong> — ${highlightSpellsInText(item.description)}`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
                     lairContainer.appendChild(li);
                 });
                 toggleSectionByList(lairContainer, true);

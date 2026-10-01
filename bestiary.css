@@ -1,0 +1,22 @@
+#detailModal .modal-content{width:min(960px,94vw);max-width:960px;padding:28px!important;border-radius:22px!important;background:linear-gradient(145deg,#19212c,#111923)!important;border:1px solid #435267!important;color:#e9eef5}
+#detailModal h2{font-size:25px;color:#f2f5fa;margin:0 0 18px}
+#detailModal #detailImage{max-height:230px;object-fit:contain;margin-bottom:18px!important}
+#detailModal .monster-summary-row{gap:8px;margin:18px 0}
+#detailModal .monster-summary-pill{font-size:14px;background:#101a28;border-color:#3b4c61;padding:9px 12px}
+#detailModal .modal-content>div:has(>strong){margin:12px 0;font-size:13px;line-height:1.7}
+#detailModal .modal-content>div>strong{color:#aebdd0}
+#detailModal hr{border:0;border-top:1px solid #344357;margin:20px 0}
+#detailSpeed,#detailSenses,#detailSaves,#detailSkills{display:inline-flex;gap:6px;flex-wrap:wrap;vertical-align:middle}
+.bestiary-chip{display:inline-block;padding:4px 9px;border:1px solid #364c64;border-radius:7px;background:#15283c;font-size:12px;line-height:1.5;color:#dce9f7}
+.bestiary-empty{color:#99a8b9;font-size:12px}
+.bestiary-data-note{display:block;width:100%;color:#c6b583;font-size:11px}
+.bestiary-section{margin:22px 0;border:1px solid #334459;border-radius:14px;overflow:hidden;background:#14202e}
+#detailModal .bestiary-section>h3{font-size:14px;letter-spacing:.5px;margin:0;padding:12px 16px;background:#1f3043;color:#d2e3f5;border-bottom:1px solid #334459}
+#detailModal .bestiary-section>ul{list-style:none;padding:0;margin:0}
+#detailModal .bestiary-section li{padding:14px 16px;border-bottom:1px solid #2d3c4f;font-size:14px;line-height:1.65}
+#detailModal .bestiary-section li:last-child{border-bottom:0}
+.bestiary-entry-title{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:650;color:#f4dfaa;margin-bottom:5px;font-size:14px}
+.bestiary-entry-body p{margin:4px 0;color:#d5deea}
+.bestiary-cost{font-size:11px;font-weight:500;padding:2px 7px;border-radius:5px;background:#493823;color:#f7dba8}
+#detailLegendary .bestiary-entry-title{color:#dfbefa}
+@media(max-width:600px){#detailModal .modal-content{padding:15px!important;width:95vw}#detailModal h2{font-size:20px}#detailModal .bestiary-section li{padding:11px 12px;font-size:13px}}
