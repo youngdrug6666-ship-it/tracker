@@ -42,7 +42,8 @@ function resolve(source){
  d._trackerProficiencies=bonuses.filter(b=>/^prof\.(weapon|armor|tool)/.test(b.target)).map(b=>({target:b.target,rank:apply(b.target,0)})).filter(b=>b.rank>0);
  const supported=t=>/^prof\.(weapon|armor|tool)/.test(t)||/^stat\.(str|dex|con|int|wis|cha)\.score$/.test(t)||['proficiency','ac','hp.max','speed.walk','initiative','spell.attack','spell.dc'].includes(t)||/^prof\.save\./.test(t)||/^prof\.skill\./.test(t)||/^save\./.test(t)||/^skill\./.test(t)||/^spellSlot\.\d+$/.test(t)||/^weapon\..+\.attack$/.test(t);
  for(const b of bonuses)if((b.expr!=null||b.value!=null)&&!supported(b.target))warnings.push('Бонус не распознан: '+b.target);
- d._trackerAcExtra=d._trackerAcFormula?d.vitality.ac.value-expression(d._trackerAcFormula,variables(d)):0;
+ d._trackerAcExtra=0;
+ if(d._trackerAcFormula){try{d._trackerAcExtra=d.vitality.ac.value-expression(d._trackerAcFormula,variables(d));}catch(e){d._trackerAcFormula=null;}}
  d._trackerWarnings=[...new Set(warnings)];d._trackerLssResolved=1;return d;
 }
 root.LssEngine={expression,resolve,variables};if(typeof module!=='undefined'&&module.exports)module.exports=root.LssEngine;
