@@ -102,11 +102,30 @@
         <details><summary>Заклинания: настройки</summary><label>Характеристика <select class="hero-spell-ability">${Object.entries(abilities).map(([key,label])=>`<option value="${key}" ${key===h.spellAbility?'selected':''}>${label}</option>`).join('')}</select></label><label>Доп. Сл <input class="hero-spell-dc-extra" type="number" value="${h.spellDcExtra}"></label><label>Доп. атака <input class="hero-spell-attack-extra" type="number" value="${h.spellAttackExtra}"></label>${h.swappedSpellFields?'<p>В исходном LSS Сл и атака были переставлены: применены значения по характеристике и владению.</p>':''}</details>
         <details><summary>Предметы с бонусом КД</summary>${h.items.map((item,i)=>`<div class="hero-item"><input class="hero-item-enabled" data-index="${i}" type="checkbox" ${item.enabled?'checked':''} aria-label="Использовать предмет"><input class="hero-item-name" data-index="${i}" value="${esc(item.name)}" aria-label="Название предмета"><input class="hero-item-bonus" data-index="${i}" type="number" value="${num(item.bonus)}" aria-label="Бонус КД"><button class="hero-item-remove" data-index="${i}" aria-label="Удалить предмет">×</button></div>`).join('')}<button class="hero-item-add">+ Предмет с бонусом КД</button><p>Бонусы складываются; применимость предметов определяет мастер.</p></details></details>`;
     }
+    function quick(hero) {
+        return `<div class="hero-quick hero-quick-compact"><button class="hero-inspiration ${hero.inspiration?'equipped':''}" aria-pressed="${!!hero.inspiration}" title="Выдать или потратить вдохновение">✦ Вдохновение</button><button class="hero-shield ${hero.heroControls.shield?'equipped':''}" aria-pressed="${hero.heroControls.shield}" title="Взять или убрать щит">🛡 Щит</button></div>`;
+    }
+    function summaryStats(hero) {
+        return `<div class="hero-stat-summary">${Object.entries(abilities).map(([key,label])=>`<div><span>${label}</span><b>${hero.stats[key].score} (${signed(hero.stats[key].mod)})</b></div>`).join('')}</div>`;
+    }
+    function slots(hero) {
+        return `<section class="hero-modal-section"><h3>Ячейки заклинаний</h3><div class="hero-modal-slots">${Object.entries(hero.spellSlots || {}).map(([key,slot])=>`<div class="hero-modal-slot"><span>${key.startsWith('pact-')?'Договор '+key.slice(5):key+' уровень'}</span><b>${slot.max-(slot.used||0)} / ${slot.max}</b><button class="hero-detail-use-slot" data-level="${esc(key)}" title="Потратить ячейку">−</button><button class="hero-detail-restore-slot" data-level="${esc(key)}" title="Восстановить ячейку">+</button><label>Всего <input class="hero-detail-slot-max" data-level="${esc(key)}" type="number" min="0" value="${slot.max}"></label></div>`).join('') || '<p>Нет ячеек в листе</p>'}</div></section>`;
+    }
+    function details(hero,richText) {
+        let content=panel(hero,richText);
+        content=content.slice(content.indexOf('<details class="hero-sheet"'));
+        content=content.replace(/<details class="hero-sheet"[^>]*><summary>[^<]*<\/summary>/, '<section class="hero-sheet hero-modal-section"><h3>Навыки и снаряжение</h3>');
+        content=content.slice(0,-10)+'</section>';
+        return `<section class="hero-modal-section"><h3>Характеристики</h3>${statInputs(hero)}<div class="hero-options"><label>Скорость <input class="hero-speed" type="number" min="0" value="${num(hero.speed,30)}"> фт</label><span>КД <b>${hero.ac}</b></span><span>Инициатива <b>${signed(hero.initBonus)}</b></span><span>Сл <b>${hero.spellSaveDC}</b> · Атака <b>${signed(hero.spellAttack)}</b></span></div></section>${slots(hero)}${content}`;
+    }
     function bind(card,hero,changed) {
         const h=hero.heroControls;
         const on=(selector,apply,event='change')=>card.querySelectorAll(selector).forEach(el=>el.addEventListener(event,e=>{
             e.stopPropagation();apply(el);recalculate(hero);changed();
         }));
+        on('.hero-detail-use-slot',el=>{const slot=hero.spellSlots[el.dataset.level];slot.used=Math.min(slot.max,(slot.used||0)+1);},'click');
+        on('.hero-detail-restore-slot',el=>{const slot=hero.spellSlots[el.dataset.level];slot.used=Math.max(0,(slot.used||0)-1);},'click');
+        on('.hero-detail-slot-max',el=>{const slot=hero.spellSlots[el.dataset.level];slot.max=Math.max(0,Math.floor(num(el.value)));slot.used=Math.min(slot.max,slot.used||0);});
         on('.hero-score',el=>{const score=Math.max(1,Math.min(30,num(el.value,10)));hero.stats[el.dataset.key].score=score;(hero.heroData.stats ||= {})[el.dataset.key]={...(hero.heroData.stats?.[el.dataset.key]||{}),score};});
         on('.hero-inspiration',()=>hero.inspiration=!hero.inspiration,'click');
         on('.hero-shield',()=>h.shield=!h.shield,'click');
@@ -130,7 +149,7 @@
         card.querySelector('.hero-sheet')?.addEventListener('toggle',e=>{hero.heroPanelOpen=e.target.open;});
         card.addEventListener('dragstart',e=>{if(e.target.closest('input,button,select,summary,table'))e.preventDefault();});
     }
-    const api={ensure,recalculate,statInputs,panel,bind,weaponAttack,weaponDamage};
+    const api={ensure,recalculate,statInputs,panel,quick,summaryStats,slots,details,bind,weaponAttack,weaponDamage};
     root.HeroCard=api;
     if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:window);

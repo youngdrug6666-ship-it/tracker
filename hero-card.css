@@ -21,3 +21,30 @@
 .hero-weapon{margin:7px 0;line-height:1.6;border-bottom:1px solid #425363}
 .hero-weapon>div{display:flex;gap:5px;flex-wrap:wrap}
 .hero-slot-max{width:36px;background:#17283b;color:white;border:1px solid #536d86;border-radius:4px;text-align:center}
+/* Compact combat cards; expanded controls belong to the master sheet. */
+.hero-stat-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:3px;margin:3px 0;background:#0006;border-radius:6px;text-align:center;font-size:10px}
+.hero-stat-summary span{display:block;color:#b7c2d3;font-size:9px}
+.hero-stat-summary b{display:block;font-size:10px;white-space:nowrap}
+.hero-quick-compact{margin:4px 0;gap:5px}
+.hero-quick-compact button{padding:3px 7px;font-size:11px;border-radius:20px;background:#253247b8;border-color:#546276}
+#heroDetailModal .hero-modal-content{width:min(900px,95vw);max-width:900px;max-height:90vh;padding:24px;border-radius:22px;background:linear-gradient(145deg,#172330,#101823);border:1px solid #46586b;color:#e9eef5}
+.hero-modal-header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:0 24px 16px 0;border-bottom:1px solid #38495b}
+.hero-modal-header h2{font-size:26px;margin:6px 0;color:#f7f9fc}
+.hero-modal-header p{font-size:13px;color:#aebfd0;margin:0}
+.hero-modal-eyebrow{color:#8caac6;letter-spacing:2px;font-size:10px}
+.hero-modal-section{margin:16px 0;padding:16px;border:1px solid #33465a;border-radius:14px;background:#15202ce0}
+.hero-modal-section h3{font-size:14px;color:#d9e7f4;margin:0 0 12px}
+.hero-modal-section .hero-stats{gap:10px;background:none;padding:0}
+.hero-modal-section .hero-stats label{font-size:12px}
+.hero-modal-section .hero-stats input{padding:8px;font-size:18px;border-radius:9px;background:#101b28}
+.hero-modal-section .hero-stats b{padding:5px}
+.hero-modal-section .hero-tables{grid-template-columns:1fr 2fr;gap:22px}
+.hero-modal-section .hero-tables table{font-size:13px}
+.hero-modal-section .hero-tables td{padding:7px 4px}
+.hero-modal-section .hero-tables select{font-size:12px;padding:4px}
+.hero-modal-section .hero-options{gap:12px;line-height:1.8}
+.hero-modal-slots{display:flex;flex-wrap:wrap;gap:10px}
+.hero-modal-slot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;background:#101b28;border:1px solid #33465a;border-radius:9px;font-size:13px}
+.hero-modal-slot button{border:1px solid #527393;border-radius:6px;background:#253b52;color:white;width:27px;height:27px;cursor:pointer}
+.hero-modal-slot input{width:42px;background:#152a3e;border:1px solid #527393;border-radius:6px;color:white;padding:4px}
+@media(max-width:600px){#heroDetailModal .hero-modal-content{padding:14px;border-radius:14px}.hero-modal-header{flex-wrap:wrap}.hero-modal-header h2{font-size:21px}.hero-modal-section{padding:10px}.hero-modal-section .hero-tables{grid-template-columns:1fr}.hero-modal-section .hero-stats{gap:4px}.hero-modal-section .hero-stats input{padding:6px 0;font-size:16px}}
