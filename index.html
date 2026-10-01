@@ -762,7 +762,7 @@ a.btn[href="translator.html"]:hover {
 .dice-result-panel{position:relative;width:280px;padding:28px;text-align:center;background:linear-gradient(145deg,#273646,#15212b);border:1px solid #526174;border-radius:22px;box-shadow:0 20px 80px #0008}
 .dice-result-panel>span{font-size:11px;letter-spacing:2px;color:#9caebc}.dice-result-panel h3{color:#dcc18a;font-size:20px}.dice-result-total{font-size:64px;font-weight:800;color:#f3e0b4}.dice-result-panel p{color:#aebcca}.dice-result-close{position:absolute;right:12px;top:10px;background:transparent;border:0;color:#b7c3ce;font-size:26px;cursor:pointer}
 </style>
-<link rel="stylesheet" href="hero-card.css?v=3">
+<link rel="stylesheet" href="hero-card.css?v=4">
 </head>
 <body>
 
@@ -857,7 +857,7 @@ a.btn[href="translator.html"]:hover {
 <script src="bestiary.js?v=6"></script>
 <script src="foundry-data.js?v=3"></script>
 <script src="lss-engine.js?v=2"></script>
-<script src="hero-card.js?v=5"></script>
+<script src="hero-card.js?v=6"></script>
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -962,6 +962,7 @@ async function loadUuidMap() {
         nextId = data.nextId || 1;
         document.getElementById('roundNumberTop').innerText = currentRound;
         renderCombat();
+        saveCurrentStateToSession();
         updateSessionSelect();
     }
     function updateSessionSelect() {

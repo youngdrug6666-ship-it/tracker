@@ -44,9 +44,9 @@
             }
         }
         const d = hero.heroData;
-        if(!hero._spellImportVersion && hero.heroSource && root.LssEngine){
+        if(num(hero._spellImportVersion)<3 && root.LssEngine && (hero.heroSource || d.spellsInfo)){
             try{
-                let source=hero.heroSource.data??hero.heroSource;if(typeof source==='string')source=JSON.parse(source);
+                let source=hero.heroSource?.data??hero.heroSource??d;if(typeof source==='string')source=JSON.parse(source);
                 const resolved=root.LssEngine.resolve(source),ability=root.LssEngine.spellAbility(resolved);
                 const base=num(hero.proficiency??resolved.proficiency,2)+hero.stats[ability].mod;
                 const h=hero.heroControls;
@@ -58,7 +58,7 @@
                 }
                 d._trackerSpellAttack=resolved._trackerSpellAttack;d._trackerSpellDc=resolved._trackerSpellDc;
             }catch(e){}
-            hero._spellImportVersion=2;
+            hero._spellImportVersion=3;
         }
         hero.speed = num(hero.speed ?? d.vitality?.speed,30);
         d.skills ||= {}; d.saves ||= {};
@@ -100,6 +100,16 @@
             hero.heroControls.items=hero._preservedControls.items || [];
             hero.heroControls.shield=hero._preservedControls.shield;
             delete hero._preservedControls;
+        }
+        if(num(hero._weaponImportVersion)<1){
+            for(const w of hero.heroControls.weapons){
+                if(w.ability && (w.attackExtra==null || !Number.isFinite(w.attackExtra) || w.originalMod==null)){
+                    const original=(d.weaponsList||[]).find(raw=>raw.name?.value===w.name);
+                    w.originalMod=hero.stats[w.ability].mod;
+                    w.attackExtra=num(original?.mod,w.originalMod+(w.proficient?hero.heroControls.proficiency:0))-w.originalMod-(w.proficient?hero.heroControls.proficiency:0);
+                }
+            }
+            hero._weaponImportVersion=1;
         }
         recalculate(hero);
         return hero;

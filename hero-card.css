@@ -63,3 +63,14 @@
 .hero-saves td:last-child{color:#f1d39c;font-weight:600}
 @media(max-width:760px){.hero-skills-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.hero-skills-grid{grid-template-columns:1fr}.hero-saves tbody{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Keep scores, labels and modifiers in the same grid cell. */
+#heroDetailModal .hero-stats label{display:grid;grid-template-rows:auto auto auto;justify-items:stretch;min-width:0;gap:4px}
+#heroDetailModal .hero-stats input[type=number]{width:100%;max-width:none;margin:0;box-sizing:border-box}
+#heroDetailModal .hero-stats b{text-align:center;padding:0}
+#heroDetailModal .hero-modal-content{box-sizing:border-box}
+#heroDetailModal .hero-skill-row{grid-template-columns:minmax(0,1fr) 76px 30px}
+#heroDetailModal .hero-skill-row select{width:100%;min-width:0}
+#heroDetailModal .hero-options label{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+#heroDetailModal .hero-saves tr{min-width:0;gap:10px}
+@media(max-width:600px){#heroDetailModal .hero-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
