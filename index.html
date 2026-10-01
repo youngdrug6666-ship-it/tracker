@@ -2129,7 +2129,7 @@ function findSpellById(id) {
         return Bestiary.esc(Bestiary.clean(raw)).replace(/\bminute(s)?\b/gi,'мин.').replace(/\bhour(s)?\b/gi,'ч.').replace(/\bround(s)?\b/gi,'раунд.').replace(/\bday(s)?\b/gi,'дн.').replace(/\byear(s)?\b/gi,'г.').replace(/\bmi\b/gi,'миль').replace(/\bft\b/gi,'футов');
     }
     function renderSpellcasting(raw) {
-        let text=Bestiary.clean(String(raw||'').replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}|@ActorEmbeddedItem\[[^\]]+\]\[[^\]]+\]\{([^}]+)\}/gi,(_,a,b)=>' '+(a||b)+', '),true);
+        let text=Bestiary.clean(String(raw||'').replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}|@ActorEmbeddedItem\[[^\]]+\]\[[^\]]+\]\{([^}]+)\}/gi,(_,a,b)=>' '+(a||b)+' '),true);
         let note='';const noteMatch=text.match(/\*\s*Заклинани[ея][^.]+(?:\.|$)/i);
         if(noteMatch){note=noteMatch[0].replace(/^\*\s*/, '');text=text.slice(0,noteMatch.index);}
         const marker=/(?:Неограниченно|\d+\s*(?:\/\s*день|в\s+день)(?:\s+каждое)?|Фокусы|Заговоры|\d+(?:[-–]?(?:й|ый|ой))?\s+(?:круг|уровень))(?:\s*\([^)]*\))?\s*:/gi;

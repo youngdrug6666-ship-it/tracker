@@ -15,3 +15,5 @@ const embedded=ctx.renderSpellcasting('Неограниченно:@ActorEmbedded
 const plainLevels=ctx.renderSpellcasting('Заговоры: Магическая рука\n1 круг (4 ячейки): Щит\n2 круг (3 ячейки): Паутина');assert.equal((plainLevels.match(/class="spellcasting-row"/g)||[]).length,3);
 const joined=ctx.renderSpellcasting('Неограниченно: НевидимостьПаралич гуманоидаМагический доспехПриворот гуманоида');assert.equal((joined.match(/class="spell-link"/g)||[]).length,4);assert(joined.indexOf('data-level="1"')<joined.indexOf('data-level="2"'));
 assert(ctx.findSpellByName('Сопротивление').spellName.endsWith('/ Resistance'));assert(ctx.findSpellByName('Указание').spellName.endsWith('/ Guidance'));
+
+const qualified=ctx.renderSpellcasting('1/день каждое: @ActorEmbeddedItem[a][b]{Левитация} (только на себя) @ActorEmbeddedItem[a][c]{Фейское сияние}');assert(qualified.indexOf('data-level="1"')<qualified.indexOf('data-level="2"'));assert(qualified.includes('только на себя'));
