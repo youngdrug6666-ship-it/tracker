@@ -10,7 +10,11 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
  const blobs=[];let clicks=0;const original=JSON.stringify([actor,spell,subclass]);
  const panel={style:{},querySelectorAll:()=>[{dataset:{packIndex:'0'}},{dataset:{packIndex:'1'}}],querySelector(selector){return selector==='[data-start]'?this.start??={}:this.cancel??={};},addEventListener(){},showModal(){this.start.onclick();},close(){},remove(){}};
  const context={game:{user:{isGM:true},packs,version:'13',system:{id:'dnd5e',version:'4'}},ui:{notifications:{info(){},warn(){},error(m){throw Error(m)}}},console,TextEncoder,Blob,URL:{createObjectURL:b=>{blobs.push(b);return 'blob:test';},revokeObjectURL(){}},setTimeout(){},document:{body:{appendChild(){}},createElement:t=>t==='dialog'?panel:{click(){clicks++;},remove(){}}}};
- await vm.runInNewContext(fs.readFileSync('tools/foundry-export-tracker.js','utf8'),context);
+ const code=fs.readFileSync('tools/foundry-export-tracker.js','utf8');
+ assert.ok(!/[^\x00-\x7f]/.test(code),'Macro source must be ASCII safe');
+ await vm.runInNewContext(code,context);
+ assert.ok(panel.innerHTML.includes('Полный экспорт для трекера'));
+ assert.ok(panel.innerHTML.includes('Скачать JSON'));
  assert.equal(clicks,1);const payload=JSON.parse(await blobs[0].text());assert.equal(payload.records.length,3);
  assert.deepEqual(payload.records[0].document,actor);assert.deepEqual(payload.records[2].document.system.advancement,subclass.system.advancement);
  assert.equal(payload.coverage.itemsWithActivities,1);assert.equal(payload.coverage.itemsWithLegacyActivation,1);assert.equal(payload.records[0].embeddedUuids.old,'Compendium.test.monsters.a.Item.old');assert.equal(JSON.stringify([actor,spell,subclass]),original);
