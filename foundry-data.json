@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "exportedAt": "2026-10-01T18:58:50.203Z",
+  "system": {
+    "id": "dnd5e",
+    "version": "5.3.3"
+  },
+  "files": [
+    "data/foundry-01.b64",
+    "data/foundry-02.b64",
+    "data/foundry-03.b64",
+    "data/foundry-04.b64",
+    "data/foundry-05.b64",
+    "data/foundry-06.b64",
+    "data/foundry-07.b64",
+    "data/foundry-08.b64",
+    "data/foundry-09.b64",
+    "data/foundry-10.b64",
+    "data/foundry-11.b64",
+    "data/foundry-12.b64",
+    "data/foundry-13.b64",
+    "data/foundry-14.b64",
+    "data/foundry-15.b64",
+    "data/foundry-16.b64",
+    "data/foundry-17.b64",
+    "data/foundry-18.b64",
+    "data/foundry-19.b64",
+    "data/foundry-20.b64",
+    "data/foundry-21.b64"
+  ],
+  "sha256": "25583e15c919938a7d55368a6f2e5e224c5167de68d0ed221dce0a63ce6129f7",
+  "monsters": 3396,
+  "spells": 1125
+}

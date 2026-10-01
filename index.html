@@ -842,7 +842,8 @@ a.btn[href="translator.html"]:hover {
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
 <link rel="stylesheet" href="bestiary.css?v=5">
-<script src="bestiary.js?v=4"></script>
+<script src="bestiary.js?v=5"></script>
+<script src="foundry-data.js?v=1"></script>
 <script src="lss-engine.js?v=1"></script>
 <script src="hero-card.js?v=3"></script>
 <script>
@@ -1505,6 +1506,8 @@ async function loadCustomMonstersTXT() {
             if (!m.languages || m.languages === '—') m.languages = primaryMonstersMap.get(key)?.languages || '';
             fullMonstersMap.set(key,Bestiary.organize(m));
         }
+        const rawData=await FoundryData.load();
+        for(const raw of rawData.monsters){const key=normalizeMonsterName(raw.name);const previous=fullMonstersMap.get(key);if(previous)fullMonstersMap.set(key,Bestiary.organize(FoundryData.applyMonster(previous,raw)));}
         console.log(`Полная база: ${fullMonstersMap.size}`);
     } catch(e) { console.warn('Ошибка загрузки монстров', e); }
 }
@@ -1567,6 +1570,9 @@ async function loadCustomMonstersTXT() {
                 spell.classes=[];spell.subclasses=[];spell.accessKnown=!!meta?.accessKnown;
                 if(meta){spell.classes=meta.classes;spell.subclasses=meta.subclasses;if(meta.components){spell.components.verbal=meta.components.includes('V');spell.components.somatic=meta.components.includes('S');spell.components.material=meta.components.includes('M');}}
             });
+            const rawData=await FoundryData.load();
+            const rawSpells=new Map(rawData.spells.map(sp=>[sp.name+'|'+(sp.source?.book||sp.source?.custom||''),sp]));
+            allSpellsList=allSpellsList.map(sp=>{const raw=rawSpells.get(sp.spellName+'|'+sp.source);return raw?FoundryData.applySpell(sp,raw):sp;});
             console.log(`Загружено заклинаний: ${allSpellsList.length}`);
         } catch(e) { console.warn('spells_full.json не загружен', e); }
     }
@@ -2003,7 +2009,7 @@ function findSpellById(id) {
             }
             if (Array.isArray(full.spells)) {
                 full.spells.forEach(id => {
-                    const spell = findSpellById(id);
+                    const spell = findSpellById(id)||findSpellByName(id);
                     if (spell) spellNameSet.add(spell.spellName);
                 });
             }

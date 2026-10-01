@@ -15,7 +15,7 @@ function clean(value,paragraphs=false){
  if(value==null)return '';let s=String(value);
  for(let i=0;i<3;i++)s=s.replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#0*39;|&apos;/gi,"'").replace(/&nbsp;/gi,' ').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>');
  s=s.replace(/<\/(?:p|div|li|h[1-6])\s*>|<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,'');
- s=s.replace(/(?:&|@)?(?:reference|eference)(?:\[[^\]]*\])?\{([^}]+)\}/gi,'$1');
+ s=s.replace(/(?:&|@)*(?:reference|eference)(?:\[[^\]]*\])?\{([^}]+)\}/gi,'$1');
  s=s.replace(/(?:&|@)reference\[([^\]]+)\]/gi,(_,x)=>({prone:'сбит с ног',frightened:'испуган',difficultterrain:'труднопроходимая местность',heavilyobscured:'сильно заслоняющая местность'}[x.toLowerCase()]||x));
  s=s.replace(/@(?:ActorEmbeddedItem|condition|spell|Item|Actor)\[[^\]]+\]\{([^}]+)\}/gi,'$1');
  s=s.replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}/gi,'$1').replace(/@(?:UUID|Compendium)\[[^\]]+\]/gi,'');
@@ -68,8 +68,8 @@ function applyStructure(m,source){
 }
 function organize(monster){
  const m=structuredClone(monster);
- if(srdKey(m)==='vecna the archlich'){m.senses='Истинное зрение 120 фт., Пассивное восприятие 25';m._sensesUnverified=false;m.skills='Восприятие +15, История +14, Магия +22, Проницательность +15';m.damage_immunities='яд; дробящий, колющий и рубящий от немагических атак';}
- if(srdKey(m)==='strahd von zarovich'){m._regularActionNames=['безоружный удар','укус'];m.senses='Тёмное зрение 120 фт.';m._sensesUnverified=false;m.skills='Восприятие +12, Магия +15, Религия +10, Скрытность +14';m.languages='Общий, Бездны, Великанский, Драконий, Инфернальный, Эльфийский';}
+ if(!m._foundryRaw && srdKey(m)==='vecna the archlich'){m.senses='Истинное зрение 120 фт., Пассивное восприятие 25';m._sensesUnverified=false;m.skills='Восприятие +15, История +14, Магия +22, Проницательность +15';m.damage_immunities='яд; дробящий, колющий и рубящий от немагических атак';}
+ if(!m._foundryRaw && srdKey(m)==='strahd von zarovich'){m._regularActionNames=['безоружный удар','укус'];m.senses='Тёмное зрение 120 фт.';m._sensesUnverified=false;m.skills='Восприятие +12, Магия +15, Религия +10, Скрытность +14';m.languages='Общий, Бездны, Великанский, Драконий, Инфернальный, Эльфийский';}
  const sections=['features','actions','bonus_actions','reactions','legendary_actions','lair_actions','regional_effects'];
  const entries=sections.flatMap(section=>(Array.isArray(m[section])?m[section]:[]).map(item=>({...item,section,name:clean(item.name),_sourceDescription:item._sourceDescription??item.description,_displayDescription:item._displayDescription??item.description,description:clean(item.description,true)})));
  const intro=entries.find(x=>/^легендарные действия$/i.test(x.name));
@@ -85,6 +85,7 @@ function organize(monster){
     for(const key of ['description','_displayDescription'])e[key]=String(e[key]||'').replace(/(используя\s+)(?:Интеллект|Мудрость|Харизму|Харизма|Ловкость|Силу)(\s+в качестве)/i,'$1'+(rule.spellAbility==='cha'?'Харизму':label)+'$2');
    }
   }
+  else if(e._rawSection){section=e.section;}
   else
   if(/^легендарн(?:ая устойчивость|ое сопротивление)/i.test(e.name)){section='features';e.name=e.name.replace(/Легендарная устойчивость/i,'Легендарное сопротивление');}
   else if(/^логово\s*:|^действия логова/i.test(e.name))section='lair_actions';
