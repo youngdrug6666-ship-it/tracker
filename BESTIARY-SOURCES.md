@@ -1,5 +1,7 @@
 Structured movement, senses and proficiency data: https://github.com/5e-bits/5e-database/tree/main/src/2014/en (2014 SRD). Metadata only is used; Russian descriptions remain from the project's existing sources. Match requires English name, challenge rating and all six ability scores. This does not certify every description or custom creature.
 
+Vecna metadata and action sections: https://5e14.dnd.su/bestiary/7943-vecna-the-archlich/
+
 White dragon reference: https://5e14.dnd.su/bestiary/111-ancient-white-dragon/
 
 MIT License

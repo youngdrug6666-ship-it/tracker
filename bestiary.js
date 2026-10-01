@@ -53,7 +53,9 @@ function enrich(m,srd){
  m._regularActionNames=(srd.regularActions||[]).map(n=>norm(actionNames[n]||n));return true;
 }
 function organize(monster){
- const m=structuredClone(monster),sections=['features','actions','bonus_actions','reactions','legendary_actions','lair_actions','regional_effects'];
+ const m=structuredClone(monster);
+ if(srdKey(m)==='vecna the archlich'){m.senses='Истинное зрение 120 фт., Пассивное восприятие 25';m._sensesUnverified=false;m.skills='Восприятие +15, История +14, Магия +22, Проницательность +15';m.damage_immunities='яд; дробящий, колющий и рубящий от немагических атак';}
+ const sections=['features','actions','bonus_actions','reactions','legendary_actions','lair_actions','regional_effects'];
  const entries=sections.flatMap(section=>(Array.isArray(m[section])?m[section]:[]).map(item=>({...item,section,name:clean(item.name),_sourceDescription:item._sourceDescription??item.description,_displayDescription:item._displayDescription??item.description,description:clean(item.description,true)})));
  const intro=entries.find(x=>/^легендарные действия$/i.test(x.name));
  const legendaryText=clean(intro?.description);m.legendaryCount=Number(legendaryText.match(/(?:совершить|совершает|использовать)\s+(\d+)\s+легендарн/i)?.[1])||null;
