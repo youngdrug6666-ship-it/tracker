@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),E=require('../spell-effects'),H=require('../hero-card');globalThis.SpellEffects=E;
+const stats=Object.fromEntries(['str','dex','con','int','wis','cha'].map(k=>[k,{score:k==='dex'?16:10}]));
+const caster={id:1,name:'Маг',stats:structuredClone(stats),conditions:new Set(),spellSlots:{1:{max:2,used:0}},heroData:{},ac:12,proficiency:2};
+const target={id:2,name:'Цель',stats:structuredClone(stats),conditions:new Set(),heroData:{},ac:12,proficiency:2};H.ensure(caster);H.ensure(target);const all=[caster,target];
+const mage={spellName:'Магический доспех / Mage Armor',level:1,duration:'8 hour',concentration:false};assert.throws(()=>E.cast(all,{spell:mage,casterId:1,targetId:2,slotLevel:'1'}));assert.equal(caster.spellSlots[1].used,0);
+const result=E.cast(all,{spell:mage,casterId:1,targetId:2,slotLevel:'1',unarmored:true});H.recalculate(target);assert.equal(target.ac,16);assert.equal(caster.spellSlots[1].used,1);assert(!caster.conditions.has('Концентрация'));target.heroControls.shield=true;H.recalculate(target);assert.equal(target.ac,18);target.stats.dex.score=18;H.recalculate(target);assert.equal(target.ac,19);E.remove(all,result.id);H.recalculate(target);assert.equal(target.ac,14);assert.equal(caster.spellSlots[1].used,1);
+const fly={spellName:'Полёт / Fly',level:3,duration:'10 minute',concentration:true};const first=E.cast(all,{spell:fly,casterId:1,targetId:2});assert(caster.conditions.has('Концентрация'));assert.equal(target.activeSpellEffects.length,1);
+assert.throws(()=>E.cast(all,{spell:fly,casterId:1,targetId:2,slotLevel:'1'}));assert.equal(caster.concentrationEffect,first.id);
+const next=E.cast(all,{spell:fly,casterId:1,targetId:1});assert.equal(target.activeSpellEffects.length,0);assert.equal(caster.activeSpellEffects.length,1);assert.notEqual(next.id,first.id);E.remove(all,next.id);assert(!caster.conditions.has('Концентрация'));
+const restored=JSON.parse(JSON.stringify({...target,activeSpellEffects:[{id:'saved',kind:'mageArmor'}]}));H.ensure(restored);assert.equal(restored.ac,19);E.remove([restored],'saved');H.recalculate(restored);assert.equal(restored.ac,14);
+console.log('PASS mage armor replace/revert, DEX/shield updates, concentration replacement, remote target cleanup, atomic slot validation and persisted effects');

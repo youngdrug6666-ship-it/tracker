@@ -761,6 +761,8 @@ a.btn[href="translator.html"]:hover {
 #diceResultModal{z-index:10000;background:rgba(5,10,16,.65);backdrop-filter:blur(5px)}
 .dice-result-panel{position:relative;width:280px;padding:28px;text-align:center;background:linear-gradient(145deg,#273646,#15212b);border:1px solid #526174;border-radius:22px;box-shadow:0 20px 80px #0008}
 .dice-result-panel>span{font-size:11px;letter-spacing:2px;color:#9caebc}.dice-result-panel h3{color:#dcc18a;font-size:20px}.dice-result-total{font-size:64px;font-weight:800;color:#f3e0b4}.dice-result-panel p{color:#aebcca}.dice-result-close{position:absolute;right:12px;top:10px;background:transparent;border:0;color:#b7c3ce;font-size:26px;cursor:pointer}
+
+.spell-cast-panel{background:#172635;border:1px solid #445b70;border-radius:14px;padding:16px;margin:0 0 18px;color:#e5edf5}.spell-cast-panel h3{margin:0 0 12px;font-size:16px}.spell-cast-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.spell-cast-fields label{display:grid;gap:6px;font-size:12px;color:#afc1d1}.spell-cast-panel select{width:100%;min-width:0;background:#0f1b27;color:#e5edf5;border:1px solid #4c6377;padding:8px;border-radius:8px;color-scheme:dark}.spell-cast-panel p{font-size:12px;color:#aabbcc}.spell-cast-panel button{background:#365875;border:1px solid #668aaa;border-radius:9px;padding:8px 14px;color:white;cursor:pointer}.spell-cast-check{display:block;margin-top:12px;font-size:13px}.spell-cast-check input{accent-color:#c7ad75}.spell-effect-remove{background:#2a3d50;color:#d4e5f2;border:1px solid #577086;border-radius:14px;padding:3px 8px;font-size:11px;cursor:pointer}#spellCastStatus{display:inline-block;margin-left:10px;font-size:12px}@media(max-width:600px){.spell-cast-fields{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -857,11 +859,13 @@ a.btn[href="translator.html"]:hover {
 <script src="bestiary.js?v=6"></script>
 <script src="foundry-data.js?v=3"></script>
 <script src="lss-engine.js?v=2"></script>
-<script src="hero-card.js?v=6"></script>
+<script src="spell-effects.js?v=1"></script>
+<script src="hero-card.js?v=7"></script>
 <script>
    (function(){
     // ========== Глобальные данные ==========
     let combatants = [];
+    let activeHeroDetailsId=null;
     let nextId = 1;
     let currentTurnIndex = 0;
     let currentRound = 1;
@@ -2130,7 +2134,7 @@ function findSpellById(id) {
         return Bestiary.esc(Bestiary.clean(raw)).replace(/\bminute(s)?\b/gi,'мин.').replace(/\bhour(s)?\b/gi,'ч.').replace(/\bround(s)?\b/gi,'раунд.').replace(/\bday(s)?\b/gi,'дн.').replace(/\byear(s)?\b/gi,'г.').replace(/\bmi\b/gi,'миль').replace(/\bft\b/gi,'футов');
     }
     function renderSpellcasting(raw) {
-        let text=Bestiary.clean(String(raw||'').replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}|@ActorEmbeddedItem\[[^\]]+\]\[[^\]]+\]\{([^}]+)\}/gi,(_,a,b)=>' '+(a||b)+' '),true);
+        let text=Bestiary.clean(String(raw||'').replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}|@ActorEmbeddedItem\[[^\]]+\]\[[^\]]+\]\{([^}]+)\}/gi,(_,a,b)=>' '+(a||b)+' '),true).replace(/[\u2010-\u2015\u2212]/g,'-');
         let note='';const noteMatch=text.match(/\*\s*Заклинани[ея][^.]+(?:\.|$)/i);
         if(noteMatch){note=noteMatch[0].replace(/^\*\s*/, '');text=text.slice(0,noteMatch.index);}
         const marker=/(?:Неограниченно|\d+\s*(?:\/\s*день|в\s+день)(?:\s+каждое)?|Фокусы|Заговоры|\d+(?:[-–]?(?:й|ый|ой))?\s+(?:круг|уровень))(?:\s*\([^)]*\))?\s*:/gi;
@@ -2151,6 +2155,20 @@ function findSpellById(id) {
             html+='<div class="spellcasting-row"><strong>'+Bestiary.esc(m[0].replace(/:$/,'').replace(/(\d+)\s*в\s+день/i,'$1/день').replace(/круг/gi,'уровень').replace(/Фокусы/i,'Заговоры'))+'</strong><div>'+parts.join(' ')+'</div></div>';
         });return html+'</div>'+(note?'<p class="spellcasting-note"><strong>*</strong> '+Bestiary.esc(note.replace(/1 круга/i,'1-го уровня'))+'</p>':'');
     }
+    function refreshSpellEffects(){renderCombat();saveCurrentStateToSession();if(document.getElementById('heroDetailModal').style.display==='flex'){const hero=combatants.find(c=>c.id===activeHeroDetailsId);if(hero)showHeroDetails(hero);}}
+    function spellCastControls(spell){
+        if(!combatants.length)return '<div class="spellcasting-note">Добавьте участника в инициативу, чтобы применить заклинание.</div>';
+        const current=combatants[currentTurnIndex]||combatants[0];
+        const options=combatants.map(c=>'<option value="'+c.id+'" '+(c.id===current.id?'selected':'')+'>'+Bestiary.esc(c.name)+'</option>').join('');
+        return `<form id="spellCastForm" class="spell-cast-panel"><h3>Применить заклинание</h3><div class="spell-cast-fields"><label>Кто колдует<select name="caster">${options}</select></label><label>Цель эффекта<select name="target">${options}</select></label><label>Ячейка<select name="slot"></select></label></div>${SpellEffects.isMageArmor(spell)?'<label class="spell-cast-check"><input type="checkbox" name="unarmored"> Цель без доспеха — КД станет 13 + ЛОВ, плюс щит и предметы</label>':''}<p>${spell.concentration?'Новая концентрация завершит предыдущую и снимет её отмеченный эффект.':'Эффект можно завершить кнопкой × на карточке.'} Урон и спасброски разрешает мастер.</p><button type="submit">Применить</button><span id="spellCastStatus" role="status"></span></form>`;
+    }
+    function bindSpellCast(spell){
+        const form=document.getElementById('spellCastForm');if(!form)return;
+        const updateSlots=()=>{const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);form.elements.slot.innerHTML='<option value="">Без расхода ячейки</option>'+Object.entries(caster?.spellSlots||{}).filter(([key,slot])=>Number(spell.level)>0&&Number(key.replace('pact-',''))>=Number(spell.level)&&slot.max-(slot.used||0)>0).map(([key,slot])=>'<option value="'+key+'">'+(key.startsWith('pact-')?'Договор ':'Уровень ')+key.replace('pact-','')+' · '+(slot.max-(slot.used||0))+' осталось</option>').join('');};
+        form.elements.caster.onchange=()=>{form.elements.target.value=form.elements.caster.value;updateSlots();};updateSlots();
+        form.onsubmit=e=>{e.preventDefault();const status=document.getElementById('spellCastStatus');try{SpellEffects.cast(combatants,{spell,casterId:form.elements.caster.value,targetId:form.elements.target.value,slotLevel:form.elements.slot.value||null,unarmored:!!form.elements.unarmored?.checked});const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);addLog(caster,'✨ '+spell.spellName.split(/\s+\/\s+/)[0]);refreshSpellEffects();status.textContent='Применено';updateSlots();}catch(error){status.textContent=error.message;}};
+    }
+    document.addEventListener('click',e=>{const button=e.target.closest('.spell-effect-remove');if(!button)return;SpellEffects.remove(combatants,button.dataset.effect);refreshSpellEffects();});
     function showSpellDetail(spell) {
         document.getElementById('spellDetailName').innerText = spell.spellName.split(/\s+\/\s+/)[0].trim();
         let levelText = spell.level === 0 ? 'Заговор' : `${spell.level} уровень`;
@@ -2188,7 +2206,8 @@ function findSpellById(id) {
             ${spell.subclasses?.length?'<div class="spell-access"><strong>Подклассы</strong>'+spell.subclasses.map(c=>'<span class="bestiary-chip">'+safe(c)+'</span>').join('')+'</div>':''}
             <div class="spell-description">${renderSpellDescription(spell.description)}${spell.higherLevel?'<h4>На больших уровнях</h4>'+renderSpellDescription(spell.higherLevel):''}</div>
             <div class="spell-source">Источник: ${safe(source)}</div>`;
-        document.getElementById('spellDetailContent').innerHTML = html;
+        document.getElementById('spellDetailContent').innerHTML = spellCastControls(spell)+html;
+        bindSpellCast(spell);
         document.querySelectorAll('#spellDetailContent .spell-link').forEach(link => {
             link.onclick = (e) => {
                 e.stopPropagation();
@@ -2345,7 +2364,8 @@ function findSpellById(id) {
             if (c.exhaustion === 0) c.conditions.delete("Истощённый"); 
             else c.conditions.add("Истощённый"); 
         } else { 
-            if(c.conditions.has(cond)) c.conditions.delete(cond); 
+            if(cond==="Концентрация" && c.conditions.has(cond)){SpellEffects.endConcentration(combatants,c);}
+            else if(c.conditions.has(cond)) c.conditions.delete(cond);
             else c.conditions.add(cond); 
         } 
         renderCombat(); 
@@ -2515,6 +2535,7 @@ function findSpellById(id) {
 }
 
     function showHeroDetails(hero) {
+        activeHeroDetailsId=hero.id;
         HeroCard.ensure(hero);
         const content = document.getElementById('heroDetailsContent');
         const openSections = Array.from(content.querySelectorAll('details')).map(section => section.open);
@@ -2588,7 +2609,7 @@ function findSpellById(id) {
                     </div>
                     ${raceClassHtml}${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
-                    <div class="active-conditions">${activeConditionsHtml}</div>
+                    <div class="active-conditions">${activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" title="Завершить эффект">✨ ${escapeHtml(effect.name)} ×</button>`).join('')}</div>
                     <div class="hp-panel">
                         <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}"><i class="fa-solid fa-dice"></i></button>` : ''}</div>
                         <div><span>❤️ </span><input class="hp-input" data-id="${c.id}" value="${c.currentHp}" data-tooltip="Текущие хиты">/<input class="max-hp-input" data-id="${c.id}" value="${c.maxHp}" data-tooltip="Максимум хитов"></div>
@@ -2658,7 +2679,7 @@ function findSpellById(id) {
                     condDiv.appendChild(span);
                 });
                 let reset = document.createElement('div'); reset.className = 'cond-item'; reset.innerText = '❌ Сбросить всё'; reset.style.background = '#562626'; 
-                reset.onclick = () => { c.conditions.clear(); c.exhaustion=0; renderCombat(); saveCurrentStateToSession(); };
+                reset.onclick = () => { SpellEffects.endConcentration(combatants,c); c.conditions.clear(); c.exhaustion=0; renderCombat(); saveCurrentStateToSession(); };
                 condDiv.appendChild(reset);
             }
         });

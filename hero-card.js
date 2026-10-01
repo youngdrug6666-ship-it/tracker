@@ -121,7 +121,7 @@
         hero.proficiency=h.proficiency;
         hero.initBonus=hero.stats.dex.mod+h.initiativeExtra;
         if(h.acFormula && root.LssEngine){try{h.baseAc=root.LssEngine.expression(h.acFormula,root.LssEngine.variables({...hero.heroData,stats:hero.stats,proficiency:h.proficiency}))+h.acExtra;}catch(e){}}
-        hero.ac=h.baseAc+(h.shield?2:0)+h.items.reduce((sum,i)=>sum+(i.enabled?num(i.bonus):0),0);
+        hero.ac=(root.SpellEffects?root.SpellEffects.armorBase(hero,h.baseAc):h.baseAc)+(h.shield?2:0)+h.items.reduce((sum,i)=>sum+(i.enabled?num(i.bonus):0),0);
         const attack=h.proficiency+hero.stats[h.spellAbility].mod;
         hero.spellAttack=attack+h.spellAttackExtra; hero.spellSaveDC=8+attack+h.spellDcExtra;
     }
