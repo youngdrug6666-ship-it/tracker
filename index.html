@@ -749,6 +749,18 @@ a.btn[href="translator.html"]:hover {
     transform: scale(1.005);
 }
 
+
+/* Dark native controls and compact editing */
+#heroDetailModal {color-scheme:dark}
+#heroDetailModal input:not([type=checkbox]),#heroDetailModal select {background:#17232d;color:#e6edf3;border:1px solid #3a4b59;border-radius:9px;padding:6px 8px;min-height:32px;box-sizing:border-box}
+#heroDetailModal input[type=number]{width:66px;appearance:textfield;text-align:center}
+#heroDetailModal input::-webkit-inner-spin-button,#heroDetailModal input::-webkit-outer-spin-button {appearance:none;margin:0}
+#heroDetailModal input[type=checkbox]{accent-color:#d6b875;width:16px;height:16px}
+#heroDetailModal input:focus,#heroDetailModal select:focus{outline:2px solid #c7a86a;outline-offset:1px}
+.spellcasting-row>div{line-height:2}.spellcasting-row .spell-link{display:inline-block;margin:2px 3px;padding:1px 7px;border-radius:7px;background:#293543;border-bottom:1px solid #bca46a;text-decoration:none}
+#diceResultModal{z-index:10000;background:rgba(5,10,16,.65);backdrop-filter:blur(5px)}
+.dice-result-panel{position:relative;width:280px;padding:28px;text-align:center;background:linear-gradient(145deg,#273646,#15212b);border:1px solid #526174;border-radius:22px;box-shadow:0 20px 80px #0008}
+.dice-result-panel>span{font-size:11px;letter-spacing:2px;color:#9caebc}.dice-result-panel h3{color:#dcc18a;font-size:20px}.dice-result-total{font-size:64px;font-weight:800;color:#f3e0b4}.dice-result-panel p{color:#aebcca}.dice-result-close{position:absolute;right:12px;top:10px;background:transparent;border:0;color:#b7c3ce;font-size:26px;cursor:pointer}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=3">
 </head>
@@ -842,10 +854,10 @@ a.btn[href="translator.html"]:hover {
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
 <link rel="stylesheet" href="bestiary.css?v=5">
-<script src="bestiary.js?v=5"></script>
-<script src="foundry-data.js?v=2"></script>
-<script src="lss-engine.js?v=1"></script>
-<script src="hero-card.js?v=3"></script>
+<script src="bestiary.js?v=6"></script>
+<script src="foundry-data.js?v=3"></script>
+<script src="lss-engine.js?v=2"></script>
+<script src="hero-card.js?v=4"></script>
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -1689,11 +1701,13 @@ async function loadCustomMonstersTXT() {
 
     // ========== Поиск заклинания по русскому названию ==========
     function findSpellByName(rusName) {
-        const lower = rusName.toLowerCase();
+        const aliases={'сопротивление':'resistance','указание':'guidance','наставление':'guidance','обнаружение яда и болезней':'detect poison and disease','приворот гуманоида':'charm person','паралич гуманоида':'hold person','полноценный образ':'major image','сила фантазма':'phantasmal force','полиглот':'tongues'};
+        const normalize=n=>String(n||'').toLowerCase().replace(/ё/g,'е').trim();
+        const lower = normalize(rusName), key=globalThis.FoundryData?.aliases?.[lower]||aliases[lower]||lower;
         return allSpellsList.find(s => {
             const fullName = s.spellName.toLowerCase();
             const rusPart = fullName.split(/\s+\/\s+/)[0].trim();
-            return rusPart === lower || fullName === lower;
+            return rusPart === lower || fullName === lower || fullName.split(/\s+\/\s+/).some(n=>normalize(n)===key);
         });
     }
 function resolveUuid(id) {
@@ -1806,7 +1820,11 @@ function findSpellById(id) {
     });
 
         // ========== Детали монстра ==========
-    function showMonsterDetails(monsterName) {
+    const monsterHistory=[];let activeMonsterName=null;
+    function showMonsterDetails(monsterName, back=false) {
+        const dialog=document.getElementById('detailModal');
+        if(!back && dialog.style.display==='flex' && activeMonsterName && activeMonsterName!==monsterName)monsterHistory.push({name:activeMonsterName,scroll:dialog.querySelector('.modal-content')?.scrollTop||0});
+        activeMonsterName=monsterName;
         const full = fullMonstersMap.get(monsterName.toLowerCase());
         if (!full) { alert(`Нет подробных данных для ${monsterName}`); return; }
         document.getElementById('detailName').innerText = full.name || monsterName;
@@ -2111,22 +2129,24 @@ function findSpellById(id) {
         return Bestiary.esc(Bestiary.clean(raw)).replace(/\bminute(s)?\b/gi,'мин.').replace(/\bhour(s)?\b/gi,'ч.').replace(/\bround(s)?\b/gi,'раунд.').replace(/\bday(s)?\b/gi,'дн.').replace(/\byear(s)?\b/gi,'г.').replace(/\bmi\b/gi,'миль').replace(/\bft\b/gi,'футов');
     }
     function renderSpellcasting(raw) {
-        let text=Bestiary.clean(raw,true);
+        let text=Bestiary.clean(String(raw||'').replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}|@ActorEmbeddedItem\[[^\]]+\]\[[^\]]+\]\{([^}]+)\}/gi,(_,a,b)=>' '+(a||b)+', '),true);
         let note='';const noteMatch=text.match(/\*\s*Заклинани[ея][^.]+(?:\.|$)/i);
         if(noteMatch){note=noteMatch[0].replace(/^\*\s*/, '');text=text.slice(0,noteMatch.index);}
-        const marker=/(?:Неограниченно|\d+\s*(?:\/\s*день|в\s+день)(?:\s+каждое)?|Фокусы|Заговоры|\d+-й\s+(?:круг|уровень))(?:\s*\([^)]*\))?\s*:/gi;
+        const marker=/(?:Неограниченно|\d+\s*(?:\/\s*день|в\s+день)(?:\s+каждое)?|Фокусы|Заговоры|\d+(?:[-–]?(?:й|ый|ой))?\s+(?:круг|уровень))(?:\s*\([^)]*\))?\s*:/gi;
         const marks=[...text.matchAll(marker)];
         if(!marks.length)return highlightSpellsInText(raw);
         let html='<p>'+highlightSpellsInText(text.slice(0,marks[0].index))+'</p><div class="spellcasting-rows">';
-        const known=allSpellsList.map(spell=>({spell,name:spell.spellName.split(/\s+\/\s+/)[0].trim()})).sort((a,b)=>b.name.length-a.name.length);
+        const aliases=[...Object.keys(FoundryData.aliases||{}),'Сопротивление','Указание','Наставление','Обнаружение яда и болезней','Приворот гуманоида','Паралич гуманоида','Полноценный образ','Сила фантазма','Полиглот'];
+        const known=[...allSpellsList.map(spell=>({spell,name:spell.spellName.split(/\s+\/\s+/)[0].trim()})),...aliases.map(name=>({name,spell:findSpellByName(name)})).filter(x=>x.spell)].sort((a,b)=>b.name.length-a.name.length);
         marks.forEach((m,i)=>{
             let remaining=text.slice(m.index+m[0].length,marks[i+1]?.index??text.length).trim(),parts=[];
             while(remaining){
                 remaining=remaining.replace(/^[\s,;:.]+/,'');if(!remaining)break;
-                const hit=known.find(x=>remaining.toLowerCase().startsWith(x.name.toLowerCase()) && !/[а-яёa-z]/i.test(remaining[x.name.length]||''));
-                if(hit){const marked=/^\s*\*/.test(remaining.slice(hit.name.length));parts.push('<span class="spell-link" data-spell="'+Bestiary.esc(hit.spell.spellName)+'">'+Bestiary.esc(hit.name)+(marked?'<sup class="spell-footnote-mark">*</sup>':'')+'</span>');remaining=remaining.slice(hit.name.length).replace(/^\s*\*/, '');}
+                const hit=known.find(x=>remaining.toLowerCase().startsWith(x.name.toLowerCase()) && (!/[а-яёa-z]/i.test(remaining[x.name.length]||'') || known.some(next=>remaining.slice(x.name.length).toLowerCase().startsWith(next.name.toLowerCase()))));
+                if(hit){const marked=/^\s*\*/.test(remaining.slice(hit.name.length));parts.push('<span data-level="'+hit.spell.level+'" class="spell-link" data-spell="'+Bestiary.esc(hit.spell.spellName)+'">'+Bestiary.esc(hit.spell.spellName.split(/\s+\/\s+/)[0].trim())+(marked?'<sup class="spell-footnote-mark">*</sup>':'')+'</span>');remaining=remaining.slice(hit.name.length).replace(/^\s*\*/, '');const qualifier=remaining.match(/^\s*\([^)]*\)/);if(qualifier){parts[parts.length-1]+=Bestiary.esc(qualifier[0]);remaining=remaining.slice(qualifier[0].length);}}
                 else {const word=remaining.match(/^\S+/)[0];parts.push(Bestiary.esc(word));remaining=remaining.slice(word.length);}
             }
+            if(parts.every(p=>p.startsWith('<span data-level=')))parts.sort((a,b)=>Number(a.match(/data-level="(\d+)/)[1])-Number(b.match(/data-level="(\d+)/)[1]));
             html+='<div class="spellcasting-row"><strong>'+Bestiary.esc(m[0].replace(/:$/,'').replace(/(\d+)\s*в\s+день/i,'$1/день').replace(/круг/gi,'уровень').replace(/Фокусы/i,'Заговоры'))+'</strong><div>'+parts.join(' ')+'</div></div>';
         });return html+'</div>'+(note?'<p class="spellcasting-note"><strong>*</strong> '+Bestiary.esc(note.replace(/1 круга/i,'1-го уровня'))+'</p>':'');
     }
@@ -2444,8 +2464,8 @@ function findSpellById(id) {
             spellMod = Math.floor((stats[spellAbility].score - 10) / 2);
         }
         
-        const spellSaveDC = Number(data.spellsInfo?.save?.value) || (8 + profBonus + spellMod);
-        const spellAttack = Number(data.spellsInfo?.mod?.value) || (profBonus + spellMod);
+        const spellSaveDC = data._trackerSpellDc ?? (8 + profBonus + spellMod);
+        const spellAttack = data._trackerSpellAttack ?? (profBonus + spellMod);
         
         // Собираем статы для карточки
         const heroStats = { 
@@ -2693,12 +2713,17 @@ function findSpellById(id) {
         const offset = window.innerWidth <= 768 ? 0 : Math.ceil(topBar.getBoundingClientRect().height) + 12;
         document.documentElement.style.setProperty('--top-bar-offset', `${offset}px`);
     }
+    function closeOneModal(modal) {
+        if(modal.id==='detailModal' && monsterHistory.length){const previous=monsterHistory.pop();showMonsterDetails(previous.name,true);const inner=modal.querySelector('.modal-content');if(inner)inner.scrollTop=previous.scroll;return;}
+        modal.style.display='none';if(modal.id==='detailModal'){activeMonsterName=null;monsterHistory.length=0;}
+    }
+    function closeTopModal(){const order=['diceResultModal','spellDetailModal','heroDetailModal','detailModal','allSpellsModal','customModal','helpModal'];const modal=order.map(id=>document.getElementById(id)).find(m=>m && m.style.display!=='none' && m.style.display);if(modal)closeOneModal(modal);}
     function closeAllModals() {
         const modals = ['helpModal', 'detailModal', 'spellDetailModal', 'allSpellsModal', 'heroDetailModal', 'customModal'];
         modals.forEach(id => { const m = document.getElementById(id); if(m) m.style.display = 'none'; });
     }
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeAllModals();
+        if (e.key === 'Escape') closeTopModal();
         if (e.key === 'ArrowRight' && !e.target.matches('input, select, textarea')) { e.preventDefault(); nextTurn(); }
         if (e.key === 'ArrowLeft' && !e.target.matches('input, select, textarea')) { e.preventDefault(); prevTurn(); }
     });
@@ -2709,10 +2734,11 @@ function findSpellById(id) {
             e.stopPropagation();
             const formula = diceLink.getAttribute('data-formula') || '';
             const result = rollDiceFormula(formula);
-            alert(`🎲 ${formula}\nБроски: ${result.details.join(' + ')}\nИтог: ${result.total}`);
+            let modal=document.getElementById('diceResultModal');if(!modal){modal=document.createElement('div');modal.id='diceResultModal';modal.className='modal';modal.innerHTML='<div class="dice-result-panel" role="dialog" aria-label="Результат броска"><button class="dice-result-close" aria-label="Закрыть">×</button><span>БРОСОК КОСТЕЙ</span><h3></h3><div class="dice-result-total"></div><p></p></div>';document.body.append(modal);modal.querySelector('button').onclick=()=>closeOneModal(modal);}
+            modal.querySelector('h3').textContent=formula.replace(/([+-])/g,' $1 ');modal.querySelector('.dice-result-total').textContent=result.total;modal.querySelector('p').textContent=result.details.join(' + ');modal.style.display='flex';
             return;
         }
-        if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+        if (e.target.classList.contains('modal')) closeOneModal(e.target);
         const panel = document.getElementById('bestiaryPanel');;
         const toggleBtn = document.getElementById('toggleBtn');
         if (burgerMenu && !e.target.closest('#burgerMenuBtn') && !e.target.closest('#burgerMenu')) burgerMenu.classList.remove('open');
@@ -2722,7 +2748,7 @@ function findSpellById(id) {
         }
     });
     document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.onclick = function() { this.closest('.modal').style.display = 'none'; };
+        btn.onclick = function() { closeOneModal(this.closest('.modal')); };
     });
     document.getElementById('helpBtn').onclick = () => document.getElementById('helpModal').style.display = 'flex';
     document.getElementById('addCustomMonsterBtn').onclick = () => document.getElementById('customModal').style.display = 'flex';

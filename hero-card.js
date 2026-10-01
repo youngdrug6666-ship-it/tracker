@@ -43,6 +43,20 @@
             }
         }
         const d = hero.heroData;
+        if(!hero._spellImportVersion && hero.heroSource && root.LssEngine){
+            try{
+                let source=hero.heroSource.data??hero.heroSource;if(typeof source==='string')source=JSON.parse(source);
+                const resolved=root.LssEngine.resolve(source),ability=root.LssEngine.spellAbility(resolved);
+                const base=num(hero.proficiency??resolved.proficiency,2)+hero.stats[ability].mod;
+                const h=hero.heroControls;
+                // Preserve deliberate edits; repair only untouched imported offsets.
+                if(h && h.spellAttackExtra===num(d._trackerSpellAttack??hero.spellAttack)-base && h.spellDcExtra===num(d._trackerSpellDc??hero.spellSaveDC)-8-base){
+                    h.spellAbility=ability;h.spellAttackExtra=resolved._trackerSpellAttack-base;h.spellDcExtra=resolved._trackerSpellDc-8-base;
+                }
+                d._trackerSpellAttack=resolved._trackerSpellAttack;d._trackerSpellDc=resolved._trackerSpellDc;
+            }catch(e){}
+            hero._spellImportVersion=2;
+        }
         hero.speed = num(hero.speed ?? d.vitality?.speed,30);
         d.skills ||= {}; d.saves ||= {};
         for (const [key,[label,baseStat]] of Object.entries(skills)) d.skills[key] ||= {label,baseStat,isProf:false};
@@ -52,7 +66,7 @@
             const value = d.spellsInfo?.base;
             const byName = {'мудрость':'wis','харизма':'cha','интеллект':'int'};
             const candidate = String(value?.code || byName[String(value?.value || '').toLowerCase()] || 'cha').toLowerCase();
-            const spellAbility = candidate in abilities ? candidate : 'cha';
+            const spellAbility = root.LssEngine?.spellAbility(d) || (candidate in abilities ? candidate : 'cha');
             const expectedAttack = prof + (hero.stats[spellAbility]?.mod ?? 0);
             let dc = num(d._trackerSpellDc ?? hero.spellSaveDC,8+expectedAttack), attack = num(d._trackerSpellAttack ?? hero.spellAttack,expectedAttack);
             const swapped = dc === expectedAttack && attack === 8+expectedAttack;

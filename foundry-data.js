@@ -9,6 +9,7 @@ async function load(){
   const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
   const data=JSON.parse(await new Response(stream).text());
   const counts=await fetch('foundry-resources.json?v=1').then(r=>r.ok?r.json():{}).catch(()=>({}));
+  api.aliases=await fetch('spell-aliases.json?v=1').then(r=>r.ok?r.json():{}).catch(()=>({}));
   for(const m of data.monsters)m.legendaryResistanceCount=counts[m.name]||0;
   return data;
  })().catch(error=>{console.warn('Foundry data fallback',error);return {monsters:[],spells:[]};});

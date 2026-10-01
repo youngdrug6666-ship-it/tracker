@@ -17,6 +17,7 @@ function expression(input,vars={}){
  const result=add();if(i!==tokens.length||!Number.isFinite(result))throw Error('Неверная формула');return result;
 }
 function variables(data){const v={LVL:number(data.info?.level,1),LEVEL:number(data.info?.level,1),PB:number(data.proficiency,2),PROF:number(data.proficiency,2)};for(const key of keys){v[key.toUpperCase()]=Math.floor((number(data.stats?.[key]?.score,10)-10)/2);v[key.toUpperCase()+'_SCORE']=number(data.stats?.[key]?.score,10);}return v;}
+function spellAbility(data){const base=data.spellsInfo?.base;const aliases={интеллект:'int',мудрость:'wis',харизма:'cha',intelligence:'int',wisdom:'wis',charisma:'cha'};const value=String(base?.code||base?.value||'cha').toLowerCase().trim();return keys.includes(value)?value:aliases[value]||'cha';}
 function resolve(source){
  const d=structuredClone(source);if(d._trackerLssResolved)return d;
  d.stats||={};
@@ -35,7 +36,7 @@ function resolve(source){
  for(const key of keys){const save=d.saves[key]||={};save.isProf=apply('prof.save.'+key,save.isProf?1:0)>0;save.bonus=apply('save.'+key,number(save.bonus));}
  for(const [key,skill] of Object.entries(d.skills)){skill.isProf=apply('prof.skill.'+key,skill.isProf===2?2:skill.isProf?1:0);skill.bonus=apply('skill.'+key,number(skill.bonus));}
  d.spells||={};for(let level=1;level<=9;level++){const key='slots-'+level,slot=d.spells[key]||{},max=apply('spellSlot.'+level,number(slot.value));if(max>0||key in d.spells)d.spells[key]={...slot,value:Math.max(0,max)};}
- const ability=d.spellsInfo?.base?.code||'cha',vars=variables(d),attack=number(d.proficiency,2)+(vars[ability.toUpperCase()]||0);
+ const ability=spellAbility(d),vars=variables(d),attack=number(d.proficiency,2)+(vars[ability.toUpperCase()]||0);
  d._trackerSpellAttack=apply('spell.attack',read(d.spellsInfo?.mod,attack));d._trackerSpellDc=apply('spell.dc',read(d.spellsInfo?.save,8+attack));
  d._trackerInitiative=apply('initiative',read(d.vitality?.initiative??d.initiative,vars.DEX));
  for(const w of d.weaponsList||[]){const abilityMod=vars[String(w.ability||'').toUpperCase()]||0;w.mod={...(w.mod||{}),value:apply('weapon.'+w.id+'.attack',read(w.mod,abilityMod+(w.isProf?number(d.proficiency,2):0)))};}
@@ -46,5 +47,5 @@ function resolve(source){
  if(d._trackerAcFormula){try{d._trackerAcExtra=d.vitality.ac.value-expression(d._trackerAcFormula,variables(d));}catch(e){d._trackerAcFormula=null;}}
  d._trackerWarnings=[...new Set(warnings)];d._trackerLssResolved=1;return d;
 }
-root.LssEngine={expression,resolve,variables};if(typeof module!=='undefined'&&module.exports)module.exports=root.LssEngine;
+root.LssEngine={expression,resolve,variables,spellAbility};if(typeof module!=='undefined'&&module.exports)module.exports=root.LssEngine;
 })(typeof globalThis!=='undefined'?globalThis:window);

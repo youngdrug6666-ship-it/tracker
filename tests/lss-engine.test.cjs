@@ -6,3 +6,5 @@ const h=H.ensure({heroData:r,stats:structuredClone(r.stats),ac:13,maxHp:14,initB
 assert.doesNotThrow(()=>E.resolve({...d,vitality:{ac:{value:'10+[UNKNOWN]'}}}));
 assert.throws(()=>E.expression('globalThis.process.exit()'));assert.throws(()=>E.expression('[UNKNOWN]'));assert.throws(()=>E.expression('1/0'));assert.equal(E.expression('max(10, 8+3)*2'),22);
 console.log('PASS: LSS bonuses, formulas, proficiency, slots, immutable import, dynamic AC and safe expression parser');
+
+for(const value of ['int','Интеллект','Intelligence']){const data={...d,stats:{...d.stats,int:{score:16}},bonuses:[],spellsInfo:{base:{value},mod:{value:''},save:{value:''}}};const r=E.resolve(data);assert.equal(r._trackerSpellAttack,5);assert.equal(r._trackerSpellDc,13);}

@@ -14,9 +14,11 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 function clean(value,paragraphs=false){
  if(value==null)return '';let s=String(value);
  for(let i=0;i<3;i++)s=s.replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#0*39;|&apos;/gi,"'").replace(/&nbsp;/gi,' ').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>');
- s=s.replace(/<\/(?:p|div|li|h[1-6])\s*>|<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,'');
+ s=s.replace(/<\/(?:p|div|li|h[1-6])\s*>|<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,' ');
  s=s.replace(/(?:&|@)*(?:reference|eference)(?:\[[^\]]*\])?\{([^}]+)\}/gi,'$1');
  s=s.replace(/(?:&|@)reference\[([^\]]+)\]/gi,(_,x)=>({prone:'сбит с ног',frightened:'испуган',difficultterrain:'труднопроходимая местность',heavilyobscured:'сильно заслоняющая местность'}[x.toLowerCase()]||x));
+ s=s.replace(/@ActorEmbeddedItem\[[^\]]+\]\[[^\]]+\]\{([^}]+)\}/gi,' $1 ');
+ s=s.replace(/([.!?])(?=[А-ЯЁ])/g,'$1 ').replace(/сотворяетодно/g,'сотворяет одно');
  s=s.replace(/@(?:ActorEmbeddedItem|condition|spell|Item|Actor)\[[^\]]+\]\{([^}]+)\}/gi,'$1');
  s=s.replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}/gi,'$1').replace(/@(?:UUID|Compendium)\[[^\]]+\]/gi,'');
  s=s.replace(/(?:испытание|спасбросок)?\s*\[\[\/save\s+([^\]]+)\]\](?:\{([^}]*)\})?/gi,(_,args,label)=>{const ability=args.match(/(?:ability=)?(strength|dexterity|constitution|intelligence|wisdom|charisma|str|dex|con|int|wis|cha)/i)?.[1]?.toLowerCase();const dc=Number(args.match(/dc=(\d+)/i)?.[1]||args.match(/\s(\d+)/)?.[1]||0)||Number(label?.match(/(?:Сл|DC)\s*(\d+)/i)?.[1]||0);return ' спасбросок '+(saveNames[ability]||label||'характеристики')+(dc>0?' Сл '+dc:'');});
@@ -36,6 +38,7 @@ function clean(value,paragraphs=false){
  const mechanical={acid:'кислота',bludgeoning:'дробящий',cold:'холод',fire:'огонь',force:'силовой',lightning:'электричество',necrotic:'некротический',piercing:'колющий',poison:'яд',psychic:'психический',radiant:'излучение',slashing:'рубящий',thunder:'звук',blinded:'ослеплённый',charmed:'очарованный',deafened:'оглохший',exhaustion:'истощение',frightened:'испуганный',grappled:'схваченный',incapacitated:'недееспособный',invisible:'невидимый',paralyzed:'парализованный',petrified:'окаменевший',poisoned:'отравленный',prone:'сбит с ног',restrained:'опутанный',stunned:'ошеломлённый',unconscious:'бессознательный',nonmagical:'немагический',magical:'магический',unarmed:'безоружный',melee:'ближний бой',ranged:'дальний бой'};
  s=s.replace(/\b(acid|bludgeoning|cold|fire|force|lightning|necrotic|piercing|poison|psychic|radiant|slashing|thunder|blinded|charmed|deafened|exhaustion|frightened|grappled|incapacitated|invisible|paralyzed|petrified|poisoned|prone|restrained|stunned|unconscious|nonmagical|magical|unarmed|melee|ranged)\b/gi,x=>mechanical[x.toLowerCase()]);
 
+ s=s.replace(/\s+([,.;!?])/g,'$1');
  return (paragraphs?s.replace(/[^\S\n]+/g,' ').replace(/\n\s*\n+/g,'\n').trim():s.replace(/\s+/g,' ').trim());
 }
 const norm=s=>clean(s).toLowerCase().replace(/ё/g,'е').replace(/\s*\([^)]*\)/g,'').trim();
@@ -115,8 +118,8 @@ function organize(monster){
  return m;
 }
 function renderText(raw,options={}){
- const tokens=[];const protect=html=>{const marker='ZZBESTIARYTOKEN'+tokens.length+'ZZ';tokens.push(html);return marker;};
- let text=String(raw||'');
+ const tokens=[];const protect=html=>{const marker='ZZBESTIARYTOKEN'+tokens.length+'ZZ';tokens.push(html);return ' '+marker+' ';};
+ let text=String(raw||'').replace(/@ActorEmbeddedItem\[[^\]]+\]\[([^\]]+)\]\{([^}]+)\}/gi,' @UUID[$1]{$2} ').replace(/\}\s*(?=@(?:UUID|Compendium)\[)/g,'} ');
  text=text.replace(/@(?:UUID|Compendium)\[([^\]]+)\](?:\{([^}]+)\})?/gi,(all,id,label)=>{
   const name=label||options.resolveUuid?.(id)||'';
   const monster=/actors|monsters|bestiary/i.test(id)?options.findMonster?.(id,name):null;
