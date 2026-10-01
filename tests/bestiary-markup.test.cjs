@@ -1,6 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),B=require('../bestiary');
 const opts={resolveUuid:id=>id.endsWith('spell-id')?'Полёт':null,findSpell:(id,name)=>name==='Полёт'?{spellName:'Полёт / Fly'}:null};
 assert.equal(B.clean('испытание [[/save constitution 22]]{Телосложения со СЛ 22}'),'спасбросок Телосложения Сл 22');assert.equal(B.clean('[[/r 1d20+13]]{+13}'),' +13'.trim());assert.equal(B.clean('[[/r 1d20+13]] (+13)'),'+13');
+assert.equal(B.clean('[[/save ability=constitution dc=17]]'),'спасбросок Телосложения Сл 17');assert.equal(B.clean('[[/attack extended]]{+13}'),'+13');
 const saved=B.renderText('испытание [[/save constitution 22]]{Телосложения со СЛ 22}');assert.match(saved,/class="bestiary-save"/);assert.doesNotMatch(saved,/\[\[|\{|constitution/);
 assert.doesNotMatch(B.renderText('Тень вызывает поток. Выйдет новая тень.',opts),/spell-link/);assert.match(B.renderText('@UUID[.spell-id]',opts),/spell-link/);assert.doesNotMatch(B.renderText('@UUID[Compendium.actors.spell-id]{Тень}',opts),/spell-link/);
 const attack=B.renderText('[[/r 1d20+13]]{+13} к броску');assert.match(attack,/data-formula="1d20\+13">\+13/);assert.doesNotMatch(attack,/\{\+13\}/);

@@ -19,7 +19,8 @@ function clean(value,paragraphs=false){
  s=s.replace(/(?:&|@)reference\[([^\]]+)\]/gi,(_,x)=>({prone:'сбит с ног',frightened:'испуган',difficultterrain:'труднопроходимая местность',heavilyobscured:'сильно заслоняющая местность'}[x.toLowerCase()]||x));
  s=s.replace(/@(?:ActorEmbeddedItem|condition|spell|Item|Actor)\[[^\]]+\]\{([^}]+)\}/gi,'$1');
  s=s.replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}/gi,'$1').replace(/@(?:UUID|Compendium)\[[^\]]+\]/gi,'');
- s=s.replace(/(?:испытание|спасбросок)?\s*\[\[\/save\s+([a-z]+)\s+(?:dc=)?(\d+)[^\]]*\]\](?:\{[^}]*\})?/gi,(_,ability,dc)=>' спасбросок '+(saveNames[ability.toLowerCase()]||ability)+' Сл '+dc);
+ s=s.replace(/(?:испытание|спасбросок)?\s*\[\[\/save\s+([^\]]+)\]\](?:\{([^}]*)\})?/gi,(_,args,label)=>{const ability=args.match(/(?:ability=)?(strength|dexterity|constitution|intelligence|wisdom|charisma|str|dex|con|int|wis|cha)/i)?.[1]?.toLowerCase();const dc=Number(args.match(/dc=(\d+)/i)?.[1]||args.match(/\s(\d+)/)?.[1]||0)||Number(label?.match(/(?:Сл|DC)\s*(\d+)/i)?.[1]||0);return ' спасбросок '+(saveNames[ability]||label||'характеристики')+(dc>0?' Сл '+dc:'');});
+ s=s.replace(/\[\[\/check\s+([^\]]+)\]\](?:\{([^}]*)\})?/gi,(_,args,label)=>{if(label)return label;const ability=args.match(/(?:ability=)?([a-z]+)/i)?.[1]?.toLowerCase(),dc=Number(args.match(/(?:dc=|\s)(\d+)/)?.[1]||0);return 'проверка '+(saveNames[ability]||'характеристики')+(dc>0?' Сл '+dc:'');});
  s=s.replace(/\[\[\/(?:r|roll|attack)\s+([^\]]+)\]\]\{([^}]+)\}/gi,'$2');
  s=s.replace(/\(\[\[\/damage\s+([^\]]+)\]\]\)\s+урона/gi,(_,v)=>{const type=v.match(/type=([a-z]+)/i)?.[1],formula=v.replace(/\s+type=\S+/g,'');return '('+formula+') урона'+(type?' ('+(damageNames[type]||type)+')':'');});
  s=s.replace(/\[\[\/(?:r|roll)\s+1d20\s*([+-]\s*\d+)\s*\]\]\s*\(\s*([+-]\d+)\s*\)/gi,(_,bonus,label)=>label);
@@ -29,6 +30,9 @@ function clean(value,paragraphs=false){
  s=s.replace(/\b(?:STR|DEX|CON|INT|WIS|CHA)\b/gi,x=>abilityLabels[x.toLowerCase()]);
  s=s.replace(/\b(?:walk|fly|swim|burrow|climb|blindsight|darkvision|tremorsense|truesight|hover)\b/gi,x=>modes[x.toLowerCase()]||senses[x.toLowerCase()]||(x.toLowerCase()==='hover'?'парение':x));
  s=s.replace(/\bft\.?/gi,'фт.').replace(/Аркана/g,'Магия').replace(/Расследование/g,'Анализ').replace(/Внимание/g,'Восприятие').replace(/Выносливость/g,'Телосложение').replace(/Выносливости/g,'Телосложения').replace(/Испытание\s*/g,'');
+ s=s.replace(/\[\[\/(?:attack|skill|item|br)\s+([^\]]+)\]\](?:\{([^}]*)\})?/gi,(match,args,label)=>label||(/\[\[\/attack/i.test(match)?'бросок атаки':args.replace(/extended/gi,'')));
+ s=s.replace(/\[\[[^\]]+\]\]\{([^}]+)\}/g,'$1');
+ s=s.replace(/\[\[[^\]]+\]\]/g,'[значение требует расчёта]');
  return (paragraphs?s.replace(/[^\S\n]+/g,' ').replace(/\n\s*\n+/g,'\n').trim():s.replace(/\s+/g,' ').trim());
 }
 const norm=s=>clean(s).toLowerCase().replace(/ё/g,'е').replace(/\s*\([^)]*\)/g,'').trim();
