@@ -1221,6 +1221,17 @@ function getFolderPlainName(type) {
         }
         return merged;
     }
+    // Empty exports must not erase defenses from the primary bestiary.
+    function mergeMonsterDefenses(primary = {}, exported = {}) {
+        const defenses = {};
+        for (const key of ['damage_resistances', 'damage_immunities', 'condition_immunities']) {
+            const value = exported[key];
+            const text = Array.isArray(value) ? value.join(', ') : String(value ?? '');
+            defenses[key] = text.trim() && !/^[—–-]+$/.test(text.trim())
+                ? value : (primary[key] ?? '');
+        }
+        return defenses;
+    }
     function parseFractionToNumber(value) {
         const str = String(value ?? '').trim();
         if (!str) return null;
@@ -1348,6 +1359,16 @@ function getFolderPlainName(type) {
         const speedMatch = line.match(/^скорость\s+(.+)$/i);
         if (speedMatch) { monster.speed = deepClean(speedMatch[1]); continue; }
         
+        const defenseMatch = line.match(/^(сопротивлени(?:е|я) урону|иммунитет(?:ы)? к урону|иммунитет(?:ы)? к состояни(?:ю|ям))\s+(.+)$/i);
+        if (defenseMatch) {
+            const label = defenseMatch[1].toLowerCase();
+            const key = label.startsWith('сопротивлен') ? 'damage_resistances'
+                : label.endsWith('урону') ? 'damage_immunities' : 'condition_immunities';
+            // Question marks in this export are tooltip markers, not rule text.
+            if (!(key in monster)) monster[key] = deepClean(defenseMatch[2]).replace(/\?/g, '');
+            continue;
+        }
+
         const profMatch = line.match(/^бонус мастерства\s*\+?\s*(\d+)/i);
         if (profMatch) { monster.profBonus = Number(profMatch[1]); continue; }
         
@@ -1434,6 +1455,7 @@ async function loadCustomMonstersTXT() {
             const baseDescription = fromExport.description || primary.description || '';
             const composed = {
                 ...fromExport,
+                ...mergeMonsterDefenses(primary, fromExport),
                 name: primary.name || fromExport.name,
                 image: primary.image || fromExport.image || null,
                 description: baseDescription
