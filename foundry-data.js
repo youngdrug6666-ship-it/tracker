@@ -7,13 +7,18 @@ async function load(){
   const pieces=await Promise.all(manifest.files.map(p=>fetch(p+'?v='+manifest.version).then(r=>{if(!r.ok)throw Error('Missing Foundry data part');return r.text();})));
   const bytes=Uint8Array.from(atob(pieces.join('')),c=>c.charCodeAt(0));
   const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-  return JSON.parse(await new Response(stream).text());
+  const data=JSON.parse(await new Response(stream).text());
+  const counts=await fetch('foundry-resources.json?v=1').then(r=>r.ok?r.json():{}).catch(()=>({}));
+  for(const m of data.monsters)m.legendaryResistanceCount=counts[m.name]||0;
+  return data;
  })().catch(error=>{console.warn('Foundry data fallback',error);return {monsters:[],spells:[]};});
  return loading;
 }
 function applyMonster(base,raw){
  const m={...base,...raw,image:base.image||null,description:base.description||''};
  if(raw.ac!==undefined && !(Number(raw.ac)>0))m.ac=base.ac;
+ if(Number.isFinite(raw.passivePerception) && !/Пассивное восприятие/i.test(m.senses||''))m.senses=(m.senses?m.senses+', ':'')+'Пассивное восприятие '+raw.passivePerception;
+ if(raw.legendaryResistanceCount>0)m.features=(m.features||[]).map(i=>/^легендарн(?:ая устойчивость|ое сопротивление)/i.test(i.name)&&!/(?:день|day)/i.test(i.name)?{...i,name:i.name+' ('+raw.legendaryResistanceCount+'/день)'}:i);
  // Previous guessed sections must not overwrite explicit raw/source sections.
  delete m._sectionRules;delete m._sourceLegendaryCount;delete m._regularActionNames;
  m._sourceLegendaryCount=raw.legendaryCount;

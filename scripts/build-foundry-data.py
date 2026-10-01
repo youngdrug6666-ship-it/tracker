@@ -118,6 +118,9 @@ for r in records:
   if rule and rule.get('creatures'):entry['creatureRefs']=rule['creatures']
   m[section].append(entry)
  output.append(m)
+# Preserve resistance budgets separately from descriptions.
+resistance_counts={r['document']['name']:r['document']['system'].get('resources',{}).get('legres',{}).get('max',0) for r in records if r['kind']=='actor' and r['document']['system'].get('resources',{}).get('legres',{}).get('max',0)}
+(root/'foundry-resources.json').write_text(json.dumps(resistance_counts,ensure_ascii=False,separators=(',',':')))
 # Parameters come from spells, not inherited activity defaults (self/inst).
 spellout=[]
 for r in records:
