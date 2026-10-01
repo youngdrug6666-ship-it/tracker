@@ -940,7 +940,7 @@ async function loadUuidMap() {
     let currentSessionId = "default";
     function saveCurrentStateToSession() {
         if (!sessions[currentSessionId]) sessions[currentSessionId] = { name: currentSessionId, combatants: [], currentTurnIndex: 0, currentRound: 1, nextId: 1 };
-        sessions[currentSessionId].combatants = JSON.parse(JSON.stringify(combatants));
+        sessions[currentSessionId].combatants = JSON.parse(JSON.stringify(combatants, (_, value) => value instanceof Set ? {__type:"Set",values:[...value]} : value));
         sessions[currentSessionId].currentTurnIndex = currentTurnIndex;
         sessions[currentSessionId].currentRound = currentRound;
         sessions[currentSessionId].nextId = nextId;
