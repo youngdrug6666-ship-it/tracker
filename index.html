@@ -750,7 +750,7 @@ a.btn[href="translator.html"]:hover {
 }
 
 </style>
-<link rel="stylesheet" href="hero-card.css?v=2">
+<link rel="stylesheet" href="hero-card.css?v=3">
 </head>
 <body>
 
@@ -841,7 +841,8 @@ a.btn[href="translator.html"]:hover {
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
-<script src="hero-card.js?v=2"></script>
+<script src="lss-engine.js?v=1"></script>
+<script src="hero-card.js?v=3"></script>
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -2395,6 +2396,7 @@ function findSpellById(id) {
         const source = data;
         if (data.data) data = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
         if (!data?.stats || !data?.vitality || !data?.name) throw new Error('Ожидается JSON персонажа Long Story Short');
+        data = LssEngine.resolve(data);
         
         const name = data.name?.value || "Импортный герой";
         let ac = lssNumber(data.vitality?.ac, 14);
@@ -2458,7 +2460,7 @@ function findSpellById(id) {
             tempHp: lssNumber(data.vitality?.["hp-temp"], 0),
             speed: lssNumber(data.vitality?.speed, null),
             hpFormula: "5d8+10", 
-            initBonus: dexMod, 
+            initBonus: data._trackerInitiative ?? dexMod, 
             initiative: 0, 
             conditions: new Set(data.vitality?.isDying ? ['Бессознательный'] : []),
             exhaustion: 0, 

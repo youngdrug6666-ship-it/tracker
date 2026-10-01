@@ -48,3 +48,18 @@
 .hero-modal-slot button{border:1px solid #527393;border-radius:6px;background:#253b52;color:white;width:27px;height:27px;cursor:pointer}
 .hero-modal-slot input{width:42px;background:#152a3e;border:1px solid #527393;border-radius:6px;color:white;padding:4px}
 @media(max-width:600px){#heroDetailModal .hero-modal-content{padding:14px;border-radius:14px}.hero-modal-header{flex-wrap:wrap}.hero-modal-header h2{font-size:21px}.hero-modal-section{padding:10px}.hero-modal-section .hero-tables{grid-template-columns:1fr}.hero-modal-section .hero-stats{gap:4px}.hero-modal-section .hero-stats input{padding:6px 0;font-size:16px}}
+
+.hero-skills-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.hero-skill-group{min-width:0;padding:12px;background:#101b28;border:1px solid #33465a;border-radius:12px}
+.hero-skill-group h4{display:flex;justify-content:space-between;margin:0 0 8px;color:#9fbdd9;font-size:12px;letter-spacing:1px}
+.hero-skill-row{display:grid;grid-template-columns:minmax(0,1fr) 62px 26px;gap:5px;align-items:center;min-height:34px;border-top:1px solid #26384a;font-size:12px}
+.hero-skill-row b{text-align:right;color:#f1d39c;font-variant-numeric:tabular-nums}
+.hero-skill-row select{width:62px;padding:4px;border-radius:6px}
+.hero-skills-title{margin:18px 0 10px;font-size:14px;color:#d9e7f4}
+.hero-saves table{width:100%;border-collapse:collapse;font-size:13px}
+.hero-saves caption{text-align:left;padding:8px 0;font-weight:600;color:#d9e7f4}
+.hero-saves tbody{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hero-saves tr{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#101b28;border:1px solid #33465a;border-radius:9px}
+.hero-saves td:last-child{color:#f1d39c;font-weight:600}
+@media(max-width:760px){.hero-skills-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.hero-skills-grid{grid-template-columns:1fr}.hero-saves tbody{grid-template-columns:repeat(2,minmax(0,1fr))}}

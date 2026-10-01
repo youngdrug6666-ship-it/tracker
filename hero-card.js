@@ -24,7 +24,26 @@
             hero.stats[key] ||= {score:10};
             hero.stats[key].mod = mod(num(hero.stats[key].score,10));
         }
+        if (!hero.heroData._trackerLssResolved && hero.heroData.bonuses?.length) {
+            const engine = root.LssEngine || (typeof require==='function' ? require('./lss-engine.js') : null);
+            if (engine) {
+                const raw = hero.heroData;
+                const resolved = engine.resolve(raw);
+                hero.stats = structuredClone(resolved.stats);
+                hero.heroData = resolved;
+                hero.ac = num(resolved.vitality.ac,10) + (resolved.vitality.shield?.value ? 2 : 0);
+                hero.maxHp = num(resolved.vitality['hp-max'],hero.maxHp);
+                hero.speed = num(resolved.vitality.speed,30);
+                hero.initBonus = resolved._trackerInitiative;
+                hero.spellAttack = resolved._trackerSpellAttack;
+                hero.spellSaveDC = resolved._trackerSpellDc;
+                const previous = hero.heroControls;
+                delete hero.heroControls;
+                hero._preservedControls = previous;
+            }
+        }
         const d = hero.heroData;
+        hero.speed = num(hero.speed ?? d.vitality?.speed,30);
         d.skills ||= {}; d.saves ||= {};
         for (const [key,[label,baseStat]] of Object.entries(skills)) d.skills[key] ||= {label,baseStat,isProf:false};
         for (const key of Object.keys(abilities)) d.saves[key] ||= {isProf:false};
@@ -35,11 +54,11 @@
             const candidate = String(value?.code || byName[String(value?.value || '').toLowerCase()] || 'cha').toLowerCase();
             const spellAbility = candidate in abilities ? candidate : 'cha';
             const expectedAttack = prof + (hero.stats[spellAbility]?.mod ?? 0);
-            let dc = num(hero.spellSaveDC,8+expectedAttack), attack = num(hero.spellAttack,expectedAttack);
+            let dc = num(d._trackerSpellDc ?? hero.spellSaveDC,8+expectedAttack), attack = num(d._trackerSpellAttack ?? hero.spellAttack,expectedAttack);
             const swapped = dc === expectedAttack && attack === 8+expectedAttack;
             if (swapped) [dc,attack] = [attack,dc];
             hero.heroControls = {
-                baseAc:num(hero.ac,10) - (d.vitality?.shield?.value === true ? 2 : 0),
+                acFormula:d._trackerAcFormula, acExtra:num(d._trackerAcExtra), baseAc:num(hero.ac,10) - (d.vitality?.shield?.value === true ? 2 : 0),
                 shield:d.vitality?.shield?.value === true, items:[], proficiency:prof, saveBonus:0,
                 spellAbility, spellDcExtra:dc-8-expectedAttack, spellAttackExtra:attack-expectedAttack,
                 initiativeExtra:num(hero.initBonus)-hero.stats.dex.mod, swappedSpellFields:swapped,
@@ -48,7 +67,7 @@
                     const originalMod = ability ? hero.stats[ability].mod : 0;
                     const trained = w.isProf === true || w.isProf === 1;
                     return {name:w.name.value, ability, proficient:trained,
-                        attackExtra:num(w.mod)-originalMod-(trained?prof:0),
+                        attackExtra:num(w.mod,originalMod+(trained?prof:0))-originalMod-(trained?prof:0),
                         damage:String(w.dmg?.value || ''), originalMod};
                 })
             };
@@ -56,9 +75,14 @@
             for (const [prefix,source] of [['',d.spells],['pact-',d.spellsPact]]) {
                 for (const [key,v] of Object.entries(source || {})) if (/^slots-\d+$/.test(key)) {
                     const level=key.slice(6), max=Math.max(0,num(v));
-                    if (max && !hero.spellSlots[prefix+level]) hero.spellSlots[prefix+level]={max,used:0};
+                    if (max && !hero.spellSlots[prefix+level]) hero.spellSlots[prefix+level]={max,used:Math.min(max,Math.max(0,num(v.filled)))};
                 }
             }
+        }
+        if (hero._preservedControls) {
+            hero.heroControls.items=hero._preservedControls.items || [];
+            hero.heroControls.shield=hero._preservedControls.shield;
+            delete hero._preservedControls;
         }
         recalculate(hero);
         return hero;
@@ -69,6 +93,7 @@
         for (const key of Object.keys(abilities)) hero.stats[key].mod=mod(num(hero.stats[key].score,10));
         hero.proficiency=h.proficiency;
         hero.initBonus=hero.stats.dex.mod+h.initiativeExtra;
+        if(h.acFormula && root.LssEngine){try{h.baseAc=root.LssEngine.expression(h.acFormula,root.LssEngine.variables({...hero.heroData,stats:hero.stats,proficiency:h.proficiency}))+h.acExtra;}catch(e){}}
         hero.ac=h.baseAc+(h.shield?2:0)+h.items.reduce((sum,i)=>sum+(i.enabled?num(i.bonus):0),0);
         const attack=h.proficiency+hero.stats[h.spellAbility].mod;
         hero.spellAttack=attack+h.spellAttackExtra; hero.spellSaveDC=8+attack+h.spellDcExtra;
@@ -86,18 +111,17 @@
     }
     function panel(hero,richText) {
         const h=hero.heroControls,d=hero.heroData;
-        const saves=Object.entries(abilities).map(([key,label])=>`<tr><td>${label}</td><td><input class="hero-save-prof" data-key="${key}" type="checkbox" ${d.saves[key].isProf?'checked':''} aria-label="Владение спасброском ${label}"></td><td>${signed(hero.stats[key].mod+(d.saves[key].isProf?hero.proficiency:0)+num(h.saveBonus))}</td></tr>`).join('');
-        const skillRows=Object.entries(d.skills).map(([key,v])=>{
-            const base=v.baseStat in abilities?v.baseStat:(skills[key]?.[1]||'wis');
+        const saves=Object.entries(abilities).map(([key,label])=>`<tr><td>${label}</td><td><input class="hero-save-prof" data-key="${key}" type="checkbox" ${d.saves[key].isProf?'checked':''} aria-label="Владение спасброском ${label}"></td><td>${signed(hero.stats[key].mod+(d.saves[key].isProf?hero.proficiency:0)+num(h.saveBonus)+num(d.saves[key].bonus))}</td></tr>`).join('');
+        const skillRows=Object.entries(abilities).map(([ability,label])=>`<section class="hero-skill-group"><h4>${label} <span>${signed(hero.stats[ability].mod)}</span></h4>${Object.entries(d.skills).filter(([key,v])=>(v.baseStat || skills[key]?.[1])===ability).map(([key,v])=>{
             const rank=v.isProf===2?2:v.isProf?1:0;
-            return `<tr><td>${esc(v.label||skills[key]?.[0]||key)}</td><td><select class="hero-skill-prof" data-key="${esc(key)}" aria-label="Владение ${esc(v.label||key)}">${['—','Влад.','Комп.'].map((label,i)=>`<option value="${i}" ${rank===i?'selected':''}>${label}</option>`).join('')}</select></td><td>${signed(hero.stats[base].mod+rank*hero.proficiency)}</td></tr>`;
-        }).join('');
+            return `<div class="hero-skill-row"><span>${esc(v.label||skills[key]?.[0]||key)}</span><select class="hero-skill-prof" data-key="${esc(key)}" aria-label="Владение ${esc(v.label||key)}">${['—','Влад.','Комп.'].map((label,i)=>`<option value="${i}" ${rank===i?'selected':''}>${label}</option>`).join('')}</select><b>${signed(hero.stats[ability].mod+rank*hero.proficiency+num(v.bonus))}</b></div>`;
+        }).join('')}</section>`).join('');
         const weapons=h.weapons.map((w,i)=>`<div class="hero-weapon"><b>${esc(w.name)}</b> ${signed(weaponAttack(hero,w))} · ${esc(weaponDamage(hero,w))}<div><select class="hero-weapon-ability" data-index="${i}" aria-label="Характеристика оружия"><option value="">Ручной бонус</option>${Object.entries(abilities).map(([key,label])=>`<option value="${key}" ${w.ability===key?'selected':''}>${label}</option>`).join('')}</select><label><input class="hero-weapon-prof" data-index="${i}" type="checkbox" ${w.proficient?'checked':''}> Владение</label><label>Доп. атака <input class="hero-weapon-extra" data-index="${i}" type="number" value="${w.attackExtra}"></label></div></div>`).join('');
         return `<div class="hero-quick"><button class="hero-inspiration ${hero.inspiration?'equipped':''}" aria-pressed="${!!hero.inspiration}">✦ Вдохновение ${hero.inspiration?'выдано':'нет'}</button><button class="hero-shield ${h.shield?'equipped':''}" aria-pressed="${h.shield}">🛡 Щит ${h.shield?'в руках':'убран'} (+2)</button><label>Скорость <input class="hero-speed" type="number" min="0" value="${num(hero.speed,30)}"> фт</label></div>
         <details class="hero-sheet" ${hero.heroPanelOpen?'open':''}><summary>Навыки, спасброски и снаряжение</summary>
         <div class="hero-options"><label>Бонус владения <input class="hero-proficiency" type="number" min="0" max="12" value="${hero.proficiency}"></label><label>Доп. ко всем спасброскам <input class="hero-save-bonus" type="number" value="${num(h.saveBonus)}"></label><label>КД без щита и предметов <input class="hero-base-ac" type="number" value="${h.baseAc}"></label></div>
-        <div class="hero-tables"><table><caption>Спасброски</caption><tbody>${saves}</tbody></table><table><caption>Все навыки</caption><tbody>${skillRows}</tbody></table></div>
-        <details><summary>Владения</summary>${richText(d.text?.prof ?? d.prof)||'Не заполнены'}</details>
+        <div class="hero-saves"><table><caption>Спасброски</caption><tbody>${saves}</tbody></table></div><h4 class="hero-skills-title">Все навыки</h4><div class="hero-skills-grid">${skillRows}</div>
+        <details><summary>Владения</summary>${richText(d.text?.prof ?? d.prof)||''}${(d._trackerProficiencies||[]).map(p=>`<p>${esc({'prof.weapon-other':'Прочее оружие','prof.weapon-simple':'Простое оружие','prof.weapon-martial':'Воинское оружие','prof.armor-light':'Лёгкие доспехи','prof.armor-medium':'Средние доспехи','prof.armor-heavy':'Тяжёлые доспехи','prof.armor-shield':'Щиты'}[p.target]||p.target)}</p>`).join('')||(!d.text?.prof&&!d.prof?'Не заполнены':'')}</details>
         <details><summary>Оружие</summary>${weapons||'Нет оружия в листе'}</details>
         <details><summary>Заклинания: настройки</summary><label>Характеристика <select class="hero-spell-ability">${Object.entries(abilities).map(([key,label])=>`<option value="${key}" ${key===h.spellAbility?'selected':''}>${label}</option>`).join('')}</select></label><label>Доп. Сл <input class="hero-spell-dc-extra" type="number" value="${h.spellDcExtra}"></label><label>Доп. атака <input class="hero-spell-attack-extra" type="number" value="${h.spellAttackExtra}"></label>${h.swappedSpellFields?'<p>В исходном LSS Сл и атака были переставлены: применены значения по характеристике и владению.</p>':''}</details>
         <details><summary>Предметы с бонусом КД</summary>${h.items.map((item,i)=>`<div class="hero-item"><input class="hero-item-enabled" data-index="${i}" type="checkbox" ${item.enabled?'checked':''} aria-label="Использовать предмет"><input class="hero-item-name" data-index="${i}" value="${esc(item.name)}" aria-label="Название предмета"><input class="hero-item-bonus" data-index="${i}" type="number" value="${num(item.bonus)}" aria-label="Бонус КД"><button class="hero-item-remove" data-index="${i}" aria-label="Удалить предмет">×</button></div>`).join('')}<button class="hero-item-add">+ Предмет с бонусом КД</button><p>Бонусы складываются; применимость предметов определяет мастер.</p></details></details>`;
@@ -116,7 +140,7 @@
         content=content.slice(content.indexOf('<details class="hero-sheet"'));
         content=content.replace(/<details class="hero-sheet"[^>]*><summary>[^<]*<\/summary>/, '<section class="hero-sheet hero-modal-section"><h3>Навыки и снаряжение</h3>');
         content=content.slice(0,-10)+'</section>';
-        return `<section class="hero-modal-section"><h3>Характеристики</h3>${statInputs(hero)}<div class="hero-options"><label>Скорость <input class="hero-speed" type="number" min="0" value="${num(hero.speed,30)}"> фт</label><span>КД <b>${hero.ac}</b></span><span>Инициатива <b>${signed(hero.initBonus)}</b></span><span>Сл <b>${hero.spellSaveDC}</b> · Атака <b>${signed(hero.spellAttack)}</b></span></div></section>${slots(hero)}${content}`;
+        return `${hero.heroData._trackerWarnings?.length ? `<div class="hero-import-note">${hero.heroData._trackerWarnings.map(esc).join('<br>')}</div>` : ''}<section class="hero-modal-section"><h3>Характеристики</h3>${statInputs(hero)}<div class="hero-options"><label>Скорость <input class="hero-speed" type="number" min="0" value="${num(hero.speed,30)}"> фт</label><span>КД <b>${hero.ac}</b></span><span>Инициатива <b>${signed(hero.initBonus)}</b></span><span>Сл <b>${hero.spellSaveDC}</b> · Атака <b>${signed(hero.spellAttack)}</b></span></div></section>${slots(hero)}${content}`;
     }
     function bind(card,hero,changed) {
         const h=hero.heroControls;
@@ -132,7 +156,7 @@
         on('.hero-speed',el=>hero.speed=Math.max(0,num(el.value)));
         on('.hero-proficiency',el=>h.proficiency=Math.max(0,Math.min(12,num(el.value,2))));
         on('.hero-save-bonus',el=>h.saveBonus=num(el.value));
-        on('.hero-base-ac',el=>h.baseAc=num(el.value,10));
+        on('.hero-base-ac',el=>{h.acFormula=null;h.baseAc=num(el.value,10);});
         on('.hero-save-prof',el=>hero.heroData.saves[el.dataset.key].isProf=el.checked);
         on('.hero-skill-prof',el=>hero.heroData.skills[el.dataset.key].isProf=num(el.value));
         on('.hero-spell-ability',el=>h.spellAbility=el.value);
