@@ -750,6 +750,7 @@ a.btn[href="translator.html"]:hover {
 }
 
 </style>
+<link rel="stylesheet" href="hero-card.css?v=1">
 </head>
 <body>
 
@@ -840,6 +841,7 @@ a.btn[href="translator.html"]:hover {
 <div id="heroDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="heroDetailName"></h2><img id="heroDetailAvatar" style="max-width:150px; border-radius:20px; margin:0 auto; display:block;"><div><strong>Раса:</strong> <span id="heroDetailRace"></span> | <strong>Класс:</strong> <span id="heroDetailClass"></span> | <strong>Уровень:</strong> <span id="heroDetailLevel"></span></div><div><strong>Мировоззрение:</strong> <span id="heroDetailAlignment"></span> | <strong>Опыт:</strong> <span id="heroDetailXP"></span></div><div><strong>Предыстория:</strong> <span id="heroDetailBackground"></span></div><div><strong>Личность:</strong> <span id="heroDetailPersonality"></span></div><hr><div><strong>Характеристики:</strong> <span id="heroDetailStats"></span></div><div><strong>Спасброски:</strong> <span id="heroDetailSaves"></span></div><div><strong>Навыки:</strong> <span id="heroDetailSkills"></span></div><hr><div><strong>Снаряжение:</strong> <span id="heroDetailEquipment"></span></div><div><strong>Оружие:</strong> <span id="heroDetailWeapons"></span></div><div><strong>Владение:</strong> <span id="heroDetailProficiencies"></span></div><div><strong>Особенности (features):</strong> <span id="heroDetailFeatures"></span></div><div><strong>Черты (traits):</strong> <span id="heroDetailTraits"></span></div><div><strong>Идеалы:</strong> <span id="heroDetailIdeals"></span></div><div><strong>Привязанности:</strong> <span id="heroDetailBonds"></span></div><div><strong>Слабости:</strong> <span id="heroDetailFlaws"></span></div><div><strong>Внешность:</strong> <span id="heroDetailAppearance"></span></div><div><strong>Союзники:</strong> <span id="heroDetailAllies"></span></div><div><strong>Заметки:</strong> <span id="heroDetailNotes"></span></div><hr><div><strong>Заклинания:</strong> <div id="heroDetailSpells"></div></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
+<script src="hero-card.js?v=1"></script>
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -2548,7 +2550,7 @@ document.getElementById('heroDetailStats').innerHTML = `
             if (key.startsWith('slots-')) spellsHtml += `<div>Магия договора, ${lssEscape(key.split('-')[1])} уровень: ${lssEscape(value.value)} ячеек</div>`;
         }
         if (data.spellsInfo) {
-            spellsHtml += `<div>Базовая: ${lssEscape(data.spellsInfo.base?.value)} · Сл: ${lssEscape(data.spellsInfo.save?.value)} · Атака: ${lssEscape(data.spellsInfo.mod?.value)}</div>`;
+            spellsHtml += `<div>Базовая: ${lssEscape(data.spellsInfo.base?.value)} · Сл: ${lssEscape(hero.spellSaveDC)} · Атака: ${hero.spellAttack >= 0 ? '+' : ''}${lssEscape(hero.spellAttack)}</div>`;
             if (String(data.spellsInfo.save?.value ?? '').startsWith('+')) spellsHtml += '<p>Проверьте лист LSS: значение сложности заклинаний указано со знаком «+».</p>';
         }
         const lists = hero.heroSource?.spells ?? data.spells ?? {};
@@ -2598,24 +2600,13 @@ document.getElementById('heroDetailStats').innerHTML = `
         if (!combatants.length) { grid.innerHTML = '<div style="padding:60px;text-align:center;"><i class="fa-solid fa-user-plus"></i> Добавьте героев или монстров из бестиария</div>'; return; }
         let html = '';
         combatants.forEach((c, idx) => {
+            if (!c.isMonster) HeroCard.ensure(c);
             const isCurrent = idx === currentTurnIndex;
             let turnClass = isCurrent ? (c.isMonster ? 'current-turn-monster' : 'current-turn-hero') : '';
             const activeConds = c.conditions.size + (c.exhaustion > 0 ? 1 : 0);
             const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<div class="race-class" data-tooltip="Раса: ${c.race || '?'} | Класс: ${c.class || '?'}">${c.race ? `<i class="fa-brands fa-critical-role"></i> ${escapeHtml(c.race)}` : ''} ${c.class ? `<i class="fa-solid fa-user-plus"></i> ${escapeHtml(c.class)}` : ''}</div>` : '';
             let statsHtml = '';
-            if (!c.isMonster && c.stats) {
-    const s = c.stats;
-    statsHtml = `
-        <div class="monster-stats-grid" style="grid-template-columns:repeat(6,1fr); gap:3px; font-size:0.6rem; background:rgba(0,0,0,0.4); border-radius:6px; padding:3px; margin:3px 0;">
-            <div style="text-align:center;"><span style="color:#b7c2d3;">СИЛ</span><br><strong>${s.str.score} (${s.str.mod>=0?'+'+s.str.mod:s.str.mod})</strong></div>
-            <div style="text-align:center;"><span style="color:#b7c2d3;">ЛОВ</span><br><strong>${s.dex.score} (${s.dex.mod>=0?'+'+s.dex.mod:s.dex.mod})</strong></div>
-            <div style="text-align:center;"><span style="color:#b7c2d3;">ТЕЛ</span><br><strong>${s.con.score} (${s.con.mod>=0?'+'+s.con.mod:s.con.mod})</strong></div>
-            <div style="text-align:center;"><span style="color:#b7c2d3;">ИНТ</span><br><strong>${s.int.score} (${s.int.mod>=0?'+'+s.int.mod:s.int.mod})</strong></div>
-            <div style="text-align:center;"><span style="color:#b7c2d3;">МДР</span><br><strong>${s.wis.score} (${s.wis.mod>=0?'+'+s.wis.mod:s.wis.mod})</strong></div>
-            <div style="text-align:center;"><span style="color:#b7c2d3;">ХАР</span><br><strong>${s.cha.score} (${s.cha.mod>=0?'+'+s.cha.mod:s.cha.mod})</strong></div>
-        </div>
-    `;
-}
+            if (!c.isMonster) statsHtml = HeroCard.statInputs(c);
             let spellHtml = '';
             if (!c.isMonster && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний"><i class="fa-solid fa-dice-d6"></i> Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями"><i class="fa-solid fa-wand-sparkles"></i> Атк +${c.spellAttack}</span></div>`;
             let activeConditionsHtml = '';
@@ -2625,12 +2616,12 @@ document.getElementById('heroDetailStats').innerHTML = `
             });
             const bgStyle = c.avatar ? `background-image: url('${c.avatar}');` : '';
             let slotsHtml = '';
-            if (c.isMonster && c.spellSlots && Object.keys(c.spellSlots).length) {
+            if (c.spellSlots && Object.keys(c.spellSlots).length) {
                 slotsHtml = '<div class="spell-slots">';
                 for (let level in c.spellSlots) {
                     const slot = c.spellSlots[level];
                     const remaining = slot.max - (slot.used || 0);
-                    slotsHtml += `<div class="slot-level">${level} ур: ${remaining}/${slot.max} 
+                    slotsHtml += `<div class="slot-level">${String(level).startsWith('pact-') ? 'Договор ' + String(level).slice(5) : level} ур: ${remaining}/${c.isMonster ? slot.max : `<input class="hero-slot-max" data-id="${c.id}" data-level="${level}" type="number" min="0" value="${slot.max}" aria-label="Максимум ячеек">`}
                         <button class="use-slot" data-id="${c.id}" data-level="${level}" data-tooltip="Потратить ячейку">-</button>
                         <button class="restore-slot" data-id="${c.id}" data-level="${level}" data-tooltip="Восстановить ячейку">+</button>
                     </div>`;
@@ -2648,11 +2639,12 @@ document.getElementById('heroDetailStats').innerHTML = `
                     <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; margin-top:4px;">
                         <div style="display:flex; gap:6px; align-items:center;">
                             <div class="ac-badge" data-tooltip="Класс Доспеха"><i class="fa-solid fa-shield"></i> <input class="ac-edit" data-id="${c.id}" value="${c.ac}"></div>
-                            ${c.isMonster && c.speed ? `<div class="ac-badge" title="Скорость" data-tooltip="Скорость"><i class="fa-solid fa-shoe-prints"></i> ${c.speed}</div>` : ''}
+                            ${c.speed ? `<div class="ac-badge" title="Скорость" data-tooltip="Скорость"><i class="fa-solid fa-shoe-prints"></i> ${c.speed}</div>` : ''}
                         </div>
                         <div style="display:flex; gap:2px;"><input class="init-input" data-id="${c.id}" value="${c.initiative}" data-tooltip="Инициатива"><button class="init-roll-btn" data-id="${c.id}" data-tooltip="Бросить 1d20 + бонус"><i class="fa-solid fa-dice-d20"></i> d20</button></div>
                     </div>
                     ${raceClassHtml}${statsHtml}${spellHtml}
+                    ${!c.isMonster ? HeroCard.panel(c, renderLssText) : ''}
                     <div class="active-conditions">${activeConditionsHtml}</div>
                     <div class="hp-panel">
                         <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}"><i class="fa-solid fa-dice"></i></button>` : ''}</div>
@@ -2671,10 +2663,11 @@ document.getElementById('heroDetailStats').innerHTML = `
         combatants.forEach(c => {
             const cardDiv = document.querySelector(`.combat-card[data-combat-id="${c.id}"]`);
             if (cardDiv) attachDragEvents(cardDiv, c.id);
+            if (cardDiv && !c.isMonster) HeroCard.bind(cardDiv, c, () => { renderCombat(); saveCurrentStateToSession(); });
             const burger = cardDiv.querySelector('.info-burger');
             if (burger) burger.onclick = (e) => { e.stopPropagation(); if (c.isMonster) showMonsterDetails(c.name); else showHeroDetails(c); };
             document.querySelectorAll(`.name-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.name = e.target.value; renderCombat(); saveCurrentStateToSession(); });
-            document.querySelectorAll(`.ac-edit[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.ac = parseInt(e.target.value) || 10; saveCurrentStateToSession(); });
+            document.querySelectorAll(`.ac-edit[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.ac = lssNumber(e.target.value, 10); if (!c.isMonster) { c.heroControls.baseAc = c.ac - (c.heroControls.shield ? 2 : 0) - c.heroControls.items.reduce((sum, item) => sum + (item.enabled ? lssNumber(item.bonus, 0) : 0), 0); } renderCombat(); saveCurrentStateToSession(); });
             document.querySelectorAll(`.init-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => {
                 c.initiative = parseInt(e.target.value) || 0;
                 renderCombat();
@@ -2697,6 +2690,12 @@ document.getElementById('heroDetailStats').innerHTML = `
             document.querySelectorAll(`.condition-badge[data-id="${c.id}"]`).forEach(badge => badge.onclick = (e) => { e.stopPropagation(); toggleCondition(c, badge.dataset.cond); });
             document.querySelectorAll(`.use-slot[data-id="${c.id}"]`).forEach(btn => btn.onclick = (e) => { e.stopPropagation(); const level = btn.dataset.level; if (c.spellSlots[level] && c.spellSlots[level].used < c.spellSlots[level].max) { c.spellSlots[level].used = (c.spellSlots[level].used || 0) + 1; renderCombat(); saveCurrentStateToSession(); } });
             document.querySelectorAll(`.restore-slot[data-id="${c.id}"]`).forEach(btn => btn.onclick = (e) => { e.stopPropagation(); const level = btn.dataset.level; if (c.spellSlots[level] && c.spellSlots[level].used > 0) { c.spellSlots[level].used--; renderCombat(); saveCurrentStateToSession(); } });
+            document.querySelectorAll(`.hero-slot-max[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => {
+                const slot = c.spellSlots[inp.dataset.level];
+                slot.max = Math.max(0, Math.floor(lssNumber(e.target.value, 0)));
+                slot.used = Math.min(slot.used || 0, slot.max);
+                renderCombat(); saveCurrentStateToSession();
+            });
             const condHeader = document.querySelector(`.conditions-header[data-id="${c.id}"]`);
             const condDiv = document.getElementById(`conds-${c.id}`);
             if (condHeader && condDiv) {

@@ -1,0 +1,23 @@
+.hero-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:8px 0;background:#101a25ed;padding:6px;border-radius:10px}
+.hero-stats label{text-align:center;font-size:11px;color:#c5d4e4}
+.hero-stats input{display:block;width:100%;min-width:0;background:#17283b;color:#fff;border:1px solid #56708b;border-radius:6px;text-align:center;font-size:14px;padding:4px 0}
+.hero-stats b{display:block;font-size:12px}
+.hero-quick,.hero-options{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0;font-size:12px}
+.hero-quick button,.hero-sheet button{background:#243d58;color:#fff;border:1px solid #6b8298;border-radius:8px;padding:5px 7px;cursor:pointer;font-size:12px}
+.hero-quick .equipped{background:#315d39;border-color:#a3d49a}
+.hero-quick input,.hero-sheet input[type=number]{width:48px;background:#142334;color:white;border:1px solid #536d86;border-radius:5px;padding:3px}
+.hero-sheet{background:#102030ed;border:1px solid #4d6580;border-radius:8px;padding:7px;margin:6px 0;font-size:12px}
+.hero-sheet summary{cursor:pointer;font-weight:600;padding:3px 0}
+.hero-sheet details{margin:6px 0;border-top:1px solid #425363;padding-top:5px}
+.hero-tables{display:grid;grid-template-columns:minmax(85px,.7fr) minmax(0,1.7fr);gap:6px;align-items:start}
+.hero-tables table{width:100%;border-collapse:collapse;font-size:11px}
+.hero-tables caption{font-weight:bold;padding:6px 0;color:#e6d7b4}
+.hero-tables td{padding:4px 2px;border-bottom:1px solid #3f5061}
+.hero-tables td:last-child{text-align:right;font-weight:bold;white-space:nowrap}
+.hero-sheet select{background:#17283b;color:white;border:1px solid #536d86;border-radius:4px;padding:2px;max-width:100%;font-size:11px}
+.hero-sheet p{margin:6px 0;line-height:1.4}
+.hero-item{display:flex;gap:4px;align-items:center;margin:5px 0}
+.hero-item-name{min-width:0;width:100%;background:#17283b;color:white;border:1px solid #536d86;border-radius:5px;padding:4px}
+.hero-weapon{margin:7px 0;line-height:1.6;border-bottom:1px solid #425363}
+.hero-weapon>div{display:flex;gap:5px;flex-wrap:wrap}
+.hero-slot-max{width:36px;background:#17283b;color:white;border:1px solid #536d86;border-radius:4px;text-align:center}
