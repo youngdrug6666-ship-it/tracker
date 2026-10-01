@@ -20,3 +20,5 @@
 .bestiary-cost{font-size:11px;font-weight:500;padding:2px 7px;border-radius:5px;background:#493823;color:#f7dba8}
 #detailLegendary .bestiary-entry-title{color:#dfbefa}
 @media(max-width:600px){#detailModal .modal-content{padding:15px!important;width:95vw}#detailModal h2{font-size:20px}#detailModal .bestiary-section li{padding:11px 12px;font-size:13px}}
+
+.bestiary-save{display:inline-block;padding:1px 6px;background:#263952;border:1px solid #53759b;border-radius:5px;color:#b9dbff;font-size:12px;font-weight:650;white-space:normal}

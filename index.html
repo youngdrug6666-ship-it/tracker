@@ -841,8 +841,8 @@ a.btn[href="translator.html"]:hover {
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
-<link rel="stylesheet" href="bestiary.css?v=1">
-<script src="bestiary.js?v=1"></script>
+<link rel="stylesheet" href="bestiary.css?v=2">
+<script src="bestiary.js?v=2"></script>
 <script src="lss-engine.js?v=1"></script>
 <script src="hero-card.js?v=3"></script>
 <script>
@@ -1703,6 +1703,7 @@ function findSpellById(id) {
     const compendiumRegex = /@Compendium\[[^\]]*?spells[^\]]*?\]\{([^}]+)\}/gi;
     let match;
     while ((match = compendiumRegex.exec(desc)) !== null) {
+        if (/actors|monsters|bestiary/i.test(match[0])) continue;
         const norm = normalizeName(match[1]);
         const spell = allSpellsList.find(s => normalizeName(s.spellName) === norm);
         if (spell) foundSpells.add(spell.spellName);
@@ -1711,6 +1712,7 @@ function findSpellById(id) {
     // 2. @UUID[...]{Название}
     const uuidWithNameRegex = /@UUID\[[^\]]*?\]\{([^}]+)\}/gi;
     while ((match = uuidWithNameRegex.exec(desc)) !== null) {
+        if (/actors|monsters|bestiary/i.test(match[0])) continue;
         const norm = normalizeName(match[1]);
         const spell = allSpellsList.find(s => normalizeName(s.spellName) === norm);
         if (spell) foundSpells.add(spell.spellName);
@@ -1719,6 +1721,7 @@ function findSpellById(id) {
     // 3. @UUID[...] без скобок — используем resolveUuid
      const uuidIdRegex = /@UUID\[([^\]]+)\]/gi;
     while ((match = uuidIdRegex.exec(desc)) !== null) {
+        if (/actors|monsters|bestiary/i.test(match[1])) continue;
         const spell = findSpellById(match[1].trim());
         if (spell) foundSpells.add(spell.spellName);
     }
@@ -1755,58 +1758,8 @@ function findSpellById(id) {
 }
 
     // ========== Подсветка заклинаний в тексте ==========
-           function highlightSpellsInText(text) {
-        if (!text) return text;
-        
-        let cleaned = text;
-        
-        // Заменяем @UUID[.id] на название, если есть в uuidMap
-        cleaned = cleaned.replace(/@UUID\[\.([^\]]+)\]/gi, (match, id) => {
-            const name = resolveUuid(id);
-            return name ? name : match;
-        });
-        
-        // 1. Обрабатываем Foundry-ссылки
-        cleaned = cleaned.replace(/@Compendium\[[^\]]*?spells[^\]]*?\]\{([^}]+)\}/gi, (match, spellName) => {
-            const found = findSpellByName(spellName.trim());
-            if (found) return `<span class="spell-link" data-spell="${found.spellName}"><i class="fa-solid fa-hat-wizard"></i> ${spellName.trim()}</span>`;
-            return match;
-        });
-        cleaned = cleaned.replace(/@UUID\[[^\]]*?\]\{([^}]+)\}/gi, (match, spellName) => {
-            const found = findSpellByName(spellName.trim());
-            if (found) return `<span class="spell-link" data-spell="${found.spellName}"><i class="fa-solid fa-hat-wizard"></i> ${spellName.trim()}</span>`;
-            return match;
-        });
-        
-        // 2. Очищаем текст
-        cleaned = cleanText(cleaned);
-        
-        // 3. Сортируем заклинания от длинных к коротким
-        const sortedSpells = [...allSpellsList].sort((a, b) => {
-            const aName = a.spellName.split('/')[0].trim();
-            const bName = b.spellName.split('/')[0].trim();
-            return bName.length - aName.length;
-        });
-        
-        // 4. Проходим по каждому заклинанию
-        for (let spell of sortedSpells) {
-            const rusName = spell.spellName.split('/')[0].trim();
-            if (rusName.length < 3) continue;
-            
-            const escaped = rusName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp('(^|\\s|>|\\b|[;:])(' + escaped + ')(?=\\s|,|;|\\.|$|<|\\b)', 'gi');
-            
-            cleaned = cleaned.replace(regex, (match, p1, p2) => {
-                const pos = cleaned.indexOf(match);
-                const before = cleaned.substring(0, pos);
-                if (before.lastIndexOf('<span class="spell-link"') > before.lastIndexOf('</span>')) {
-                    return match;
-                }
-                return p1 + `<span class="spell-link" data-spell="${spell.spellName}">${p2}</span>`;
-            });
-        }
-        
-        return wrapDiceFormulas(cleaned);
+    function highlightSpellsInText(text) {
+        return Bestiary.renderText(text,{resolveUuid,findSpell:(id,name)=>findSpellById(id)||findSpellByName(name),wrapDice:wrapDiceFormulas});
     }
 
         // ========== Детали монстра ==========
@@ -1875,7 +1828,7 @@ function findSpellById(id) {
             if (filteredItems.length) {
                 filteredItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
                     container.appendChild(li);
                 });
                 toggleSectionByList(container, true);
@@ -1896,7 +1849,7 @@ function findSpellById(id) {
             if (legendaryItems.length) {
                 legendaryItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
                     legendaryContainer.appendChild(li);
                 });
                 toggleSectionByList(legendaryContainer, true);
@@ -1913,7 +1866,7 @@ function findSpellById(id) {
             if (bonusItems.length) {
                 bonusItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
                     bonusContainer.appendChild(li);
                 });
                 toggleSectionByList(bonusContainer, true);
@@ -1930,7 +1883,7 @@ function findSpellById(id) {
             if (reactionItems.length) {
                 reactionItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
                     reactionsContainer.appendChild(li);
                 });
                 toggleSectionByList(reactionsContainer, true);
@@ -1946,7 +1899,7 @@ function findSpellById(id) {
             if (lairItems.length) {
                 lairItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body">${Bestiary.clean(item.description,true).split(/\n+/).filter(Boolean).map(p=>`<p>${highlightSpellsInText(Bestiary.esc(p))}</p>`).join('')}</div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
                     lairContainer.appendChild(li);
                 });
                 toggleSectionByList(lairContainer, true);
@@ -1977,53 +1930,38 @@ function findSpellById(id) {
         }
         // Заклинания
         const spellsContainer = document.getElementById('spellsContainer');
-        let isCaster = false;
         const slots = parseSpellSlots(full.description || '');
-        if (Object.keys(slots).length > 0) {
-            isCaster = true;
-        } else {
-            if (full.features) {
-                for (let f of full.features) {
-                    const name = (f.name || '').toLowerCase();
-                    if (name.includes('заклинания') || name.includes('spellcasting') || name.includes('врождённое колдовство') || name.includes('использование заклинаний')) {
-                        const desc = (f.description || '').toLowerCase();
-                        if (desc.includes('ячейк') || desc.includes('заговоры') || desc.includes('@compendium') || desc.includes('@uuid') || desc.includes('круг') || desc.includes('заклинание')) {
-                            isCaster = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        
+        const casterEntries = ['features','actions','bonus_actions','reactions','legendary_actions'].flatMap(key=>full[key]||[]);
+        const npcKeyForCaster = monsterName.toLowerCase().split('/')[0].trim();
+        const isCaster = Object.keys(slots).length > 0 || (full.spells||[]).length > 0 || (npcSpellsMap.get(npcKeyForCaster)?.size||0)>0 || casterEntries.some(f=>/^(?:заклинания(?:\s|$|\()|spellcasting|врожд[её]нное колдовство|использование заклинаний)/i.test(f.name||''));
         if (!isCaster) {
-            spellsContainer.innerHTML = '<div style="padding:12px;"><i class="fa-solid fa-scroll"></i> Это существо не является заклинателем.</div>';
+            spellsContainer.innerHTML = '<div style="padding:12px;"><i class="fa-solid fa-scroll"></i> В источнике не указан список заклинаний.</div>';
         } else {
             const npcKey = monsterName.toLowerCase().split('/')[0].trim();
             const spellNameSet = new Set(npcSpellsMap.get(npcKey) || []);
             if (full.features) {
                 full.features.forEach(f => {
-                    extractSpellsFromDescription(f.description).forEach(name => spellNameSet.add(name));
+                    extractSpellsFromDescription(f._sourceDescription ?? f.description).forEach(name => spellNameSet.add(name));
                 });
             }
             if (full.actions) {
                 full.actions.forEach(a => {
-                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                    extractSpellsFromDescription(a._sourceDescription ?? a.description).forEach(name => spellNameSet.add(name));
                 });
             }
             if (full.legendary_actions) {
                 full.legendary_actions.forEach(a => {
-                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                    extractSpellsFromDescription(a._sourceDescription ?? a.description).forEach(name => spellNameSet.add(name));
                 });
             }
             if (full.bonus_actions) {
                 full.bonus_actions.forEach(a => {
-                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                    extractSpellsFromDescription(a._sourceDescription ?? a.description).forEach(name => spellNameSet.add(name));
                 });
             }
             if (full.reactions) {
                 full.reactions.forEach(a => {
-                    extractSpellsFromDescription(a.description).forEach(name => spellNameSet.add(name));
+                    extractSpellsFromDescription(a._sourceDescription ?? a.description).forEach(name => spellNameSet.add(name));
                 });
             }
             if (Array.isArray(full.spells)) {

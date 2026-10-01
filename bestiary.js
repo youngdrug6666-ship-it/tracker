@@ -8,6 +8,8 @@ const types={aberration:'Аберрация',beast:'Зверь',celestial:'Не�
 const modes={walk:'Ходьба',fly:'Полёт',swim:'Плавание',burrow:'Копание',climb:'Лазание'};
 const senses={blindsight:'Слепое зрение',darkvision:'Тёмное зрение',tremorsense:'Чувство вибрации',truesight:'Истинное зрение',passive_perception:'Пассивное восприятие'};
 const languages={common:'Общий',draconic:'Драконий',dwarvish:'Дварфийский',elvish:'Эльфийский',giant:'Великанский',gnomish:'Гномий',goblin:'Гоблинский',halfling:'Полуросликов',orc:'Орочий',abyssal:'Бездны',celestial:'Небесный',infernal:'Инфернальный',primordial:'Первичный',sylvan:'Сильван',undercommon:'Подземный',deep_speech:'Глубинная речь',aquan:'Акван',auran:'Ауран',ignan:'Игнан',terran:'Терран',telepathy:'Телепатия'};
+const saveNames={str:'Силы',strength:'Силы',dex:'Ловкости',dexterity:'Ловкости',con:'Телосложения',constitution:'Телосложения',int:'Интеллекта',intelligence:'Интеллекта',wis:'Мудрости',wisdom:'Мудрости',cha:'Харизмы',charisma:'Харизмы'};
+const damageNames={necrotic:'некротической энергией',piercing:'колющий',slashing:'рубящий',bludgeoning:'дробящий',cold:'холодом',fire:'огнём',poison:'ядом',acid:'кислотой',lightning:'электричеством',thunder:'звуком',force:'силовым полем',psychic:'психический',radiant:'излучением'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function clean(value,paragraphs=false){
  if(value==null)return '';let s=String(value);
@@ -17,7 +19,11 @@ function clean(value,paragraphs=false){
  s=s.replace(/(?:&|@)reference\[([^\]]+)\]/gi,(_,x)=>({prone:'сбит с ног',frightened:'испуган',difficultterrain:'труднопроходимая местность',heavilyobscured:'сильно заслоняющая местность'}[x.toLowerCase()]||x));
  s=s.replace(/@(?:ActorEmbeddedItem|condition|spell|Item|Actor)\[[^\]]+\]\{([^}]+)\}/gi,'$1');
  s=s.replace(/@(?:UUID|Compendium)\[[^\]]+\]\{([^}]+)\}/gi,'$1').replace(/@(?:UUID|Compendium)\[[^\]]+\]/gi,'');
- s=s.replace(/\[\[\/(?:r|roll)\s+([^\]]+)\]\]/gi,'$1').replace(/\[\[\/damage\s+([^\]]+)\]\]/gi,(_,v)=>v.replace(/\s+type=\S+/g,''));
+ s=s.replace(/(?:испытание|спасбросок)?\s*\[\[\/save\s+([a-z]+)\s+(?:dc=)?(\d+)[^\]]*\]\](?:\{[^}]*\})?/gi,(_,ability,dc)=>' спасбросок '+(saveNames[ability.toLowerCase()]||ability)+' Сл '+dc);
+ s=s.replace(/\[\[\/(?:r|roll|attack)\s+([^\]]+)\]\]\{([^}]+)\}/gi,'$2');
+ s=s.replace(/\(\[\[\/damage\s+([^\]]+)\]\]\)\s+урона/gi,(_,v)=>{const type=v.match(/type=([a-z]+)/i)?.[1],formula=v.replace(/\s+type=\S+/g,'');return '('+formula+') урона'+(type?' ('+(damageNames[type]||type)+')':'');});
+ s=s.replace(/\[\[\/(?:r|roll)\s+1d20\s*([+-]\s*\d+)\s*\]\]\s*\(\s*([+-]\d+)\s*\)/gi,(_,bonus,label)=>label);
+ s=s.replace(/\[\[\/(?:r|roll)\s+([^\]]+)\]\]/gi,'$1').replace(/\[\[\/damage\s+([^\]]+)\]\]/gi,(_,v)=>{const type=v.match(/type=([a-z]+)/i)?.[1];return v.replace(/\s+type=\S+/g,'')+(type?' '+(damageNames[type]||type):'');});
  s=s.replace(/\[\[lookup[^\]]+\]\]/gi,'').replace(/\{@\w+\s+([^}|]+)(?:\|[^}]+)?\}/g,'$1');
  s=s.replace(/\b(?:DEC|PER|SLT|PRC|INV|ARC|ITM|ACR|ANI|ATH|HIS|INS|MED|NAT|REL|STE|SUR)\b/g,x=>skillLabels[codes[x.toLowerCase()]]||x);
  s=s.replace(/\b(?:STR|DEX|CON|INT|WIS|CHA)\b/gi,x=>abilityLabels[x.toLowerCase()]);
@@ -44,7 +50,7 @@ function enrich(m,srd){
 }
 function organize(monster){
  const m=structuredClone(monster),sections=['features','actions','bonus_actions','reactions','legendary_actions','lair_actions','regional_effects'];
- const entries=sections.flatMap(section=>(Array.isArray(m[section])?m[section]:[]).map(item=>({...item,section,name:clean(item.name),description:clean(item.description,true)})));
+ const entries=sections.flatMap(section=>(Array.isArray(m[section])?m[section]:[]).map(item=>({...item,section,name:clean(item.name),_sourceDescription:item._sourceDescription??item.description,_displayDescription:item._displayDescription??item.description,description:clean(item.description,true)})));
  const intro=entries.find(x=>/^легендарные действия$/i.test(x.name));
  const legendaryText=clean(intro?.description);m.legendaryCount=Number(legendaryText.match(/(?:совершить|совершает|использовать)\s+(\d+)\s+легендарн/i)?.[1])||null;
  const legendaryNames=new Map();
@@ -58,13 +64,15 @@ function organize(monster){
    if(e.section==='actions' && m._regularActionNames?.includes(norm(e.name)))m.actions.push({...e});
    section='legendary_actions';e.cost=legendaryNames.get(norm(e.name));
   }
+  else if(srdKey(m)==='vecna the archlich' && ['полет проклятых','гнилая судьба','заклинания'].includes(norm(e.name)))section='actions';
   else if(section==='features' && /^(мультиатака|.*дыхание|(?:пугающее|ужасающее) присутствие)(?:\s|$)/i.test(e.name))section='actions';
   const key=section+'|'+norm(e.name)+( /^легендарное сопротивление/i.test(e.name)?'':'|'+norm(e.description));if(seen.has(key))continue;seen.add(key);
   if(e===intro){const cut=e.description.search(/(?:Обнаружение|Атака хвостом|Атака крыльями)\./);if(cut>=0)e.description=e.description.slice(0,cut).trim();}
   const {section:old,...item}=e;
+  if(srdKey(m)==='vecna the archlich' && norm(item.name)==='полет проклятых' && !item.name.includes('('))item.name+=' (перезарядка 5–6)';
   const recharge=item.description.match(/^\((перезарядка[^)]*|\d+\s*(?:в день|раз[^)]*|\/день))\)\s*/i);
-  if(recharge && !item.name.includes('(')){item.name+=' ('+recharge[1]+')';item.description=item.description.slice(recharge[0].length);}
-  if(srdKey(m)==='ancient white dragon' && section==='lair_actions')item.description=item.description.replace(/Существо, завершающее свой ход в этом тумане, получает [^.]+урона холодом\./,'');
+  if(recharge && !item.name.includes('(')){item.name+=' ('+recharge[1]+')';item.description=item.description.slice(recharge[0].length);item._displayDescription=String(item._displayDescription||'').replace(/^\((?:перезарядка[^)]*|\d+\s*(?:в день|раз[^)]*|\/день))\)\s*/i,'');}
+  if(srdKey(m)==='ancient white dragon' && section==='lair_actions'){for(const field of ['description','_displayDescription'])item[field]=String(item[field]||'').replace(/Существо, завершающее свой ход в этом тумане, получает [^.]+урона холодом\./,'');}
   if(section==='legendary_actions'){item.cost ||= Number(item.name.match(/(?:стоит|стоимость|затрат[аы]|costs?)\s*(\d+)/i)?.[1])||null;item.name=item.name.replace(/^Легендарное действие:\s*/i,'');}
   m[section].push(item);
  }
@@ -74,5 +82,22 @@ function organize(monster){
  m.languages=languageText(m.languages);m.type=types[String(m.type).toLowerCase()]||clean(m.type);
  return m;
 }
-root.Bestiary={clean,esc,chips,list,organize,enrich,srdKey,languageText,skillLabels};if(typeof module!=='undefined'&&module.exports)module.exports=root.Bestiary;
+function renderText(raw,options={}){
+ const tokens=[];const protect=html=>{const marker='ZZBESTIARYTOKEN'+tokens.length+'ZZ';tokens.push(html);return marker;};
+ let text=String(raw||'');
+ text=text.replace(/@(?:UUID|Compendium)\[([^\]]+)\](?:\{([^}]+)\})?/gi,(all,id,label)=>{
+  const name=label||options.resolveUuid?.(id)||'';
+  const spell=!/actors|monsters|bestiary/i.test(id) ? options.findSpell?.(id,name) : null;
+  return spell?protect(`<span class="spell-link" data-spell="${esc(spell.spellName)}">${esc(name||spell.spellName.split('/')[0])}</span>`):name;
+ });
+ text=text.replace(/\[\[\/(?:r|roll|attack)\s+([^\]]+)\]\]\{([^}]+)\}/gi,(_,formula,label)=>protect(`<span class="dice-formula-link" data-formula="${esc(formula)}">${esc(label)}</span>`));
+ text=text.replace(/\[\[\/(?:r|roll)\s+(1d20\s*([+-]\s*\d+))\s*\]\]\s*\(\s*([+-]\d+)\s*\)/gi,(_,formula,bonus,label)=>protect(`<span class="dice-formula-link" data-formula="${esc(formula)}">${esc(label)}</span>`));
+ let html=esc(clean(text,true));
+ html=html.replace(/(?:спасбросок\s+)?(Силы|Ловкости|Телосложения|Интеллекта|Мудрости|Харизмы)\s+(?:со\s+)?(?:СЛ|Сл)\s*(\d+)/g,(_,ability,dc)=>`<strong class="bestiary-save">Спасбросок ${ability} · Сл ${dc}</strong>`);
+ // Dice remain interactive; spell links are created only from explicit references.
+ if(options.wrapDice)html=options.wrapDice(html);
+ for(let i=0;i<tokens.length;i++)html=html.replace('ZZBESTIARYTOKEN'+i+'ZZ',tokens[i]);
+ return html.replace(/\n+/g,'<br>');
+}
+root.Bestiary={renderText,clean,esc,chips,list,organize,enrich,srdKey,languageText,skillLabels};if(typeof module!=='undefined'&&module.exports)module.exports=root.Bestiary;
 })(typeof globalThis!=='undefined'?globalThis:window);
