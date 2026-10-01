@@ -841,8 +841,8 @@ a.btn[href="translator.html"]:hover {
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
-<link rel="stylesheet" href="bestiary.css?v=2">
-<script src="bestiary.js?v=2"></script>
+<link rel="stylesheet" href="bestiary.css?v=3">
+<script src="bestiary.js?v=3"></script>
 <script src="lss-engine.js?v=1"></script>
 <script src="hero-card.js?v=3"></script>
 <script>
@@ -1530,6 +1530,7 @@ async function loadCustomMonstersTXT() {
             const response = await fetch('spells_full.json');
             if (!response.ok) throw new Error('spells_full.json не найден');
             const data = await response.json();
+            const metadata = await fetch('spell-metadata.json').then(r=>r.ok?r.json():[]).catch(()=>[]);
             const schoolTranslations = {
                 'abj': 'Ограждение', 'con': 'Вызов', 'div': 'Прорицание', 'enc': 'Очарование',
                 'evo': 'Воплощение', 'ill': 'Иллюзия', 'nec': 'Некромантия', 'trs': 'Преобразование'
@@ -1554,8 +1555,14 @@ async function loadCustomMonstersTXT() {
                 saveDC: spell.saveDC ? `${spell.saveDC.ability?.toUpperCase()} Сл ${spell.saveDC.dc}` : null,
                 ritual: spell.ritual || false,
                 concentration: spell.concentration || false,
-                source: spell.source?.book || spell.source?.custom || '—'
+                source: spell.source?.book || spell.source?.custom || '—',
+                classes: spell.classes || [], subclasses: spell.subclasses || [], higherLevel: spell.higherLevel || ''
             }));
+            allSpellsList.forEach(spell => {
+                const english=spell.spellName.split('/').slice(1).join('/').trim().toLowerCase().replace(/’/g, "'");
+                const meta=metadata.find(m=>m.name.toLowerCase().replace(/’/g, "'")===english);
+                if(meta){spell.classes=meta.classes;spell.subclasses=meta.subclasses;spell.components.verbal=meta.components.includes('V');spell.components.somatic=meta.components.includes('S');spell.components.material=meta.components.includes('M');}
+            });
             console.log(`Загружено заклинаний: ${allSpellsList.length}`);
         } catch(e) { console.warn('spells_full.json не загружен', e); }
     }
@@ -1828,7 +1835,7 @@ function findSpellById(id) {
             if (filteredItems.length) {
                 filteredItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${(/заклинания|колдовство/i.test(item.name) ? renderSpellcasting(item._displayDescription ?? item.description) : highlightSpellsInText(item._displayDescription ?? item.description))}</p></div>`;
                     container.appendChild(li);
                 });
                 toggleSectionByList(container, true);
@@ -1849,7 +1856,7 @@ function findSpellById(id) {
             if (legendaryItems.length) {
                 legendaryItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${(/заклинания|колдовство/i.test(item.name) ? renderSpellcasting(item._displayDescription ?? item.description) : highlightSpellsInText(item._displayDescription ?? item.description))}</p></div>`;
                     legendaryContainer.appendChild(li);
                 });
                 toggleSectionByList(legendaryContainer, true);
@@ -1866,7 +1873,7 @@ function findSpellById(id) {
             if (bonusItems.length) {
                 bonusItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${(/заклинания|колдовство/i.test(item.name) ? renderSpellcasting(item._displayDescription ?? item.description) : highlightSpellsInText(item._displayDescription ?? item.description))}</p></div>`;
                     bonusContainer.appendChild(li);
                 });
                 toggleSectionByList(bonusContainer, true);
@@ -1883,7 +1890,7 @@ function findSpellById(id) {
             if (reactionItems.length) {
                 reactionItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${(/заклинания|колдовство/i.test(item.name) ? renderSpellcasting(item._displayDescription ?? item.description) : highlightSpellsInText(item._displayDescription ?? item.description))}</p></div>`;
                     reactionsContainer.appendChild(li);
                 });
                 toggleSectionByList(reactionsContainer, true);
@@ -1899,7 +1906,7 @@ function findSpellById(id) {
             if (lairItems.length) {
                 lairItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${highlightSpellsInText(item._displayDescription ?? item.description)}</p></div>`;
+                    li.innerHTML = `<div class="bestiary-entry-title">${/^легендарные действия$/i.test(item.name) ? '' : Bestiary.esc(cleanText(item.name))}${item.cost ? `<span class="bestiary-cost">${item.cost} ${item.cost===1?'действие':'действия'}</span>` : ''}</div><div class="bestiary-entry-body"><p>${(/заклинания|колдовство/i.test(item.name) ? renderSpellcasting(item._displayDescription ?? item.description) : highlightSpellsInText(item._displayDescription ?? item.description))}</p></div>`;
                     lairContainer.appendChild(li);
                 });
                 toggleSectionByList(lairContainer, true);
@@ -2019,6 +2026,30 @@ function findSpellById(id) {
         document.getElementById('detailModal').style.display = 'flex';
     }
 
+    function renderSpellDescription(raw) {
+        return Bestiary.clean(raw, true).split(/\n+/).filter(Boolean).map(line => {
+            const heading=line.match(/^([^.!?]{2,65}\.)\s+/);
+            return '<p>'+(heading?'<strong>'+Bestiary.esc(heading[1])+'</strong> '+highlightSpellsInText(line.slice(heading[0].length)):highlightSpellsInText(line))+'</p>';
+        }).join('');
+    }
+    function renderSpellcasting(raw) {
+        const text=Bestiary.clean(raw,true);
+        const marker=/(?:Неограниченно|\d+\/день(?:\s+каждое)?|Фокусы|Заговоры|\d+-й\s+(?:круг|уровень))(?:\s*\([^)]*\))?\s*:/gi;
+        const marks=[...text.matchAll(marker)];
+        if(!marks.length)return highlightSpellsInText(raw);
+        let html='<p>'+highlightSpellsInText(text.slice(0,marks[0].index))+'</p><div class="spellcasting-rows">';
+        const known=allSpellsList.map(spell=>({spell,name:spell.spellName.split('/')[0].trim()})).sort((a,b)=>b.name.length-a.name.length);
+        marks.forEach((m,i)=>{
+            let remaining=text.slice(m.index+m[0].length,marks[i+1]?.index??text.length).trim(),parts=[];
+            while(remaining){
+                remaining=remaining.replace(/^[\s,;:.]+/,'');if(!remaining)break;
+                const hit=known.find(x=>remaining.toLowerCase().startsWith(x.name.toLowerCase()) && !/[а-яёa-z]/i.test(remaining[x.name.length]||''));
+                if(hit){parts.push('<span class="spell-link" data-spell="'+Bestiary.esc(hit.spell.spellName)+'">'+Bestiary.esc(hit.name)+'</span>');remaining=remaining.slice(hit.name.length);}
+                else {const word=remaining.match(/^\S+/)[0];parts.push(Bestiary.esc(word));remaining=remaining.slice(word.length);}
+            }
+            html+='<div class="spellcasting-row"><strong>'+Bestiary.esc(m[0].replace(/:$/,''))+'</strong><div>'+parts.join(' ')+'</div></div>';
+        });return html+'</div>';
+    }
     function showSpellDetail(spell) {
         document.getElementById('spellDetailName').innerText = spell.spellName.split('/')[0].trim();
         let levelText = spell.level === 0 ? 'Заговор' : `${spell.level} уровень`;
@@ -2044,20 +2075,17 @@ function findSpellById(id) {
         let damage = spell.damage || '—';
         if (spell.damageType) damage += ` (${spell.damageType})`;
         let source = spell.source || '—';
-        let html = `
-            <p><strong>${levelText}${schoolText}${tagsStr}</strong></p>
-            <p><strong>Время накладывания:</strong> ${castingTime}</p>
-            <p><strong>Дистанция:</strong> ${range}</p>
-            <p><strong>Компоненты:</strong> ${compStr}</p>
-            ${materialDesc}
-            <p><strong>Длительность:</strong> ${duration}</p>
-            <p><strong>Атака/Сл:</strong> ${attackSave}</p>
-            <p><strong>Урон:</strong> ${damage}</p>
-            <p><strong>Источник:</strong> ${source}</p>
-            <hr>
-            <div><strong>Описание:</strong></div>
-            <div>${highlightSpellsInText(spell.description)}</div>
-        `;
+        const safe=value=>Bestiary.esc(cleanText(value));
+        const units=value=>safe(value).replace(/\bft\b/g,'футов').replace(/\bminute(s)?\b/g,'мин.').replace(/\bhour(s)?\b/g,'ч.').replace(/\bround(s)?\b/g,'раундов').replace(/\bday(s)?\b/g,'дней');
+        const row=(label,value)=>`<div class="spell-fact"><dt>${label}</dt><dd>${value}</dd></div>`;
+        let html = `<div class="spell-subtitle">${safe(levelText+schoolText+tagsStr)}</div><dl class="spell-facts">
+            ${row('Время накладывания',units(castingTime))}${row('Дистанция',units(range))}
+            ${row('Компоненты',safe(compStr)+(spell.components?.materialDesc?' ('+safe(spell.components.materialDesc)+')':''))}
+            ${row('Длительность',units(duration))}</dl>
+            ${spell.classes?.length?'<div class="spell-access"><strong>Классы</strong>'+spell.classes.map(c=>'<span class="bestiary-chip">'+safe(c)+'</span>').join('')+'</div>':'<div class="bestiary-empty">Список классов отсутствует в источнике</div>'}
+            ${spell.subclasses?.length?'<div class="spell-access"><strong>Подклассы</strong>'+spell.subclasses.map(c=>'<span class="bestiary-chip">'+safe(c)+'</span>').join('')+'</div>':''}
+            <div class="spell-description">${renderSpellDescription(spell.description)}${spell.higherLevel?'<h4>На больших уровнях</h4>'+renderSpellDescription(spell.higherLevel):''}</div>
+            <div class="spell-source">Источник: ${safe(source)}</div>`;
         document.getElementById('spellDetailContent').innerHTML = html;
         document.querySelectorAll('#spellDetailContent .spell-link').forEach(link => {
             link.onclick = (e) => {

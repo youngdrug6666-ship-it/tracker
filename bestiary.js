@@ -55,6 +55,7 @@ function enrich(m,srd){
 function organize(monster){
  const m=structuredClone(monster);
  if(srdKey(m)==='vecna the archlich'){m.senses='Истинное зрение 120 фт., Пассивное восприятие 25';m._sensesUnverified=false;m.skills='Восприятие +15, История +14, Магия +22, Проницательность +15';m.damage_immunities='яд; дробящий, колющий и рубящий от немагических атак';}
+ if(srdKey(m)==='strahd von zarovich'){m._regularActionNames=['безоружный удар','укус'];m.senses='Тёмное зрение 120 фт.';m._sensesUnverified=false;m.skills='Восприятие +12, Магия +15, Религия +10, Скрытность +14';m.languages='Общий, Бездны, Великанский, Драконий, Инфернальный, Эльфийский';}
  const sections=['features','actions','bonus_actions','reactions','legendary_actions','lair_actions','regional_effects'];
  const entries=sections.flatMap(section=>(Array.isArray(m[section])?m[section]:[]).map(item=>({...item,section,name:clean(item.name),_sourceDescription:item._sourceDescription??item.description,_displayDescription:item._displayDescription??item.description,description:clean(item.description,true)})));
  const intro=entries.find(x=>/^легендарные действия$/i.test(x.name));
@@ -66,10 +67,11 @@ function organize(monster){
   if(/^легендарн(?:ая устойчивость|ое сопротивление)/i.test(e.name)){section='features';e.name=e.name.replace(/Легендарная устойчивость/i,'Легендарное сопротивление');}
   else if(/^логово\s*:|^действия логова/i.test(e.name))section='lair_actions';
   else if(/^эффекты местности|^местные эффекты|^региональные эффекты/i.test(e.name))section='regional_effects';
-  else if(legendaryNames.has(norm(e.name))){
+  else if(legendaryNames.has(norm(e.name)) && !(srdKey(m)==='strahd von zarovich' && e.section==='actions')){
    if(e.section==='actions' && m._regularActionNames?.includes(norm(e.name)))m.actions.push({...e});
    section='legendary_actions';e.cost=legendaryNames.get(norm(e.name));
   }
+  else if(srdKey(m)==='strahd von zarovich' && ['очарование','дети ночи'].includes(norm(e.name)))section='actions';
   else if(srdKey(m)==='vecna the archlich' && ['полет проклятых','гнилая судьба','заклинания'].includes(norm(e.name)))section='actions';
   else if(section==='features' && /^(мультиатака|.*дыхание|(?:пугающее|ужасающее) присутствие)(?:\s|$)/i.test(e.name))section='actions';
   const key=section+'|'+norm(e.name)+( /^легендарное сопротивление/i.test(e.name)?'':'|'+norm(e.description));if(seen.has(key))continue;seen.add(key);

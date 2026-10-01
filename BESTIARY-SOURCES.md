@@ -26,3 +26,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+
+## Spell metadata and Strahd corrections
+Spell components and class lists: 5e-bits/5e-database, src/2014/en/5e-SRD-Spells.json (MIT). English-name matching; missing metadata is left unknown. Extended Web and Bigby class/subclass lists checked against https://dnd.su/spells/227-web/ and https://dnd.su/spells/57-bigbys-hand/. Strahd section assignments and senses checked against https://dnd.su/bestiary/960-strahd-von-zarovich/. Descriptions remain from the existing exports.
