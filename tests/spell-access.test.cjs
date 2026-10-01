@@ -1,0 +1,15 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const B=require('../bestiary.js');const metadata=JSON.parse(fs.readFileSync('spell-metadata.json'));
+const get=n=>metadata.find(s=>s.name===n&&s.source==='PHB');
+assert.deepEqual(get('Fog Cloud').subclasses,['Гений (колдун) · Марид','Домен бури (жрец)']);
+assert(get('Web').subclasses.includes('Круг земли (друид) · Подземье'));
+assert(get('Detect Thoughts').subclasses.includes('Великий Древний (колдун)'));
+assert(metadata.every(s=>!s.subclasses.some(x=>/Коллегия знаний|Eldritch|Arcane Trickster/.test(x))));
+assert.equal(metadata.length,JSON.parse(fs.readFileSync('spells_full.json')).length);
+const h=fs.readFileSync('index.html','utf8');const ctx={Bestiary:B};vm.createContext(ctx);
+vm.runInContext(h.slice(h.indexOf('    function spellParameter'),h.indexOf('    function renderSpellcasting')),ctx);
+for(const [raw,want] of [['inst','Мгновенно'],['touch','Касание'],['self','На себя'],['perm','Постоянно'],['1 minute','1 мин.']])assert.equal(ctx.spellParameter(raw),want);
+vm.runInContext(h.slice(h.indexOf('    function wrapDiceFormulas'),h.indexOf('    function rollDiceFormula')),ctx);
+const dice=ctx.wrapDiceFormulas('Урон 2d6+4 и 1d8 - 2');assert(dice.includes('>2d6 + 4</span>'));assert(dice.includes('>1d8 - 2</span>'));
+for(const m of h.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))if(m[1].trim())new vm.Script(m[1]);
+console.log('PASS all spell access records, Fog Cloud/Web/Detect Thoughts subclasses, Russian parameters, readable dice, JS syntax');

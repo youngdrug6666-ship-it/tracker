@@ -841,7 +841,7 @@ a.btn[href="translator.html"]:hover {
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
-<link rel="stylesheet" href="bestiary.css?v=3">
+<link rel="stylesheet" href="bestiary.css?v=4">
 <script src="bestiary.js?v=3"></script>
 <script src="lss-engine.js?v=1"></script>
 <script src="hero-card.js?v=3"></script>
@@ -1530,7 +1530,7 @@ async function loadCustomMonstersTXT() {
             const response = await fetch('spells_full.json');
             if (!response.ok) throw new Error('spells_full.json не найден');
             const data = await response.json();
-            const metadata = await fetch('spell-metadata.json').then(r=>r.ok?r.json():[]).catch(()=>[]);
+            const metadata = await fetch('spell-metadata.json?v=2').then(r=>r.ok?r.json():[]).catch(()=>[]);
             const schoolTranslations = {
                 'abj': 'Ограждение', 'con': 'Вызов', 'div': 'Прорицание', 'enc': 'Очарование',
                 'evo': 'Воплощение', 'ill': 'Иллюзия', 'nec': 'Некромантия', 'trs': 'Преобразование'
@@ -1560,8 +1560,9 @@ async function loadCustomMonstersTXT() {
             }));
             allSpellsList.forEach(spell => {
                 const english=spell.spellName.split('/').slice(1).join('/').trim().toLowerCase().replace(/’/g, "'");
-                const meta=metadata.find(m=>m.name.toLowerCase().replace(/’/g, "'")===english);
-                if(meta){spell.classes=meta.classes;spell.subclasses=meta.subclasses;spell.components.verbal=meta.components.includes('V');spell.components.somatic=meta.components.includes('S');spell.components.material=meta.components.includes('M');}
+                const meta=metadata.find(m=>m.name.toLowerCase().replace(/’/g, "'")===english && (!m.source || m.source.toLowerCase()===spell.source.toLowerCase()));
+                spell.classes=[];spell.subclasses=[];spell.accessKnown=!!meta?.accessKnown;
+                if(meta){spell.classes=meta.classes;spell.subclasses=meta.subclasses;if(meta.components){spell.components.verbal=meta.components.includes('V');spell.components.somatic=meta.components.includes('S');spell.components.material=meta.components.includes('M');}}
             });
             console.log(`Загружено заклинаний: ${allSpellsList.length}`);
         } catch(e) { console.warn('spells_full.json не загружен', e); }
@@ -1616,7 +1617,7 @@ async function loadCustomMonstersTXT() {
     function wrapDiceFormulas(text) {
         if (!text) return text;
         const diceRegex = /\b(\d*d?[dк]\d+(?:\s*[+\-]\s*\d+)*(?:\s*[+\-]\s*\d*d?[dк]\d+)*)\b/gi;
-        return text.replace(diceRegex, (full, formula) => `<span class="dice-formula-link" data-formula="${formula.replace(/"/g, '&quot;')}">${formula}</span>`);
+        return text.replace(diceRegex, (full, formula) => `<span class="dice-formula-link" data-formula="${formula.replace(/"/g, '&quot;')}">${formula.replace(/\s+/g, '').replace(/к/gi,'d').replace(/[+\-]/g,' $& ')}</span>`);
     }
     function rollDiceFormula(formula) {
         const norm = (formula || '').toLowerCase().replace(/\s+/g, '').replace(/к/g, 'd');
@@ -2027,10 +2028,52 @@ function findSpellById(id) {
     }
 
     function renderSpellDescription(raw) {
-        return Bestiary.clean(raw, true).split(/\n+/).filter(Boolean).map(line => {
-            const heading=line.match(/^([^.!?]{2,65}\.)\s+/);
-            return '<p>'+(heading?'<strong>'+Bestiary.esc(heading[1])+'</strong> '+highlightSpellsInText(line.slice(heading[0].length)):highlightSpellsInText(line))+'</p>';
-        }).join('');
+        // Parse source structure, but never insert source attributes or arbitrary HTML.
+        const doc=new DOMParser().parseFromString(String(raw||''),'text/html');
+        const inline=node=>{
+            if(node.nodeType===3)return highlightSpellsInText(node.textContent);
+            if(node.nodeType!==1)return '';
+            const tag=node.tagName.toLowerCase();
+            if(['script','style','iframe','object','svg'].includes(tag)||node.id==='gtx-trans')return '';
+            const body=Array.from(node.childNodes).map(inline).join('');
+            if(['strong','b'].includes(tag))return '<strong>'+body+'</strong>';
+            if(['em','i'].includes(tag))return '<em>'+body+'</em>';
+            if(tag==='br')return '<br>';
+            return body;
+        };
+        const block=node=>{
+            if(node.nodeType===3){const text=node.textContent.trim();return text?'<p>'+highlightSpellsInText(text)+'</p>':'';}
+            if(node.nodeType!==1)return '';
+            const tag=node.tagName.toLowerCase();
+            if(['script','style','iframe','object','svg'].includes(tag)||node.id==='gtx-trans')return '';
+            if(tag==='table'){
+                let rows='';
+                for(const row of node.rows){let cells='';for(const cell of row.cells){
+                    let content=inline(cell);
+                    const headers=Array.from(node.querySelectorAll('thead th')).map(c=>Bestiary.clean(c.textContent));
+                    if(/^(Сил|Лвк|Лов)$/i.test(headers[cell.cellIndex]||'')){
+                        const score=Bestiary.clean(cell.textContent).match(/\((\d+)\)\s*$/)?.[1];
+                        if(score)content=Bestiary.esc(score);
+                    }
+                    const cellTag=cell.tagName.toLowerCase()==='th'?'th':'td';
+                    const span=cell.colSpan>1?' colspan="'+Math.min(cell.colSpan,20)+'"':'';
+                    cells+='<'+cellTag+span+'>'+content+'</'+cellTag+'>';
+                }rows+='<tr>'+cells+'</tr>';}
+                return '<div class="spell-table-scroll"><table class="spell-table">'+(node.caption?'<caption>'+inline(node.caption)+'</caption>':'')+rows+'</table></div>';
+            }
+            if(['ul','ol'].includes(tag))return '<'+tag+'>'+Array.from(node.children).map(n=>'<li>'+inline(n)+'</li>').join('')+'</'+tag+'>';
+            if(/^h[1-6]$/.test(tag))return '<h4>'+inline(node)+'</h4>';
+            if(tag==='p')return '<p>'+inline(node)+'</p>';
+            if(['div','section','article','body'].includes(tag))return Array.from(node.childNodes).map(block).join('');
+            return '<p>'+inline(node)+'</p>';
+        };
+        return block(doc.body);
+    }
+    function spellParameter(value) {
+        const raw=String(value||'').trim();
+        const labels={inst:'Мгновенно',instantaneous:'Мгновенно',touch:'Касание',self:'На себя',spec:'Особая — см. описание',special:'Особая — см. описание',any:'Неограниченная',unlimited:'Неограниченная',perm:'Постоянно',dstr:'До уничтожения',disp:'До рассеивания','null special':'Особое — см. описание'};
+        if(labels[raw.toLowerCase()])return labels[raw.toLowerCase()];
+        return Bestiary.esc(Bestiary.clean(raw)).replace(/\bminute(s)?\b/gi,'мин.').replace(/\bhour(s)?\b/gi,'ч.').replace(/\bround(s)?\b/gi,'раунд.').replace(/\bday(s)?\b/gi,'дн.').replace(/\byear(s)?\b/gi,'г.').replace(/\bmi\b/gi,'миль').replace(/\bft\b/gi,'футов');
     }
     function renderSpellcasting(raw) {
         const text=Bestiary.clean(raw,true);
@@ -2071,18 +2114,19 @@ function findSpellById(id) {
         let castingTime = spell.castingTime || '—';
         let range = spell.range || '—';
         let duration = spell.duration || '—';
-        if (spell.concentration) duration += ' (концентрация)';
+        duration = spellParameter(duration);
+        if (spell.concentration) duration = 'Концентрация, до ' + duration;
         let damage = spell.damage || '—';
         if (spell.damageType) damage += ` (${spell.damageType})`;
         let source = spell.source || '—';
         const safe=value=>Bestiary.esc(cleanText(value));
-        const units=value=>safe(value).replace(/\bft\b/g,'футов').replace(/\bminute(s)?\b/g,'мин.').replace(/\bhour(s)?\b/g,'ч.').replace(/\bround(s)?\b/g,'раундов').replace(/\bday(s)?\b/g,'дней');
+        const units=spellParameter;
         const row=(label,value)=>`<div class="spell-fact"><dt>${label}</dt><dd>${value}</dd></div>`;
         let html = `<div class="spell-subtitle">${safe(levelText+schoolText+tagsStr)}</div><dl class="spell-facts">
             ${row('Время накладывания',units(castingTime))}${row('Дистанция',units(range))}
             ${row('Компоненты',safe(compStr)+(spell.components?.materialDesc?' ('+safe(spell.components.materialDesc)+')':''))}
-            ${row('Длительность',units(duration))}</dl>
-            ${spell.classes?.length?'<div class="spell-access"><strong>Классы</strong>'+spell.classes.map(c=>'<span class="bestiary-chip">'+safe(c)+'</span>').join('')+'</div>':'<div class="bestiary-empty">Список классов отсутствует в источнике</div>'}
+            ${row('Длительность',duration)}</dl>
+            ${spell.classes?.length?'<div class="spell-access"><strong>Классы</strong>'+spell.classes.map(c=>'<span class="bestiary-chip">'+safe(c)+'</span>').join('')+'</div>':'<div class="bestiary-empty">Доступность по классам и подклассам пока не подтверждена</div>'}
             ${spell.subclasses?.length?'<div class="spell-access"><strong>Подклассы</strong>'+spell.subclasses.map(c=>'<span class="bestiary-chip">'+safe(c)+'</span>').join('')+'</div>':''}
             <div class="spell-description">${renderSpellDescription(spell.description)}${spell.higherLevel?'<h4>На больших уровнях</h4>'+renderSpellDescription(spell.higherLevel):''}</div>
             <div class="spell-source">Источник: ${safe(source)}</div>`;

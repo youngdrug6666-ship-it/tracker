@@ -29,3 +29,6 @@ SOFTWARE.
 
 ## Spell metadata and Strahd corrections
 Spell components and class lists: 5e-bits/5e-database, src/2014/en/5e-SRD-Spells.json (MIT). English-name matching; missing metadata is left unknown. Extended Web and Bigby class/subclass lists checked against https://dnd.su/spells/227-web/ and https://dnd.su/spells/57-bigbys-hand/. Strahd section assignments and senses checked against https://dnd.su/bestiary/960-strahd-von-zarovich/. Descriptions remain from the existing exports.
+
+## 2014 spell access audit
+Replaced generic SRD subclass associations with filtered explicit 2014 spell-source lookup links from https://github.com/5etools-mirror-3/5etools-src/blob/main/data/generated/gendata-spell-source-lookup.json . 2024/UA sources, Magical Secrets, and broad wizard-list access are excluded. Divine Soul general cleric-list choice is excluded except its five named alignment spells. Circle of the Land terrain and Genie elemental patrons are preserved. All 1123 local spells are audited; 519 source/name pairs resolve, others remain explicitly unknown. No 2024 fallback or cross-book name-only match. Rebuild: python scripts/build-spell-access.py . The filtered source snapshot contains metadata only, no spell descriptions.
