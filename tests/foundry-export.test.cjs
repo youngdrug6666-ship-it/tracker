@@ -1,0 +1,18 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+(async()=>{
+ const legacy={_id:'old',name:'Призыв',type:'feat',system:{activation:{type:'bonus',cost:1}},flags:{source:'test'}};
+ const modern={_id:'new',name:'Посох',type:'weapon',system:{activities:{a:{activation:{type:'legendary',value:2},damage:{parts:['2d6']}}}}};
+ const actor={_id:'a',name:'Монстр',type:'npc',system:{attributes:{ac:{value:17}}},items:[legacy,modern],effects:[{name:'Эффект'}]};
+ const spell={_id:'s',name:'Паутина',type:'spell',system:{components:{vocal:true,somatic:true,material:true},materials:{value:'паутина'}}};
+ const subclass={_id:'c',name:'Подкласс',type:'subclass',system:{advancement:[{type:'ItemGrant',configuration:{items:[{uuid:'Compendium.test.spells.s'}]}}]}};
+ const doc=(data,uuid)=>({toObject:()=>structuredClone(data),uuid,items:(data.items||[]).map(i=>({id:i._id,uuid:uuid+'.Item.'+i._id}))});
+ const packs=[{collection:'test.monsters',documentName:'Actor',metadata:{label:'Монстры'},getDocuments:async()=>[doc(actor,'Compendium.test.monsters.a')]},{collection:'test.spells',documentName:'Item',metadata:{label:'Заклинания'},getDocuments:async()=>[doc(spell,'Compendium.test.spells.s'),doc(subclass,'Compendium.test.spells.c')]}];
+ const blobs=[];let clicks=0;const original=JSON.stringify([actor,spell,subclass]);
+ const panel={style:{},querySelectorAll:()=>[{dataset:{packIndex:'0'}},{dataset:{packIndex:'1'}}],querySelector(selector){return selector==='[data-start]'?this.start??={}:this.cancel??={};},addEventListener(){},showModal(){this.start.onclick();},close(){},remove(){}};
+ const context={game:{user:{isGM:true},packs,version:'13',system:{id:'dnd5e',version:'4'}},ui:{notifications:{info(){},warn(){},error(m){throw Error(m)}}},console,TextEncoder,Blob,URL:{createObjectURL:b=>{blobs.push(b);return 'blob:test';},revokeObjectURL(){}},setTimeout(){},document:{body:{appendChild(){}},createElement:t=>t==='dialog'?panel:{click(){clicks++;},remove(){}}}};
+ await vm.runInNewContext(fs.readFileSync('tools/foundry-export-tracker.js','utf8'),context);
+ assert.equal(clicks,1);const payload=JSON.parse(await blobs[0].text());assert.equal(payload.records.length,3);
+ assert.deepEqual(payload.records[0].document,actor);assert.deepEqual(payload.records[2].document.system.advancement,subclass.system.advancement);
+ assert.equal(payload.coverage.itemsWithActivities,1);assert.equal(payload.coverage.itemsWithLegacyActivation,1);assert.equal(payload.records[0].embeddedUuids.old,'Compendium.test.monsters.a.Item.old');assert.equal(JSON.stringify([actor,spell,subclass]),original);
+ console.log('PASS full raw export, modern/legacy activation, subclass advancement, components and embedded UUIDs retained, no document mutations');
+})().catch(e=>{console.error(e);process.exitCode=1;});
