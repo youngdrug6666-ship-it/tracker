@@ -30,6 +30,7 @@
                 const raw = hero.heroData;
                 const resolved = engine.resolve(raw);
                 hero.stats = structuredClone(resolved.stats);
+                for(const key of Object.keys(abilities))hero.stats[key].mod=mod(num(hero.stats[key].score,10));
                 hero.heroData = resolved;
                 hero.ac = num(resolved.vitality.ac,10) + (resolved.vitality.shield?.value ? 2 : 0);
                 hero.maxHp = num(resolved.vitality['hp-max'],hero.maxHp);
@@ -50,7 +51,9 @@
                 const base=num(hero.proficiency??resolved.proficiency,2)+hero.stats[ability].mod;
                 const h=hero.heroControls;
                 // Preserve deliberate edits; repair only untouched imported offsets.
-                if(h && h.spellAttackExtra===num(d._trackerSpellAttack??hero.spellAttack)-base && h.spellDcExtra===num(d._trackerSpellDc??hero.spellSaveDC)-8-base){
+                const abilityMod=hero.stats[ability].mod;
+                const duplicatedModifier=h && h.spellAbility===ability && h.spellAttackExtra===abilityMod && h.spellDcExtra===abilityMod && num(hero.spellAttack)===num(d._trackerSpellAttack)+abilityMod && num(hero.spellSaveDC)===num(d._trackerSpellDc)+abilityMod && resolved._trackerSpellAttack===base && resolved._trackerSpellDc===8+base;
+                if(h && (duplicatedModifier || h.spellAttackExtra===num(d._trackerSpellAttack??hero.spellAttack)-base && h.spellDcExtra===num(d._trackerSpellDc??hero.spellSaveDC)-8-base)){
                     h.spellAbility=ability;h.spellAttackExtra=resolved._trackerSpellAttack-base;h.spellDcExtra=resolved._trackerSpellDc-8-base;
                 }
                 d._trackerSpellAttack=resolved._trackerSpellAttack;d._trackerSpellDc=resolved._trackerSpellDc;

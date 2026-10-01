@@ -8,3 +8,7 @@ assert.throws(()=>E.expression('globalThis.process.exit()'));assert.throws(()=>E
 console.log('PASS: LSS bonuses, formulas, proficiency, slots, immutable import, dynamic AC and safe expression parser');
 
 for(const value of ['int','Интеллект','Intelligence']){const data={...d,stats:{...d.stats,int:{score:16}},bonuses:[],spellsInfo:{base:{value},mod:{value:''},save:{value:''}}};const r=E.resolve(data);assert.equal(r._trackerSpellAttack,5);assert.equal(r._trackerSpellDc,13);}
+
+// Migrating older imported heroes must calculate modifiers before storing extras.
+const legacy=H.ensure({heroData:structuredClone(d),stats:structuredClone(d.stats),ac:12,initBonus:2,proficiency:2});assert.equal(legacy.spellAttack,5);assert.equal(legacy.spellSaveDC,13);
+const saved={heroSource:structuredClone(d),heroData:structuredClone(r),stats:structuredClone(r.stats),ac:13,proficiency:2,initBonus:3,spellAttack:8,spellSaveDC:16,heroControls:{baseAc:13,shield:false,items:[],proficiency:2,saveBonus:0,spellAbility:'int',spellAttackExtra:3,spellDcExtra:3,initiativeExtra:0,weapons:[]}};globalThis.LssEngine=E;H.ensure(saved);assert.equal(saved.spellAttack,5);assert.equal(saved.spellSaveDC,13);saved.stats.int.score=18;H.recalculate(saved);assert.equal(saved.spellAttack,6);assert.equal(saved.spellSaveDC,14);
