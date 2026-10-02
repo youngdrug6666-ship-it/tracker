@@ -3,6 +3,8 @@
 let loading;
 async function load(){
  if(!loading)loading=(async()=>{
+  if(typeof Worker!=='undefined')try{const result=await new Promise((resolve,reject)=>{const worker=new Worker('foundry-worker.js?v=1');worker.onmessage=e=>{worker.terminate();e.data.error?reject(Error(e.data.error)):resolve(e.data);};worker.onerror=e=>{worker.terminate();reject(Error(e.message||'Worker unavailable'));};worker.postMessage('load');});api.aliases=result.aliases;return result.data;}catch(error){console.warn('Фоновая загрузка недоступна, используется обычная',error);}
+
   const manifest=await fetch('foundry-data.json?v=1').then(r=>{if(!r.ok)throw Error('Foundry data unavailable');return r.json();});
   const pieces=await Promise.all(manifest.files.map(p=>fetch(p+'?v='+manifest.version).then(r=>{if(!r.ok)throw Error('Missing Foundry data part');return r.text();})));
   const bytes=Uint8Array.from(atob(pieces.join('')),c=>c.charCodeAt(0));
