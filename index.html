@@ -863,6 +863,7 @@ html,body{max-width:100%;box-sizing:border-box}
 body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;display:none!important}
 #appTooltip{position:fixed;z-index:2147483647;pointer-events:none;box-sizing:border-box;width:max-content;max-width:min(300px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:hidden;white-space:normal;overflow-wrap:anywhere;background:#152532;color:#f0e5ce;border:1px solid #8e7955;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:500;line-height:1.5;box-shadow:0 8px 24px #0007}
 #appTooltip[hidden]{display:none!important}
+.monster-defenses{display:flex;gap:4px;flex-wrap:wrap;margin:3px 0}.monster-defenses:empty{display:none}.monster-defenses button{display:flex;align-items:center;gap:4px;background:#223440;border:1px solid #536579;border-radius:8px;color:#e1eaf2;padding:3px 6px;font-size:10px}.monster-card .hero-stat-summary{margin:4px 0}.monster-card .spell-stats{gap:8px}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -2770,10 +2771,14 @@ function findSpellById(id) {
             let turnClass = isCurrent ? (c.isMonster ? 'current-turn-monster' : 'current-turn-hero') : '';
             const activeConds = c.conditions.size + (c.exhaustion > 0 ? 1 : 0);
             const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<div class="race-class" data-tooltip="Раса: ${c.race || '?'} | Класс: ${c.class || '?'}">${c.race ? `<i class="fa-brands fa-critical-role"></i> ${escapeHtml(c.race)}` : ''} ${c.class ? `<i class="fa-solid fa-user-plus"></i> ${escapeHtml(c.class)}` : ''}</div>` : '';
+            const monsterFull=c.isMonster?fullMonstersMap.get(c.name.toLowerCase()):null;
             let statsHtml = '';
-            if (!c.isMonster) statsHtml = HeroCard.summaryStats(c);
+            if (!c.isMonster || ['str','dex','con','int','wis','cha'].every(k=>Number.isFinite(Number(c.stats?.[k]?.score)))) statsHtml = HeroCard.summaryStats(c);
+            if(monsterFull){const defenses=[['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(monsterFull[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
             let spellHtml = '';
-            if ((!c.isMonster || fullMonstersMap.get(c.name.toLowerCase())?._customMonster) && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний"><i class="fa-solid fa-dice-d6"></i> Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями"><i class="fa-solid fa-wand-sparkles"></i> Атк +${c.spellAttack}</span></div>`;
+            let dc=c.spellSaveDC,attack=c.spellAttack;
+            if(monsterFull&&!monsterFull._customMonster){dc=monsterFull.spellSaveDC;attack=monsterFull.spellAttack;const casting=(monsterFull.features||[]).filter(e=>/заклинан|колдовство|spellcasting/i.test(e.name)).map(e=>cleanText(e._displayDescription??e.description)).join(' ');const dcMatch=casting.match(/(?:СЛ(?: спасброска)?|сложность спасброска|spell save DC)\s*(\d+)/i);const attackMatch=casting.match(/([+−-]\d+)\s*(?:к попаданию|к броскам атаки|к атаке|to hit with spell)|(?:атака заклинаниями|spell attack)\s*([+−-]?\d+)/i);if(dcMatch)dc=Number(dcMatch[1]);if(attackMatch)attack=Number((attackMatch[1]||attackMatch[2]).replace('−','-'));}
+            if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="Сложность спасброска от заклинаний"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="Бонус атаки заклинанием"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
             let activeConditionsHtml = '';
             c.conditions.forEach(cond => { 
                 let display = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond; 
@@ -2989,7 +2994,7 @@ function findSpellById(id) {
         const panel = document.getElementById('bestiaryPanel');;
         const toggleBtn = document.getElementById('toggleBtn');
         if (burgerMenu && !e.target.closest('#burgerMenuBtn') && !e.target.closest('#burgerMenu')) burgerMenu.classList.remove('open');
-        if (panel && panel.classList.contains('open') && !panel.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+        if (panel && panel.classList.contains('open') && !e.target.closest('.modal') && !panel.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
             panel.classList.remove('open');
             document.getElementById('trackerArea').classList.remove('shifted');
         }
