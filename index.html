@@ -954,7 +954,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
         <p style="margin-top:15px; text-align:right;"><em>Приятной игры! 🐉</em></p>
     </div>
 </div>
-<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><section class="bestiary-section"><h3>Особенности</h3><ul id="detailFeatures"></ul></section><section class="bestiary-section"><h3>Действия</h3><ul id="detailActions"></ul></section><section class="bestiary-section"><h3>Бонусные действия</h3><ul id="detailBonusActions"></ul></section><section class="bestiary-section"><h3>Реакции</h3><ul id="detailReactions"></ul></section><section class="bestiary-section"><h3>Легендарные действия</h3><ul id="detailLegendary"></ul></section><section class="bestiary-section"><h3>Действия логова</h3><ul id="detailLairActions"></ul></section><section class="bestiary-section"><h3>Местные эффекты</h3><ul id="detailRegionalEffects"></ul></section><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
+<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><section class="bestiary-section"><h3>Особенности</h3><ul id="detailFeatures"></ul></section><section class="bestiary-section"><h3>Действия</h3><ul id="detailActions"></ul></section><section class="bestiary-section"><h3>Бонусные действия</h3><ul id="detailBonusActions"></ul></section><section class="bestiary-section"><h3>Реакции</h3><ul id="detailReactions"></ul></section><section class="bestiary-section"><h3>Легендарные действия</h3><ul id="detailLegendary"></ul></section><section class="bestiary-section"><h3>Действия логова</h3><ul id="detailLairActions"></ul></section><section class="bestiary-section"><h3>Местные эффекты</h3><ul id="detailRegionalEffects"></ul></section><button type="button" class="btn" id="editMonsterBtn" style="margin:12px 0">Редактор монстра</button><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
 <div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><div class="catalogue-search"><input type="search" id="spellSearchInput" placeholder="Поиск по названию" aria-label="Поиск заклинаний"></div><div class="catalogue-filters spell-filters"><label>Уровень<select id="spellLevelFilter"></select></label><label>Класс<select id="spellClassFilter"></select></label><label>Школа<select id="spellSchoolFilter"></select></label><label>Источник<select id="spellSourceFilter"></select></label></div><div class="catalogue-tools"><span id="spellResultCount" aria-live="polite"></span><button id="resetSpellFilters" type="button">Сбросить</button></div><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
@@ -965,9 +965,9 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="lss-engine.js?v=2"></script>
 <script src="spell-effects.js?v=3"></script>
 <script src="combat-history.js?v=1"></script>
-<script src="monster-builder.js?v=1"></script>
+<script src="monster-builder.js?v=2"></script>
 <script src="app-tooltips.js?v=1"></script>
-<link rel="stylesheet" href="monster-builder.css?v=1">
+<link rel="stylesheet" href="monster-builder.css?v=2">
 <script src="hero-card.js?v=7"></script>
 <script>
    (function(){
@@ -1993,6 +1993,7 @@ function findSpellById(id) {
         } else {
             img.style.display = 'none';
         }
+        document.getElementById('editMonsterBtn').onclick=()=>openCustomMonsterBuilder(full);
          document.getElementById('detailAC').innerText = full.ac ?? '?';
         document.getElementById('detailSpeed').innerHTML = Bestiary.chips(full.speed);
         document.getElementById('detailHP').innerText = full.hp ?? '?';
@@ -2954,13 +2955,22 @@ function findSpellById(id) {
         if(modal.id==='detailModal' && monsterHistory.length){const previous=monsterHistory.pop();showMonsterDetails(previous.name,true);const inner=modal.querySelector('.modal-content');if(inner)inner.scrollTop=previous.scroll;return;}
         modal.style.display='none';if(modal.id==='detailModal'){activeMonsterName=null;monsterHistory.length=0;}
     }
-    function closeTopModal(){const order=['diceResultModal','spellDetailModal','heroDetailModal','detailModal','allSpellsModal','customModal','helpModal'];const modal=order.map(id=>document.getElementById(id)).find(m=>m && m.style.display!=='none' && m.style.display);if(modal)closeOneModal(modal);}
+    const openedWindows=[];
+    const windowObserver=new MutationObserver(records=>{for(const record of records){const el=record.target;if(!el.classList.contains('modal'))continue;const i=openedWindows.indexOf(el);if(i>=0)openedWindows.splice(i,1);if(getComputedStyle(el).display!=='none')openedWindows.push(el);}});
+    windowObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
+    function closeTopModal(){
+        const top=[...openedWindows].reverse().find(el=>getComputedStyle(el).display!=='none');
+        const modal=top||['diceResultModal','customModal','spellDetailModal','heroDetailModal','detailModal','allSpellsModal','helpModal'].map(id=>document.getElementById(id)).find(el=>el&&getComputedStyle(el).display!=='none');
+        if(modal){closeOneModal(modal);return;}
+        if(burgerMenu?.classList.contains('open')){burgerMenu.classList.remove('open');burgerMenuBtn.setAttribute('aria-expanded','false');return;}
+        const panel=document.getElementById('bestiaryPanel');if(panel?.classList.contains('open')){panel.classList.remove('open');document.getElementById('trackerArea').classList.remove('shifted');}
+    }
     function closeAllModals() {
         const modals = ['helpModal', 'detailModal', 'spellDetailModal', 'allSpellsModal', 'heroDetailModal', 'customModal'];
         modals.forEach(id => { const m = document.getElementById(id); if(m) m.style.display = 'none'; });
     }
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeTopModal();
+        if (e.key === 'Escape' && !e.repeat) { e.preventDefault();closeTopModal(); }
         if (e.key === 'ArrowRight' && !e.target.matches('input, select, textarea')) { e.preventDefault(); nextTurn(); }
         if (e.key === 'ArrowLeft' && !e.target.matches('input, select, textarea')) { e.preventDefault(); prevTurn(); }
     });
@@ -2997,13 +3007,18 @@ function findSpellById(id) {
         try{for(const full of JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]'))if(full._customMonster&&full.name)registerCustomMonster(full);}catch(e){console.warn('Не удалось загрузить своих монстров',e);}
     }
     function openCustomMonsterBuilder(existing=null){
+        if(existing){const library=monstersLibrary.find(m=>m.name===existing.name);existing={...existing,hpFormula:existing.hpFormula||library?.hpFormula,initBonus:existing.initBonus??library?.initBonus};}
+        const previousRecord=existing?fullMonstersMap.get(existing.name.toLowerCase()):null;
         MonsterBuilder.open({spells:allSpellsList,existing,onSave:(full,addToCombat,previous)=>{
+            if(previous)full={...previous,...full,description:previous.description,source:previous.source||full.source};
             const collision=fullMonstersMap.get(full.name.toLowerCase());
-            if(collision&&collision!==previous)throw Error('Такое имя уже есть в бестиарии. Укажите другое.');
+            if(collision&&collision!==previousRecord)throw Error('Такое имя уже есть в бестиарии. Укажите другое.');
             const saved=JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]').filter(m=>m.name!==previous?.name);
             saved.push(full);localStorage.setItem('dnd_custom_monsters_v1',JSON.stringify(saved));
             if(previous&&previous.name!==full.name){fullMonstersMap.delete(previous.name.toLowerCase());monstersLibrary=monstersLibrary.filter(m=>m.name!==previous.name);}
             registerCustomMonster(full);initFilters();renderBestiary();
+            for(const c of combatants)if(c.isMonster&&c.name===previous?.name){c.name=full.name;c.ac=full.ac;c.stats=structuredClone(full.stats);c.speed=extractSpeedValue(full.speed);c.avatar=full.image||null;for(const [key,slot] of Object.entries(full.spellSlots||{})){c.spellSlots||={};c.spellSlots[key]={max:slot.max,used:Math.min(c.spellSlots[key]?.used||0,slot.max)};}}
+            renderCombat();saveCurrentStateToSession();if(previous&&document.getElementById('detailModal').style.display==='flex')showMonsterDetails(full.name,true);
             if(addToCombat)addCombatant({name:full.name,ac:full.ac,hpFormula:full.hpFormula,initBonus:full.initBonus,isMonster:true,avatar:full.image||null,speed:extractSpeedValue(full.speed),stats:full.stats,spellSaveDC:full.spellSaveDC,spellAttack:full.spellAttack});
         }});
     }
