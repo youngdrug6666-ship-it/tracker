@@ -45,20 +45,20 @@
         float depth=float(i)/4.0;
         vec2 uv=pos+warp*1.65+vec2(depth*7.0,depth*3.0)+drift*(1.0+depth);
         float n=fbm(uv);
-        float shape=clamp(1.0-max(distance,0.0)/(6.0+depth*12.0),0.0,1.0);
+        float shape=clamp(1.0-max(distance-2.0+(warp.x-0.5)*7.0,0.0)/(14.0+depth*10.0),0.0,1.0);
         float energy=overlay(shape,n);
-        float layer=smoothstep(0.43,0.82,energy)*(1.0-depth*0.55);
+        float layer=smoothstep(0.38,0.76,energy)*(1.0-depth*0.55);
         field=max(field,layer);
       }
       float n=fbm(pos*2.0+warp*2.5+drift*1.8);
       // Break up the outer silhouette into flowing, translucent wisps.
-      float extent=3.5+15.0*pow(fbm(pos+warp*2.0+drift),1.4);
+      float extent=3.0+25.0*pow(fbm(pos+warp*2.0+drift),1.15);
       float tip=1.0-smoothstep(extent-4.0,extent+1.0,distance);
       float inner=smoothstep(-2.5,-0.5,distance);
-      float body=field*tip*inner;
+      float body=field*tip*inner*(0.55+0.45*smoothstep(0.25,0.7,n));
       float core=exp(-abs(distance-0.6)*0.7)*(0.45+0.55*n)*inner;
       float halo=exp(-max(distance,0.0)*0.17)*0.16*inner;
-      float alpha=clamp(body*0.85+core*0.6+halo,0.0,0.92);
+      float alpha=clamp(body*0.85+core*0.35+halo,0.0,0.92);
       vec3 color=mix(vec3(0.30,0.045,0.62),vec3(0.65,0.24,0.98),smoothstep(0.0,0.75,body));
       color=mix(color,vec3(0.94,0.73,1.0),clamp(core*0.95+pow(body,4.0)*0.35,0.0,0.85));
       gl_FragColor=vec4(color*alpha,alpha);
