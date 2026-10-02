@@ -805,12 +805,12 @@ select option,select optgroup{background:#172532;color:#e3edf5}
 
 /* Фиолетовое пламя только у текущего участника. */
 .combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none;transform:none;box-shadow:0 0 0 2px #c997ff,0 0 20px #9d48dc88}
-.turn-flames{position:absolute;inset:-7px;border-radius:29px;padding:7px;z-index:2;pointer-events:none;background:conic-gradient(from 30deg,#7133bb,#deaaff,#9e42e2,#f0d1ff,#7835cb,#ce85ff,#7133bb);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;filter:drop-shadow(0 0 5px #bc63fa);animation:violetEmbers 2.8s ease-in-out infinite alternate}
-.turn-flames::before{content:'';position:absolute;inset:-12px;background:radial-gradient(ellipse at 50% 90%,#f5d8ff 0 10%,#c66bff 20%,#7733b4 40%,transparent 65%);background-size:27px 42px;opacity:.65;animation:violetFlames 1.6s linear infinite}
+@property --turn-glow-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+.turn-flames{--turn-glow-angle:0deg;position:absolute;inset:-4px;border-radius:27px;padding:4px;z-index:2;pointer-events:none;background:conic-gradient(from var(--turn-glow-angle),#a66ce0 0deg,#b986ee 65deg,#dfbaff 110deg,#b986ee 155deg,#a66ce0 210deg,#9460ce 285deg,#a66ce0 360deg);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;animation:violetOrbit 12s linear infinite}
+.turn-flames::before{content:none}
 .turn-label{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;color:#f1dbff;background:#34184ce8;border:1px solid #b776e4;border-radius:7px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 7px;margin-bottom:1px}
-.turn-label i{color:#d69aff;animation:violetEmbers 1.8s ease-in-out infinite alternate}
-@keyframes violetFlames{from{background-position:0 0}to{background-position:13px -42px}}
-@keyframes violetEmbers{from{opacity:.62}to{opacity:1}}
+.turn-label i{color:#d69aff}
+@keyframes violetOrbit{from{--turn-glow-angle:0deg}to{--turn-glow-angle:360deg}}
 @media(prefers-reduced-motion:reduce){.turn-flames,.turn-flames::before,.turn-label i{animation:none!important}.combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none!important}}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
