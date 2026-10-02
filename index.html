@@ -772,6 +772,23 @@ a.btn[href="translator.html"]:hover {
 
 .catalogue-search{margin:0 0 10px}.catalogue-search input{width:100%;box-sizing:border-box;background:#152331;color:#edf2f7;border:1px solid #40576b;border-radius:10px;padding:9px 12px;font-size:13px}
 .catalogue-filters{display:grid;gap:8px;margin-bottom:8px}.bestiary-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.spell-filters{grid-template-columns:repeat(4,minmax(0,1fr))}.catalogue-filters label{display:grid;gap:3px;font-size:10px;color:#a8bdcc;min-width:0}.catalogue-filters select{width:100%;min-width:0;box-sizing:border-box;background:#1c2b39;color:#e2eaf1;border:1px solid #3b5267;border-radius:8px;padding:6px 8px;min-height:31px;font-size:12px;color-scheme:dark}.catalogue-tools{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;color:#a5b9c8}.catalogue-tools button{border:1px solid #3f5669;border-radius:7px;background:transparent;color:#c5d5e1;padding:4px 9px;cursor:pointer}#bestiaryPanel h2{margin-bottom:12px!important}.catalogue-filters select:focus,.catalogue-search input:focus{outline:2px solid #799ab8;outline-offset:1px}@media(max-width:650px){.spell-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Единое оформление системных контролов и прокрутки. */
+:root{color-scheme:dark;--scroll-track:#111c27;--scroll-thumb:#526c81}
+*{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:var(--scroll-track);border-radius:12px;margin:8px}
+*::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:2px solid var(--scroll-track);border-radius:12px}
+*::-webkit-scrollbar-thumb:hover{background:#7994aa}
+*::-webkit-scrollbar-corner{background:var(--scroll-track)}
+select,input,textarea{color-scheme:dark}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m2 2 4 4 4-4' fill='none' stroke='%239bb3c7' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px!important;max-width:100%}
+select option,select optgroup{background:#172532;color:#e3edf5}
+#monsterList,.spell-list,.modal-content{scrollbar-color:var(--scroll-thumb) var(--scroll-track);min-width:0;min-height:0}
+#monsterList::-webkit-scrollbar-track,.spell-list::-webkit-scrollbar-track,.modal-content::-webkit-scrollbar-track{background:var(--scroll-track);margin-block:12px}
+#monsterList::-webkit-scrollbar-thumb,.spell-list::-webkit-scrollbar-thumb,.modal-content::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:2px solid var(--scroll-track)}
+.modal-content{box-sizing:border-box;overflow-x:hidden!important;max-width:min(900px,calc(100vw - 24px));scrollbar-gutter:stable;padding-right:16px!important}
+.bestiary-panel{box-sizing:border-box;min-width:0;max-width:100vw}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -789,7 +806,7 @@ a.btn[href="translator.html"]:hover {
             <button class="btn" id="prevTurnBtnTop" data-tooltip="Предыдущий ход"><i class="fa-solid fa-angle-left fa-icon"></i></button>
             <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход"><span class="btn-label"><i class="fa-solid fa-angle-right fa-icon"></i>Следующий ход</span></button>
             <button class="btn btn-primary" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Сортировать по иниц</span></button>
-            <button class="btn" id="rollAllInitBtn" style="background:#91220b;" data-tooltip="Бросить инициативу для всех монстров (1d20 + бонус)"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
+            <button class="btn" id="rollAllInitBtn" style="background:#91220b;" data-tooltip="Один бросок инициативы для всех монстров с одинаковым названием"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
             <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
             <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания"><span class="btn-label"><i class="fa-solid fa-scroll fa-icon"></i>Заклинания</span></button>
 			<a href="translator.html" class="btn" style="background:#004687;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
@@ -846,7 +863,7 @@ a.btn[href="translator.html"]:hover {
         <h3><i class="fa-solid fa-circle-question"></i> Руководство по трекеру боя D&D 5e</h3>
         <ul style="margin-left:20px; margin-top:10px; line-height:1.6;">
             <li><strong>➕ Добавление участников:</strong> Нажмите <strong><i class="fa-solid fa-dragon"></i> Бестиарий</strong> — откроется панель со списком монстров. Используйте фильтры по папкам (иконки) и CR. Кнопка <strong>«<i class="fa-solid fa-plus"></i> Добавить»</strong> помещает существо в бой. Героев добавляйте через <strong><i class="fa-brands fa-buffer"></i> Меню → <i class="fa-solid fa-square-plus"></i> Новый герой</strong> или импорт JSON.</li>
-            <li><strong>🎲 Инициатива:</strong> В карточке есть поле «Инициатива» и кнопка <strong><i class="fa-solid fa-dice-d20"></i> d20</strong> (бросок 1d20 + бонус). Кнопка <strong><i class="fa-solid fa-hand-fist"></i> Инициатива монстрам</strong> бросает инициативу всем монстрам. <strong><i class="fa-solid fa-hand-fist"></i> Сортировать по иниц</strong> упорядочивает очередь ходов.</li>
+            <li><strong>🎲 Инициатива:</strong> В карточке есть поле «Инициатива» и кнопка <strong><i class="fa-solid fa-dice-d20"></i> d20</strong> (бросок 1d20 + бонус). Кнопка <strong><i class="fa-solid fa-hand-fist"></i> Инициатива монстрам</strong> бросает инициативу по группам: все монстры с одинаковым названием получают один общий результат. <strong><i class="fa-solid fa-hand-fist"></i> Сортировать по иниц</strong> упорядочивает очередь ходов.</li>
             <li><strong>❤️ Хиты и урон:</strong> Введите число в поле «урон», затем используйте кнопки: <strong>⚔️</strong> — нанести урон, <strong>½ / ¼ / ×2</strong> — модификаторы, <strong>💚</strong> — лечение. У монстров есть <strong><i class="fa-solid fa-dice"></i></strong> — перебросить ХП по формуле.</li>
             <li><strong>📋 Состояния:</strong> Нажмите <strong>«📋 Состояния»</strong> в карточке, чтобы открыть панель. Выбранные состояния отображаются цветными бейджами. Чтобы снять состояние, нажмите на его бейдж или снова выберите в панели. Кнопка <strong>«❌ Сбросить всё»</strong> убирает все состояния сразу.</li>
             <li><strong>🔮 Заклинания:</strong> У заклинателей отображаются ячейки (кнопки <strong>+/-</strong>). В детальном окне (через <strong><i class="fa-brands fa-buffer"></i></strong> в карточке) показан полный список заклинаний, сгруппированный по уровням. Каждое заклинание подсвечивается цветом своей школы (Ограждение, Воплощение, Некромантия и т.д.). Клик по названию открывает полное описание.</li>
@@ -2373,6 +2390,23 @@ function findSpellById(id) {
         renderCombat(); 
         saveCurrentStateToSession(); 
     }
+    function rollGroupedMonsterInitiative() {
+        const groups = new Map();
+        for (const c of combatants) {
+            if (!c.isMonster) continue;
+            const key = String(c.name || '').normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('ru');
+            if (!groups.has(key)) {
+                const roll = Math.floor(Math.random()*20)+1;
+                const bonus = Number(c.initBonus)||0;
+                groups.set(key,{roll,bonus,total:roll+bonus});
+            }
+            const group=groups.get(key);
+            c.initiative=group.total;
+            addLog(c,`🎲 Групповая иниц: ${group.roll} + ${group.bonus} = ${group.total}`);
+        }
+        renderCombat();
+        saveCurrentStateToSession();
+    }
     function sortByInitiative() { combatants.sort((a,b)=>b.initiative - a.initiative); currentTurnIndex = 0; renderCombat(); scrollToCurrentTurn(); saveCurrentStateToSession(); }
     function toggleCondition(c, cond) { 
         if (cond === "Истощённый") { 
@@ -2725,7 +2759,7 @@ function findSpellById(id) {
     document.getElementById('sortInitBtn').onclick = sortByInitiative;
     document.getElementById('addHeroBtn').onclick = addHero;
     document.getElementById('clearMonstersBtn').onclick = () => { combatants = combatants.filter(c => !c.isMonster); currentTurnIndex=0; renderCombat(); saveCurrentStateToSession(); };
-    document.getElementById('rollAllInitBtn').onclick = () => { combatants.forEach(c => { if(c.isMonster){ let r=Math.floor(Math.random()*20)+1; c.initiative = r+c.initBonus; addLog(c, `🎲 Автоиниц: ${r}+${c.initBonus}`); } }); renderCombat(); saveCurrentStateToSession(); };
+    document.getElementById('rollAllInitBtn').onclick = rollGroupedMonsterInitiative;
     document.getElementById('nextTurnBtnTop').onclick = nextTurn;
     document.getElementById('prevTurnBtnTop').onclick = prevTurn;
     document.getElementById('nextRoundBtnTop').onclick = () => { currentRound++; document.getElementById('roundNumberTop').innerText = currentRound; addLog(combatants[0] || {log:[]}, `🌕 Раунд ${currentRound}`); renderCombat(); saveCurrentStateToSession(); };
