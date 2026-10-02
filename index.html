@@ -1275,7 +1275,17 @@ function getFolderPlainName(type) {
     }
     function monsterFilterData(m){const full=fullMonstersMap.get(m.name.toLowerCase())||{};const raw=normalizeMonsterInlineText(full.type).toLowerCase();const types={'гуманоид':'Гуманоид','нежить':'Нежить','животное':'Зверь','зверь':'Зверь','конструкция':'Конструкт','конструкт':'Конструкт','custom':'Особый'};return {type:types[raw]||(raw?raw.charAt(0).toUpperCase()+raw.slice(1):'Не указан'),size:translateSize(full.size),alignment:catalogueAlignment(full.alignment),source:sourceKey(full.source)};}
 
+    function normalizeBestiaryFolders(){
+        const aliases={humanoid:'Гуманоиды',гуманоид:'Гуманоиды',гуманоиды:'Гуманоиды',undead:'Нежить',нежить:'Нежить',construct:'Конструкты',конструкция:'Конструкты',конструкт:'Конструкты',конструкты:'Конструкты',beast:'Звери',животное:'Звери',зверь:'Звери',звери:'Звери',dragon:'Драконы',дракон:'Драконы',драконы:'Драконы',plant:'Растения',растение:'Растения',растения:'Растения',giant:'Великаны',великан:'Великаны',великаны:'Великаны',fiend:'Исчадия',исчадие:'Исчадия',исчадия:'Исчадия',aberration:'Ужасы',аберрация:'Ужасы',ужасы:'Ужасы',monstrosity:'Чудовища',монстр:'Чудовища',чудовище:'Чудовища',чудовища:'Чудовища',celestial:'Небожители',небожитель:'Небожители',небожители:'Небожители',fey:'Феи',фея:'Феи',феи:'Феи',elemental:'Элементали',элементаль:'Элементали',элементали:'Элементали',ooze:'Слизи',слизь:'Слизи',слизи:'Слизи'};
+        for(const m of monstersLibrary){
+            if(m.folder==='Свои монстры')continue;
+            const folder=String(m.folder||'').trim().toLowerCase(),full=fullMonstersMap.get(m.name.toLowerCase());
+            const type=normalizeMonsterInlineText(full?.type).toLowerCase().trim();
+            m.folder=aliases[folder]||aliases[type]||'Без категории';
+        }
+    }
     function initFilters() {
+        normalizeBestiaryFolders();
         fillCatalogueFilter('folderSelect',monstersLibrary.map(m=>m.folder),'Все группы');
         fillCatalogueFilter('crFilter',monstersLibrary.map(m=>m.cr),'Любая опасность',x=>'CR '+x);
         const data=monstersLibrary.map(monsterFilterData);
