@@ -901,6 +901,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
                         <button id="newSessionBtn" class="btn" style="background:#3a6b47;" data-tooltip="Создать новую кампанию"><span class="btn-label"><i class="fa-solid fa-user-plus fa-icon"></i>Сессия</span></button>
                         <button id="deleteSessionBtn" class="btn" style="background:#7a3e2a;" data-tooltip="Удалить текущую кампанию"><span class="btn-label"><i class="fa-solid fa-trash-can fa-icon"></i>Удалить сессию</span></button>
                         <button id="resetAllSessionsBtn" class="btn" style="background:#b85c5c;" data-tooltip="Сбросить все сессии и начать заново"><span class="btn-label"><i class="fa-solid fa-arrows-rotate fa-icon"></i>Сброс сессий</span></button>
+            <a href="players.html" target="_blank" rel="noopener" class="btn" id="openPlayerDisplayBtn">Экран игроков / ТВ</a>
             <a id="exportBackupBtn" class="btn" download="tracker-backup.json" href="#">Скачать резервную копию</a><button id="importBackupBtn" class="btn">Восстановить из копии</button><input id="backupFileInput" type="file" accept="application/json,.json" hidden><div id="backupStatus" role="status" style="font-size:12px;color:#c8bdde;padding:6px"></div>
             <div class="right-panel-links">
                 <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank">
@@ -970,6 +971,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="monster-builder.js?v=4"></script>
 <script src="monster-mechanics.js?v=3"></script>
 <script src="tracker-backup.js?v=1"></script>
+<script src="player-display.js?v=1"></script>
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
 <script src="hero-card.js?v=7"></script>
@@ -2550,7 +2552,7 @@ function findSpellById(id) {
         renderCombat();
         saveCurrentStateToSession();
     }
-    function sortByInitiative() { combatants.sort((a,b)=>b.initiative - a.initiative); currentTurnIndex = 0; renderCombat(); scrollToCurrentTurn(); saveCurrentStateToSession(); }
+    function sortByInitiative() { combatants.sort((a,b)=>b.initiative - a.initiative); currentTurnIndex = Math.max(0,combatants.findIndex(c=>Number.isFinite(Number(c.initiative))&&Number(c.initiative)!==0)); renderCombat(); scrollToCurrentTurn(); saveCurrentStateToSession(); }
     function toggleCondition(c, cond) { 
         if (cond === "Истощённый") { 
             let newLevel = (c.exhaustion || 0) + 1; 
@@ -2566,8 +2568,14 @@ function findSpellById(id) {
         renderCombat(); 
         saveCurrentStateToSession(); 
     }
-    function nextTurn() { if(!combatants.length) return; currentTurnIndex++; if(currentTurnIndex >= combatants.length) { currentTurnIndex = 0; currentRound++; document.getElementById('roundNumberTop').innerText = currentRound; addLog(combatants[0], `🌀 Раунд ${currentRound}`); } renderCombat(); scrollToCurrentTurn(); saveCurrentStateToSession(); }
-    function prevTurn() { if(!combatants.length) return; currentTurnIndex--; if(currentTurnIndex < 0) { currentTurnIndex = combatants.length - 1; if(currentRound > 0) { currentRound--; document.getElementById('roundNumberTop').innerText = currentRound; addLog(combatants[0], `🌀 Раунд ${currentRound}`); } } renderCombat(); scrollToCurrentTurn(); saveCurrentStateToSession(); }
+    function stepCombatTurn(direction) {
+        const next=PlayerDisplay.step(combatants,currentTurnIndex,direction);if(!next)return;
+        currentTurnIndex=next.index;
+        if(next.wrapped){if(direction>0)currentRound++;else if(currentRound>0)currentRound--;document.getElementById('roundNumberTop').innerText=currentRound;addLog(combatants[currentTurnIndex],`🌀 Раунд ${currentRound}`);}
+        renderCombat();scrollToCurrentTurn();saveCurrentStateToSession();
+    }
+    function nextTurn(){stepCombatTurn(1);}
+    function prevTurn(){stepCombatTurn(-1);}
     function resetRound() { currentRound = 0; document.getElementById('roundNumberTop').innerText = currentRound; addLog(combatants[0] || {log:[]}, `🌀 Раунд сброшен на 0`); renderCombat(); saveCurrentStateToSession(); }
     function scrollToCurrentTurn() { setTimeout(() => { const currentCard = document.querySelector(`.combat-card.current-turn-hero, .combat-card.current-turn-monster`); if (currentCard) currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); }
     function addLog(c, msg) { if (!c) return; if (!c.log) c.log = []; c.log.unshift(`🕒 ${new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})} ${msg}`); if (c.log.length > 3) c.log.pop(); renderCombat(); saveCurrentStateToSession(); }
@@ -2756,6 +2764,7 @@ function findSpellById(id) {
 
     function renderCombat() {
         const grid = document.getElementById('combatantsGrid');
+        PlayerDisplay.publish(combatants,currentTurnIndex,currentRound);
         if (!combatants.length) { grid.innerHTML = '<div style="padding:60px;text-align:center;"><i class="fa-solid fa-user-plus"></i> Добавьте героев или монстров из бестиария</div>'; return; }
         SpellEffects.advance(combatants,currentRound);
         let html = '';
