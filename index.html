@@ -812,6 +812,26 @@ select option,select optgroup{background:#172532;color:#e3edf5}
 .turn-label i{color:#d69aff}
 @keyframes violetOrbit{from{--turn-glow-angle:0deg}to{--turn-glow-angle:360deg}}
 @media(prefers-reduced-motion:reduce){.turn-flames,.turn-flames::before,.turn-label i{animation:none!important}.combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none!important}}
+
+/* Одна строка инструментов; меню всегда остаётся в пределах экрана. */
+html,body{max-width:100%;box-sizing:border-box}
+#topBar{position:fixed!important;top:0!important;left:0;right:0;width:100%!important;margin:0!important;transform:none!important;background:rgba(12,18,26,.92)}
+#topBar .top-bar-content{display:flex!important;flex-wrap:nowrap!important;gap:8px!important;padding:7px 16px!important;min-width:0}
+#topBar .top-bar-left{display:flex!important;flex:1 1 auto;flex-wrap:nowrap!important;width:auto!important;min-width:0;gap:7px!important;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;align-items:center}
+#topBar .top-bar-left::-webkit-scrollbar{display:none}
+#topBar .top-bar-left>*{flex:0 0 auto;order:0!important;white-space:nowrap}
+#topBar .menu-wrapper{flex:0 0 auto;order:0!important;margin:0!important;position:relative}
+#topBar .btn{font-size:12px!important;padding:6px 12px!important;min-height:32px;white-space:nowrap}
+#topBar .round-indicator{padding:3px 8px!important;gap:5px!important;margin:0!important;font-size:12px;flex-wrap:nowrap}
+#topBar .round-indicator .btn{padding:4px 9px!important;min-height:28px}
+#burgerMenu{position:fixed!important;left:var(--menu-left,8px)!important;top:var(--menu-top,52px)!important;right:auto!important;width:min(300px,calc(100vw - 16px))!important;min-width:0!important;max-width:calc(100vw - 16px)!important;box-sizing:border-box;border-radius:14px!important;margin:0!important;overflow-y:auto;overflow-x:hidden;z-index:450}
+#burgerMenu .right-panel-links{display:flex;flex-wrap:wrap;gap:10px;padding:8px 4px;border-top:1px solid #425266}
+#burgerMenu .burger-grid>*{box-sizing:border-box;min-width:0;max-width:100%}
+#trackerArea{padding-top:var(--top-bar-offset)!important;min-width:0}
+#combatantsGrid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));min-width:0}
+#bestiaryPanel{top:var(--top-bar-offset);height:calc(100dvh - var(--top-bar-offset));padding-top:16px;max-width:100vw}
+@media(max-width:1100px){#topBar .btn{padding:6px 9px!important;font-size:11px!important}#topBar .top-bar-left{gap:5px!important}#trackerArea.shifted{margin-left:0!important}#bestiaryPanel{z-index:210;width:min(540px,100vw)}}
+@media(max-width:768px){body{padding:0 10px 12px!important}#topBar .top-bar-content{padding:6px 8px!important;gap:6px!important}#topBar .round-indicator{font-size:11px;gap:3px!important}#topBar .btn{font-size:11px!important;padding:5px 8px!important}#bestiaryPanel{width:100vw!important;border-radius:0;padding:14px 16px;z-index:210}#bestiaryPanel h2{margin-top:0!important}#bestiaryPanel .close-bestiary-mobile{top:10px;right:12px}#combatantsGrid{gap:12px;padding:6px 2px}}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -834,6 +854,8 @@ select option,select optgroup{background:#172532;color:#e3edf5}
             <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
             <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания"><span class="btn-label"><i class="fa-solid fa-scroll fa-icon"></i>Заклинания</span></button>
 			<a href="translator.html" class="btn" style="background:#004687;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
+
+        </div>
             <div class="menu-wrapper">
                 <button class="btn" id="burgerMenuBtn" data-tooltip="Дополнительные действия"><span class="btn-label"><i class="fa-brands fa-buffer fa-icon"></i>Меню</span></button>
                 <div class="burger-menu" id="burgerMenu">
@@ -847,9 +869,6 @@ select option,select optgroup{background:#172532;color:#e3edf5}
                         <button id="newSessionBtn" class="btn" style="background:#3a6b47;" data-tooltip="Создать новую кампанию"><span class="btn-label"><i class="fa-solid fa-user-plus fa-icon"></i>Сессия</span></button>
                         <button id="deleteSessionBtn" class="btn" style="background:#7a3e2a;" data-tooltip="Удалить текущую кампанию"><span class="btn-label"><i class="fa-solid fa-trash-can fa-icon"></i>Удалить сессию</span></button>
                         <button id="resetAllSessionsBtn" class="btn" style="background:#b85c5c;" data-tooltip="Сбросить все сессии и начать заново"><span class="btn-label"><i class="fa-solid fa-arrows-rotate fa-icon"></i>Сброс сессий</span></button>
-                    </div>
-                </div>
-            </div>
             <div class="right-panel-links">
                 <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank">
                     <svg class="telegram-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.02-.13-.05-.18-.07-.05-.17-.03-.25-.02-.1.01-1.7 1.08-4.8 3.17-.45.31-.86.46-1.23.45-.4-.01-1.18-.23-1.76-.42-.71-.23-1.27-.35-1.22-.74.03-.2.3-.41.83-.63 3.2-1.39 5.34-2.31 6.42-2.76 3.05-1.28 3.69-1.5 4.1-1.51.09 0 .29.02.42.13.11.09.14.22.15.32.01.13-.01.3-.03.46z"/></svg>
@@ -858,7 +877,10 @@ select option,select optgroup{background:#172532;color:#e3edf5}
                 <a href="https://pay.cloudtips.ru/p/dfc6c2f5" target="_blank"><i class="fa-solid fa-dollar-sign fa-icon"></i> Поддержать</a>
                 <button class="help-btn" id="helpBtn" data-tooltip="Открыть руководство"><i class="fa-solid fa-circle-question fa-icon"></i> Руководство</button>
             </div>
-        </div>
+                    </div>
+                </div>
+            </div>
+
     </div>
 </div>
 
@@ -2846,7 +2868,7 @@ function findSpellById(id) {
     document.getElementById('addHeroBtn').onclick = addHero;
     document.getElementById('clearMonstersBtn').onclick = () => { combatants = combatants.filter(c => !c.isMonster); currentTurnIndex=0; renderCombat(); saveCurrentStateToSession(); };
     document.getElementById('undoCombatBtn').onclick=undoCombatAction;
-    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!e.shiftKey&&!e.target.closest('input,textarea,select,[contenteditable="true"]')){e.preventDefault();undoCombatAction();}});
+    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&(e.code==='KeyZ'||['z','я'].includes(e.key.toLowerCase()))&&!e.shiftKey&&!e.target.closest('input,textarea,select,[contenteditable="true"]')){e.preventDefault();undoCombatAction();}});
     document.getElementById('rollAllInitBtn').onclick = rollGroupedMonsterInitiative;
     document.getElementById('nextTurnBtnTop').onclick = nextTurn;
     document.getElementById('prevTurnBtnTop').onclick = prevTurn;
@@ -2861,10 +2883,18 @@ function findSpellById(id) {
     document.getElementById('resetAllSessionsBtn').onclick = resetAllSessions;
     const burgerMenuBtn = document.getElementById('burgerMenuBtn');
     const burgerMenu = document.getElementById('burgerMenu');
+    function positionBurgerMenu(){
+        if(!burgerMenu||!burgerMenuBtn)return;
+        const rect=burgerMenuBtn.getBoundingClientRect(),width=Math.min(300,window.innerWidth-16);
+        burgerMenu.style.setProperty('--menu-left',Math.max(8,Math.min(rect.right-width,window.innerWidth-width-8))+'px');
+        burgerMenu.style.setProperty('--menu-top',(rect.bottom+8)+'px');
+        burgerMenu.style.maxHeight=Math.max(100,window.innerHeight-rect.bottom-24)+'px';
+    }
     if (burgerMenuBtn && burgerMenu) {
+        document.body.appendChild(burgerMenu);
         burgerMenuBtn.onclick = (e) => {
             e.stopPropagation();
-            burgerMenu.classList.toggle('open');
+            positionBurgerMenu();burgerMenu.classList.toggle('open');burgerMenuBtn.setAttribute('aria-expanded',String(burgerMenu.classList.contains('open')));
         };
         burgerMenu.addEventListener('click', (e) => e.stopPropagation());
     }
@@ -2873,7 +2903,7 @@ function findSpellById(id) {
         const topBar = document.getElementById('topBar');
         const trackerArea = document.getElementById('trackerArea');
         if (!topBar || !trackerArea) return;
-        const offset = window.innerWidth <= 768 ? 0 : Math.ceil(topBar.getBoundingClientRect().height) + 12;
+        const offset = Math.ceil(topBar.getBoundingClientRect().height) + 10;
         document.documentElement.style.setProperty('--top-bar-offset', `${offset}px`);
     }
     function closeOneModal(modal) {
@@ -2927,9 +2957,10 @@ function findSpellById(id) {
             // ========== Функция для коррекции sticky-позиции toolbar ==========
     function adjustMobileSticky() {
         if (window.innerWidth <= 768) document.body.style.paddingTop = '0px';
-        adjustTopBarOffset();
+        adjustTopBarOffset();positionBurgerMenu();
     }
 
+    new ResizeObserver(adjustMobileSticky).observe(document.getElementById('topBar'));
     window.addEventListener('load', adjustMobileSticky);
     window.addEventListener('resize', adjustMobileSticky);
 
