@@ -47,7 +47,7 @@ def text(value,embedded=None):
  s=re.sub(r'<[^>]*>','',s)
  return re.sub(r'\n\s*\n+','\n',s).strip()
 def defense(t,labels):
- vals=list(t.get('value',[]));physical=[x for x in vals if x in ['bludgeoning','piercing','slashing']];other=[labels.get(x,x) for x in vals if x not in physical];b=t.get('bypasses',[])
+ vals=list(t.get('value',[]));vals=[v for v in vals if v!='physical']+([v for v in ['bludgeoning','piercing','slashing'] if v not in vals] if 'physical' in vals else []);physical=[x for x in vals if x in ['bludgeoning','piercing','slashing']];other=[labels.get(x,x) for x in vals if x not in physical];b=t.get('bypasses',[])
  if physical:
   p=', '.join(labels[x] for x in physical)
   if 'mgc' in b:p+=' от немагических атак'
