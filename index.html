@@ -1465,22 +1465,10 @@ function getFolderPlainName(type) {
     function normalizeMonsterDescriptionForMatch(value) {
         return normalizeMonsterInlineText(value).toLowerCase().replace(/[^a-zа-я0-9\s]/gi, ' ').replace(/\s+/g, ' ').trim();
     }
-    function resolveCustomMonsterTargetKey(custom = {}) {
-        const customName = normalizeMonsterName(custom.name);
-        if (customName && fullMonstersMap.has(customName)) return customName;
-        if (customName) {
-            for (const [key, base] of fullMonstersMap.entries()) {
-                const baseName = normalizeMonsterName(base?.name || key);
-                if (!baseName) continue;
-                const baseParts = baseName.split('/').map(p => p.trim()).filter(Boolean);
-                if (baseParts.includes(customName)) return key;
-            }
-        }
-        // Slugs in the TXT are matched to an exact English alias; never guess from stats.
-        const slug = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-        const candidates = [...fullMonstersMap].filter(([key,base]) => (base.name || '').split('/').some(part => slug(part) && slug(part) === slug(custom.name)));
-        return candidates.length === 1 ? candidates[0][0] : null;
-    }
+    let customAliasIndex=null;
+    const monsterSlug=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    function buildCustomAliasIndex(){const names=new Map(),slugs=new Map();for(const [key,base] of fullMonstersMap){for(const part of normalizeMonsterName(base.name||key).split('/').map(p=>p.trim()).filter(Boolean)){if(!names.has(part))names.set(part,key);const slug=monsterSlug(part);if(slug){if(!slugs.has(slug))slugs.set(slug,key);else if(slugs.get(slug)!==key)slugs.set(slug,null);}}}customAliasIndex={names,slugs};}
+    function resolveCustomMonsterTargetKey(custom={}){const name=normalizeMonsterName(custom.name);if(name&&fullMonstersMap.has(name))return name;if(!customAliasIndex)buildCustomAliasIndex();return customAliasIndex.names.get(name)||customAliasIndex.slugs.get(monsterSlug(custom.name))||null;}
     function getMonsterProfBonus(monster = {}) {
         const explicit = Number(monster.profBonus ?? monster.proficiency?.value ?? monster.proficiency);
         if (Number.isFinite(explicit) && explicit > 0) return explicit;
@@ -1588,7 +1576,7 @@ async function loadCustomMonstersTXT() {
         if (!response.ok) throw new Error('monsters_custom.txt не найден');
         const txt = await response.text();
         const blocks = txt.replace(/\uFEFF/g, '').split(/={20,}/).map(b => b.trim()).filter(Boolean);
-        customMonstersEntries = blocks.map(parseCustomMonsterEntry).filter(Boolean);
+        customMonstersEntries=[];for(let i=0;i<blocks.length;i++){if(i%30===0)await yieldToUI();const entry=parseCustomMonsterEntry(blocks[i]);if(entry)customMonstersEntries.push(entry);}
         console.log(`Загружено из monsters_custom.txt: ${customMonstersEntries.length}`);
     } catch (e) {
         customMonstersEntries = [];
@@ -1630,7 +1618,9 @@ async function loadCustomMonstersTXT() {
         }
 
         // Custom: абсолютный приоритет для механики, но НЕ для name/image/description.
+        buildCustomAliasIndex();let customProcessed=0;
         for (const custom of customMonstersEntries) {
+            if(++customProcessed%30===0)await yieldToUI();
             const targetKey = resolveCustomMonsterTargetKey(custom);
             if (!targetKey) continue;
             const existing = fullMonstersMap.get(targetKey) || {};
@@ -1740,9 +1730,10 @@ async function loadCustomMonstersTXT() {
                 source: spell.source?.book || spell.source?.custom || '—',
                 classes: spell.classes || [], subclasses: spell.subclasses || [], higherLevel: spell.higherLevel || ''
             }));
+            const metadataIndex=new Map();for(const meta of metadata){const key=meta.name.toLowerCase().replace(/’/g,"'");if(!metadataIndex.has(key))metadataIndex.set(key,[]);metadataIndex.get(key).push(meta);}
             allSpellsList.forEach(spell => {
                 const english=spell.spellName.split(/\s+\/\s+/).slice(1).join('/').trim().toLowerCase().replace(/’/g, "'");
-                const meta=metadata.find(m=>m.name.toLowerCase().replace(/’/g, "'")===english && (!m.source || m.source.toLowerCase()===spell.source.toLowerCase()));
+                const meta=(metadataIndex.get(english)||[]).find(m=>!m.source||m.source.toLowerCase()===spell.source.toLowerCase());
                 spell.classes=[];spell.subclasses=[];spell.accessKnown=!!meta?.accessKnown;
                 if(meta){spell.classes=meta.classes;spell.subclasses=meta.subclasses;if(meta.components){spell.components.verbal=meta.components.includes('V');spell.components.somatic=meta.components.includes('S');spell.components.material=meta.components.includes('M');}}
             });
