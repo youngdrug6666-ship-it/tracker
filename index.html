@@ -829,7 +829,7 @@ html,body{max-width:100%;box-sizing:border-box}
 #burgerMenu .burger-grid>*{box-sizing:border-box;min-width:0;max-width:100%}
 #trackerArea{padding-top:var(--top-bar-offset)!important;min-width:0}
 #trackerArea{container-type:inline-size}
-#combatantsGrid{grid-template-columns:repeat(4,minmax(0,1fr));min-width:0;align-items:start}
+#combatantsGrid{grid-template-columns:repeat(4,minmax(0,1fr));min-width:0;align-items:stretch}
 @container(max-width:1300px){#combatantsGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @container(max-width:1000px){#combatantsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @container(max-width:700px){#combatantsGrid{grid-template-columns:minmax(0,1fr)}}
@@ -850,7 +850,15 @@ html,body{max-width:100%;box-sizing:border-box}
 #topBar .top-bar-left{flex:1 1 auto}
 #topBar .top-bar-left>.btn{flex:1 0 auto;justify-content:center;display:inline-flex;align-items:center}
 #topBar .menu-wrapper .btn{justify-content:center;display:inline-flex;align-items:center}
-@media(max-width:768px){#topBar .top-bar-left{flex:1 1 auto}#combatantsGrid{align-items:start}.combat-card .turn-label{top:-17px}}
+@media(max-width:768px){#topBar .top-bar-left{flex:1 1 auto}#combatantsGrid{align-items:stretch}.combat-card .turn-label{top:-17px}}
+
+.combat-card .card-header{position:absolute;right:5px;top:5px;margin:0!important;z-index:4}
+.combat-card .name-input{box-sizing:border-box;padding-right:36px;margin-bottom:2px}
+.combat-card .hero-quick{margin:3px 0;gap:5px}
+.combat-card .spell-stats{margin:2px 0}
+.combat-card .card-content{height:100%;gap:3px}
+.combat-card .log-area{margin-top:auto;padding:5px 7px;border-radius:9px;font-size:10px;line-height:1.4;display:grid;gap:2px}
+.combat-card .log-area>div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -953,6 +961,8 @@ html,body{max-width:100%;box-sizing:border-box}
 <script src="lss-engine.js?v=2"></script>
 <script src="spell-effects.js?v=3"></script>
 <script src="combat-history.js?v=1"></script>
+<script src="monster-builder.js?v=1"></script>
+<link rel="stylesheet" href="monster-builder.css?v=1">
 <script src="hero-card.js?v=7"></script>
 <script>
    (function(){
@@ -2736,7 +2746,7 @@ function findSpellById(id) {
         let html = '';
         combatants.forEach((c, idx) => {
             if (!c.isMonster) HeroCard.ensure(c);
-            else {const full=fullMonstersMap.get(c.name.toLowerCase());if(full){c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const entry of [...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);}
+            else {const full=fullMonstersMap.get(c.name.toLowerCase());if(full){c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const [key,slot] of Object.entries(full.spellSlots||{}))if(!c.spellSlots[key])c.spellSlots[key]=structuredClone(slot);if(full._customMonster){c.spellSaveDC=full.spellSaveDC;c.spellAttack=full.spellAttack;}for(const entry of [...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);}
             if(!c.conditions.has('Концентрация'))c.concentrationChecks=[];
             const check=c.concentrationChecks?.[0];
             const concentrationHtml=check?`<div class="concentration-check" role="status"><span>Концентрация · ТЕЛ <b>СЛ ${check.dc}</b>${c.concentrationChecks.length>1?` · ещё ${c.concentrationChecks.length-1}`:''}</span><div><button class="concentration-pass" data-id="${c.id}">Успех</button><button class="concentration-fail" data-id="${c.id}">Провал</button></div></div>`:'';
@@ -2747,7 +2757,7 @@ function findSpellById(id) {
             let statsHtml = '';
             if (!c.isMonster) statsHtml = HeroCard.summaryStats(c);
             let spellHtml = '';
-            if (!c.isMonster && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний"><i class="fa-solid fa-dice-d6"></i> Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями"><i class="fa-solid fa-wand-sparkles"></i> Атк +${c.spellAttack}</span></div>`;
+            if ((!c.isMonster || fullMonstersMap.get(c.name.toLowerCase())?._customMonster) && (c.spellSaveDC || c.spellAttack)) spellHtml = `<div class="spell-stats"><span data-tooltip="Сл заклинаний"><i class="fa-solid fa-dice-d6"></i> Сл ${c.spellSaveDC}</span><span data-tooltip="Атака заклинаниями"><i class="fa-solid fa-wand-sparkles"></i> Атк +${c.spellAttack}</span></div>`;
             let activeConditionsHtml = '';
             c.conditions.forEach(cond => { 
                 let display = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond; 
@@ -2797,7 +2807,7 @@ function findSpellById(id) {
                     ${slotsHtml}
                     <div class="conditions-header" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
                     <div class="conditions-list" id="conds-${c.id}" style="display:none;"></div>
-                    <div class="log-area">${c.log.slice(0,1).map(l=>`<div>${escapeHtml(l)}</div>`).join('')}</div>
+                    <div class="log-area">${c.log.slice(0,3).map(l=>`<div title="${escapeHtml(l)}">${escapeHtml(l)}</div>`).join('')}</div>
                 </div>
             </div>`;
         });
@@ -2963,16 +2973,26 @@ function findSpellById(id) {
         btn.onclick = function() { closeOneModal(this.closest('.modal')); };
     });
     document.getElementById('helpBtn').onclick = () => document.getElementById('helpModal').style.display = 'flex';
-    document.getElementById('addCustomMonsterBtn').onclick = () => document.getElementById('customModal').style.display = 'flex';
-    document.getElementById('customCancel').onclick = () => document.getElementById('customModal').style.display = 'none';
-    document.getElementById('customAdd').onclick = () => {
-        const name = document.getElementById('customName').value.trim() || "Монстр";
-        const ac = parseInt(document.getElementById('customAC').value) || 12;
-        const hpFormula = document.getElementById('customHPFormula').value.trim() || "6d8+12";
-        const initBonus = parseInt(document.getElementById('customInit').value) || 0;
-        addCombatant({ name, ac, hpFormula, initBonus, isMonster: true });
-        document.getElementById('customModal').style.display = 'none';
-    };
+    function registerCustomMonster(full){
+        fullMonstersMap.set(full.name.toLowerCase(),full);
+        const row={name:full.name,ac:full.ac,hpFormula:full.hpFormula,hpAvg:avgFromFormula(full.hpFormula),initBonus:full.initBonus,folder:'Свои монстры',cr:full.cr};
+        const index=monstersLibrary.findIndex(m=>m.name===full.name);if(index<0)monstersLibrary.push(row);else monstersLibrary[index]=row;
+    }
+    function loadSavedCustomMonsters(){
+        try{for(const full of JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]'))if(full._customMonster&&full.name)registerCustomMonster(full);}catch(e){console.warn('Не удалось загрузить своих монстров',e);}
+    }
+    function openCustomMonsterBuilder(existing=null){
+        MonsterBuilder.open({spells:allSpellsList,existing,onSave:(full,addToCombat,previous)=>{
+            const collision=fullMonstersMap.get(full.name.toLowerCase());
+            if(collision&&collision!==previous)throw Error('Такое имя уже есть в бестиарии. Укажите другое.');
+            const saved=JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]').filter(m=>m.name!==previous?.name);
+            saved.push(full);localStorage.setItem('dnd_custom_monsters_v1',JSON.stringify(saved));
+            if(previous&&previous.name!==full.name){fullMonstersMap.delete(previous.name.toLowerCase());monstersLibrary=monstersLibrary.filter(m=>m.name!==previous.name);}
+            registerCustomMonster(full);initFilters();renderBestiary();
+            if(addToCombat)addCombatant({name:full.name,ac:full.ac,hpFormula:full.hpFormula,initBonus:full.initBonus,isMonster:true,avatar:full.image||null,speed:extractSpeedValue(full.speed),stats:full.stats,spellSaveDC:full.spellSaveDC,spellAttack:full.spellAttack});
+        }});
+    }
+    document.getElementById('addCustomMonsterBtn').onclick=()=>openCustomMonsterBuilder();
             // ========== Функция для коррекции sticky-позиции toolbar ==========
     function adjustMobileSticky() {
         if (window.innerWidth <= 768) document.body.style.paddingTop = '0px';
@@ -2992,7 +3012,7 @@ function findSpellById(id) {
         loadSpells(),
         loadUuidMap()   // <-- обязательно!
      ]).then(() => {
-        initFilters();renderBestiary();
+        loadSavedCustomMonsters();initFilters();renderBestiary();
         initSessions();
         adjustMobileSticky();
         adjustTopBarOffset();
