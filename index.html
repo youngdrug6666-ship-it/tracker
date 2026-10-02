@@ -1162,7 +1162,22 @@ function getFolderPlainName(type) {
     const sourceTitles={MM:'MM — Бестиарий',PHB:'PHB — Книга игрока',DMG:'DMG — Руководство мастера',XGE:'XGE — Руководство Занатара',TCE:'TCE — Котёл Таши',VGM:'VGM — Руководство Воло',MTF:'MTF — Том Морденкайнена',MPMM:'MPMM — Монстры мультивселенной',CoS:'CoS — Проклятие Страда'};
     function sourceKey(value){return typeof value==='object'?String(value?.book||value?.name||'Не указан'):String(value||'Не указан');}
     function fillCatalogueFilter(id,values,title,label=x=>x){const select=document.getElementById(id),previous=select.value;const unique=[...new Set(values.filter(v=>v!==''&&v!=null))].sort((a,b)=>String(a).localeCompare(String(b),'ru',{numeric:true}));select.innerHTML='<option value="all">'+title+'</option>'+unique.map(v=>'<option value="'+escapeHtml(String(v))+'">'+escapeHtml(String(label(v)))+'</option>').join('');if(unique.some(v=>String(v)===previous))select.value=previous;}
-    function monsterFilterData(m){const full=fullMonstersMap.get(m.name.toLowerCase())||{};return {type:normalizeMonsterInlineText(full.type)||'Не указан',size:translateSize(full.size),alignment:translateAlignment(full.alignment),source:sourceKey(full.source)};}
+    function catalogueAlignment(value){
+        let text=translateAlignment(value).toLowerCase().trim().replace(/neutral evil/g,'нейтральный злой').replace(/lawful neutral/g,'принципиальный нейтральный');
+        if(/^(?:без миров|без миро)/.test(text))return 'Без мировоззрения';
+        if(/^(?:любая|любое|любое мировоззрение)$/.test(text))return 'Любое мировоззрение';
+        if(text==='—'||!text)return 'Не указано';
+        if(!/\d|или|кроме/.test(text)&&!/^люб/.test(text)){
+            const law=/прин|приниц/.test(text)?'Принципиальный':/хаот|хаотч/.test(text)?'Хаотичный':null;
+            const moral=/добр/.test(text)?'добрый':/зл/.test(text)?'злой':'нейтральный';
+            if(law)return law+' '+moral;
+            if(/^не[йт]/.test(text))return moral==='нейтральный'?'Нейтральный':'Нейтральный '+moral;
+            text=text.replace(/недоброе|не доброе/g,'недоброе').replace(/неприницпиальное|не принципиальное/g,'непринципиальное');
+        }
+        return text.charAt(0).toUpperCase()+text.slice(1);
+    }
+    function monsterFilterData(m){const full=fullMonstersMap.get(m.name.toLowerCase())||{};const raw=normalizeMonsterInlineText(full.type).toLowerCase();const types={'гуманоид':'Гуманоид','нежить':'Нежить','животное':'Зверь','зверь':'Зверь','конструкция':'Конструкт','конструкт':'Конструкт','custom':'Особый'};return {type:types[raw]||(raw?raw.charAt(0).toUpperCase()+raw.slice(1):'Не указан'),size:translateSize(full.size),alignment:catalogueAlignment(full.alignment),source:sourceKey(full.source)};}
+
     function initFilters() {
         fillCatalogueFilter('folderSelect',monstersLibrary.map(m=>m.folder),'Все группы');
         fillCatalogueFilter('crFilter',monstersLibrary.map(m=>m.cr),'Любая опасность',x=>'CR '+x);
