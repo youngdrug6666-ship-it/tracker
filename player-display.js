@@ -5,11 +5,22 @@
     if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;
     try{const url=new URL(value,typeof location==='object'?location.href:'https://example.invalid/');return /^https?:$/.test(url.protocol)?url.href:'';}catch{return '';}
   }
+  function participant(c){
+    const isAlly=!c.isMonster||c.isAlly===true;
+    const hp=Number(c.currentHp),max=Number(c.maxHp);
+    const health=Number.isFinite(hp)&&Number.isFinite(max)&&max>0?(hp<=0?'down':hp<=max/2?'bloodied':hp<max?'wounded':'healthy'):'unknown';
+    const raw=c.conditions instanceof Set?[...c.conditions]:Array.isArray(c.conditions)?c.conditions:Array.isArray(c.conditions?.values)?c.conditions.values:[];
+    const conditions=raw.filter(v=>typeof v==='string');
+    if(Number(c.exhaustion)>0&&!conditions.some(v=>v.startsWith('Истощ')))conditions.push('Истощение '+Number(c.exhaustion));
+    const result={id:String(c.id),name:String(c.name||'Участник').split(/\s+\/\s+/)[0],initiative:Number(c.initiative),image:image(c.avatar),isMonster:!!c.isMonster,isAlly,health,conditions};
+    if(isAlly)result.metrics={hp:Number.isFinite(hp)?hp:null,maxHp:Number.isFinite(max)?max:null,tempHp:Number(c.tempHp)||0,ac:Number.isFinite(Number(c.ac))?Number(c.ac):null};
+    return result;
+  }
   function project(combatants,currentIndex,round){
     const visible=combatants.filter(c=>Number.isFinite(Number(c.initiative))&&Number(c.initiative)!==0);
     const active=combatants[currentIndex];
     return {version:1,round:Number(round)||0,currentId:active&&visible.includes(active)?String(active.id):null,
-      participants:visible.map(c=>({id:String(c.id),name:String(c.name||'Участник').split(/\s+\/\s+/)[0],initiative:Number(c.initiative),image:image(c.avatar),isMonster:!!c.isMonster}))};
+      participants:visible.map(participant)};
   }
   function step(combatants,index,direction){
     if(!combatants.length)return null;
