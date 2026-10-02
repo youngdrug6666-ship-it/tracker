@@ -763,6 +763,12 @@ a.btn[href="translator.html"]:hover {
 .dice-result-panel>span{font-size:11px;letter-spacing:2px;color:#9caebc}.dice-result-panel h3{color:#dcc18a;font-size:20px}.dice-result-total{font-size:64px;font-weight:800;color:#f3e0b4}.dice-result-panel p{color:#aebcca}.dice-result-close{position:absolute;right:12px;top:10px;background:transparent;border:0;color:#b7c3ce;font-size:26px;cursor:pointer}
 
 .spell-cast-panel{background:#172635;border:1px solid #445b70;border-radius:14px;padding:16px;margin:0 0 18px;color:#e5edf5}.spell-cast-panel h3{margin:0 0 12px;font-size:16px}.spell-cast-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.spell-cast-fields label{display:grid;gap:6px;font-size:12px;color:#afc1d1}.spell-cast-panel select{width:100%;min-width:0;background:#0f1b27;color:#e5edf5;border:1px solid #4c6377;padding:8px;border-radius:8px;color-scheme:dark}.spell-cast-panel p{font-size:12px;color:#aabbcc}.spell-cast-panel button{background:#365875;border:1px solid #668aaa;border-radius:9px;padding:8px 14px;color:white;cursor:pointer}.spell-cast-check{display:block;margin-top:12px;font-size:13px}.spell-cast-check input{accent-color:#c7ad75}.spell-effect-remove{background:#2a3d50;color:#d4e5f2;border:1px solid #577086;border-radius:14px;padding:3px 8px;font-size:11px;cursor:pointer}#spellCastStatus{display:inline-block;margin-left:10px;font-size:12px}@media(max-width:600px){.spell-cast-fields{grid-template-columns:1fr}}
+
+#spellCastForm{padding:11px 13px;margin-bottom:14px;border-radius:11px;background:#17212bd9;border-color:#364858}
+#spellCastForm h3{font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:8px}#spellCastForm h3 span{font-size:11px;color:#cbb77f;background:#253341;border-radius:20px;padding:2px 7px;font-weight:500}
+#spellCastForm select{padding:5px 7px;min-height:32px;font-size:12px;border-radius:7px}#spellCastForm .spell-cast-fields{gap:8px}#spellCastForm .spell-cast-fields label{font-size:11px;gap:3px}
+#spellCastForm .spell-cast-check{font-size:11px;margin-top:8px;display:flex;gap:5px;align-items:center}#spellCastForm p{font-size:11px;margin:6px 0;color:#97aaba}#spellCastForm .spell-cast-footer{display:flex;align-items:center;gap:8px}#spellCastForm button{font-size:12px;padding:5px 12px;border-radius:7px}#spellCastStatus{margin:0;font-size:11px}
+@media(max-width:600px){#spellCastForm .spell-cast-fields{grid-template-columns:1fr 1fr}#spellCastForm .spell-cast-fields label:last-child{grid-column:1/-1}}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -859,7 +865,7 @@ a.btn[href="translator.html"]:hover {
 <script src="bestiary.js?v=6"></script>
 <script src="foundry-data.js?v=3"></script>
 <script src="lss-engine.js?v=2"></script>
-<script src="spell-effects.js?v=1"></script>
+<script src="spell-effects.js?v=2"></script>
 <script src="hero-card.js?v=7"></script>
 <script>
    (function(){
@@ -2160,11 +2166,11 @@ function findSpellById(id) {
         if(!combatants.length)return '<div class="spellcasting-note">Добавьте участника в инициативу, чтобы применить заклинание.</div>';
         const current=combatants[currentTurnIndex]||combatants[0];
         const options=combatants.map(c=>'<option value="'+c.id+'" '+(c.id===current.id?'selected':'')+'>'+Bestiary.esc(c.name)+'</option>').join('');
-        return `<form id="spellCastForm" class="spell-cast-panel"><h3>Применить заклинание</h3><div class="spell-cast-fields"><label>Кто колдует<select name="caster">${options}</select></label><label>Цель эффекта<select name="target">${options}</select></label><label>Ячейка<select name="slot"></select></label></div>${SpellEffects.isMageArmor(spell)?'<label class="spell-cast-check"><input type="checkbox" name="unarmored"> Цель без доспеха — КД станет 13 + ЛОВ, плюс щит и предметы</label>':''}<p>${spell.concentration?'Новая концентрация завершит предыдущую и снимет её отмеченный эффект.':'Эффект можно завершить кнопкой × на карточке.'} Урон и спасброски разрешает мастер.</p><button type="submit">Применить</button><span id="spellCastStatus" role="status"></span></form>`;
+        return `<form id="spellCastForm" class="spell-cast-panel"><h3>Применение <span>${spell.level===0?'Заговор':spell.level+' круг'}</span></h3><div class="spell-cast-fields"><label>Кто колдует<select name="caster">${options}</select></label><label>Цель эффекта<select name="target">${options}</select></label><label>Ячейка<select name="slot"></select></label></div>${SpellEffects.isMageArmor(spell)?'<label class="spell-cast-check"><input type="checkbox" name="unarmored"> Без доспеха · КД 13 + ЛОВ</label>':''}<p>${spell.concentration?'Новая концентрация завершит предыдущую и снимет её отмеченный эффект.':'Эффект можно завершить кнопкой × на карточке.'}</p><div class="spell-cast-footer"><button type="submit">Применить</button><span id="spellCastStatus" role="status"></span></div></form>`;
     }
     function bindSpellCast(spell){
         const form=document.getElementById('spellCastForm');if(!form)return;
-        const updateSlots=()=>{const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);form.elements.slot.innerHTML='<option value="">Без расхода ячейки</option>'+Object.entries(caster?.spellSlots||{}).filter(([key,slot])=>Number(spell.level)>0&&Number(key.replace('pact-',''))>=Number(spell.level)&&slot.max-(slot.used||0)>0).map(([key,slot])=>'<option value="'+key+'">'+(key.startsWith('pact-')?'Договор ':'Уровень ')+key.replace('pact-','')+' · '+(slot.max-(slot.used||0))+' осталось</option>').join('');};
+        const updateSlots=()=>{const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);const slots=SpellEffects.availableSlots(caster,spell);form.elements.slot.innerHTML='<option value="">'+(spell.level===0?'Заговор · без ячейки':slots.length?'Без расхода ячейки':'Нет ячеек · без расхода')+'</option>'+slots.map(([key,slot])=>'<option value="'+key+'">'+(key.startsWith('pact-')?'Договор ':'')+key.replace('pact-','')+' круг · '+(slot.max-(slot.used||0))+' осталось</option>').join('');form.elements.slot.value=SpellEffects.defaultSlot(caster,spell);};
         form.elements.caster.onchange=()=>{form.elements.target.value=form.elements.caster.value;updateSlots();};updateSlots();
         form.onsubmit=e=>{e.preventDefault();const status=document.getElementById('spellCastStatus');try{SpellEffects.cast(combatants,{spell,casterId:form.elements.caster.value,targetId:form.elements.target.value,slotLevel:form.elements.slot.value||null,unarmored:!!form.elements.unarmored?.checked});const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);addLog(caster,'✨ '+spell.spellName.split(/\s+\/\s+/)[0]);refreshSpellEffects();status.textContent='Применено';updateSlots();}catch(error){status.textContent=error.message;}};
     }
@@ -2281,7 +2287,8 @@ function findSpellById(id) {
            function parseSpellSlots(description) {
         const slots = {};
         // Поддержка "2-й круг", "2 круг", "2-го круга", "2 круга" и т.д.
-        const regex = /(\d+)(?:-й|-го)?\s*круг[а]?\s*\((\d+)\s*ячейк[а-я]*\)/gi;
+        description=Bestiary.clean(description,true).replace(/[\u2010-\u2015\u2212]/g,'-');
+        const regex = /(\d+)(?:-й|-го)?\s*(?:круг[а]?|уровень|уровня)\s*\((\d+)\s*ячейк[а-я]*\)/gi;
         let match;
         while ((match = regex.exec(description)) !== null) {
             const level = parseInt(match[1]);
@@ -2565,6 +2572,7 @@ function findSpellById(id) {
         let html = '';
         combatants.forEach((c, idx) => {
             if (!c.isMonster) HeroCard.ensure(c);
+            else {const full=fullMonstersMap.get(c.name.toLowerCase());if(full){c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const entry of [...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);}
             const isCurrent = idx === currentTurnIndex;
             let turnClass = isCurrent ? (c.isMonster ? 'current-turn-monster' : 'current-turn-hero') : '';
             const activeConds = c.conditions.size + (c.exhaustion > 0 ? 1 : 0);
