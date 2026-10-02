@@ -2,7 +2,7 @@
 (() => {
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   let canvas, ctx, frame = 0, width = 0, height = 0, last = 0;
-  const margin = 13;
+  const margin = 22;
   function point(distance, w, h, r) {
     const straight = [w - 2*r, h - 2*r, w - 2*r, h - 2*r];
     const arc = Math.PI*r/2;
@@ -40,30 +40,40 @@
     if(cw<=0 || ch<=0)return;
     const length=2*(cw+ch-4*r)+2*Math.PI*r, samples=Math.ceil(length/3);
     const time=motion.matches?0:now/1000;
-    ctx.beginPath();
-    for(let i=0;i<=samples;i++) {
-      const s=i/samples, a=s*Math.PI*2;
-      // Spatial harmonics meet exactly at the seam; time never resets.
-      const wave=Math.sin(a*19-time*2.1)+.55*Math.sin(a*37+time*3.2)+.3*Math.sin(a*61-time*4.3);
-      const flare=Math.pow(Math.max(0,Math.sin(a*13-time*1.6)),5)*3.5;
-      const d=1.2+wave*1.65+flare;
-      const [x,y,nx,ny]=point(s*length,cw,ch,r);
-      const px=x+margin+nx*d,py=y+margin+ny*d;
-      if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+    // Filled, tapered flames instead of a stroked perimeter.
+    const count=Math.ceil(length/11);
+    ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<count;i++) {
+      const phase=i*2.399963;
+      const pulse=.5+.5*Math.sin(time*2.7+phase);
+      const sway=Math.sin(time*3.3+phase)*3.5+Math.sin(time*1.4+i)*2;
+      const tall=6+9*pulse+2*Math.sin(time*4.1+phase);
+      const base=3.4+1.8*(.5+.5*Math.sin(time*2.1+phase));
+      const distance=(i/count*length+2*Math.sin(time*1.5+phase)+length)%length;
+      const [x,y,nx,ny]=point(distance,cw,ch,r);
+      ctx.save();ctx.translate(x+margin,y+margin);
+      // Local x follows the edge, local y points outwards.
+      ctx.transform(-ny,nx,nx,ny,0,0);
+      function tongue(scale,color,blur) {
+        ctx.beginPath();
+        ctx.moveTo(-base*scale,-1);
+        ctx.bezierCurveTo(-base*1.5*scale,tall*.28*scale,sway-4*scale,tall*.65*scale,sway,tall*scale);
+        ctx.bezierCurveTo(sway+1.7*scale,tall*.61*scale,base*1.6*scale,tall*.34*scale,base*scale,-1);
+        ctx.quadraticCurveTo(0,-2,-base*scale,-1);
+        ctx.closePath();ctx.fillStyle=color;ctx.shadowColor='#9b35ff';ctx.shadowBlur=blur;ctx.fill();
+      }
+      const halo=ctx.createLinearGradient(0,-2,0,tall);
+      halo.addColorStop(0,'rgba(129,31,229,.55)');halo.addColorStop(.4,'rgba(157,52,246,.36)');halo.addColorStop(1,'rgba(120,34,230,0)');
+      tongue(1.15,halo,7);
+      const body=ctx.createLinearGradient(0,-1,0,tall);
+      body.addColorStop(0,'rgba(217,157,255,.85)');body.addColorStop(.28,'rgba(185,94,255,.75)');body.addColorStop(.72,'rgba(146,47,238,.48)');body.addColorStop(1,'rgba(129,30,224,0)');
+      tongue(1,body,2);
+      const core=ctx.createLinearGradient(0,-1,0,tall*.6);
+      core.addColorStop(0,'rgba(250,221,255,.88)');core.addColorStop(.35,'rgba(227,179,255,.65)');core.addColorStop(1,'rgba(194,123,255,0)');
+      tongue(.56,core,0);
+      ctx.restore();
     }
-    ctx.closePath();
-    ctx.lineJoin='round';ctx.lineCap='round';
-    ctx.shadowColor='#9b38ff';ctx.shadowBlur=10;ctx.strokeStyle='rgba(137,52,232,.32)';ctx.lineWidth=7;ctx.stroke();
-    ctx.shadowBlur=5;ctx.strokeStyle='#b568f5';ctx.lineWidth=3.4;ctx.stroke();
-    ctx.shadowBlur=2;ctx.strokeStyle='#efcfff';ctx.lineWidth=1.35;ctx.stroke();
-    // Short curling tongues along the exterior, away from controls.
-    ctx.shadowBlur=4;ctx.strokeStyle='rgba(211,149,255,.65)';ctx.lineWidth=1;
-    for(let i=0;i<36;i++) {
-      const s=i/36, pulse=(1+Math.sin(time*2.6+i*2.4))/2;
-      const [x,y,nx,ny]=point(s*length,cw,ch,r), size=2+pulse*5;
-      ctx.beginPath();ctx.moveTo(x+margin+nx*2,y+margin+ny*2);
-      ctx.quadraticCurveTo(x+margin+nx*size-ny*3,y+margin+ny*size+nx*3,x+margin+nx*(size+1)+ny*2,y+margin+ny*(size+1)-nx*2);ctx.stroke();
-    }
+    ctx.globalCompositeOperation='source-over';ctx.shadowBlur=0;
     if(!motion.matches)frame=requestAnimationFrame(draw);
   }
   function sync() {

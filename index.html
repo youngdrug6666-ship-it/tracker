@@ -805,7 +805,7 @@ select option,select optgroup{background:#172532;color:#e3edf5}
 
 /* Фиолетовое пламя только у текущего участника. */
 .combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none;transform:none;box-shadow:0 0 0 2px #c997ff,0 0 20px #9d48dc88}
-.turn-flames{position:absolute;inset:-13px;border-radius:37px;z-index:3;pointer-events:none}
+.turn-flames{position:absolute;inset:-22px;border-radius:46px;z-index:3;pointer-events:none}
 .turn-flames canvas{display:block;width:100%;height:100%;pointer-events:none}
 .turn-label{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;color:#f1dbff;background:#34184ce8;border:1px solid #b776e4;border-radius:7px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 7px;margin-bottom:1px}
 .turn-label i{color:#d69aff}
@@ -3074,6 +3074,6 @@ function findSpellById(id) {
     });
 })();
 </script>
-<script src="turn-flames.js?v=1"></script>
+<script src="turn-flames.js?v=2"></script>
 </body>
 </html>
