@@ -805,12 +805,11 @@ select option,select optgroup{background:#172532;color:#e3edf5}
 
 /* Фиолетовое пламя только у текущего участника. */
 .combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none;transform:none;box-shadow:0 0 0 2px #c997ff,0 0 20px #9d48dc88}
-@property --turn-glow-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
-.turn-flames{--turn-glow-angle:0deg;position:absolute;inset:-4px;border-radius:27px;padding:4px;z-index:2;pointer-events:none;background:conic-gradient(from var(--turn-glow-angle),#a66ce0 0deg,#b986ee 65deg,#dfbaff 110deg,#b986ee 155deg,#a66ce0 210deg,#9460ce 285deg,#a66ce0 360deg);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;animation:violetOrbit 12s linear infinite}
-.turn-flames::before{content:none}
+.turn-flames{position:absolute;inset:-13px;border-radius:37px;z-index:3;pointer-events:none}
+.turn-flames canvas{display:block;width:100%;height:100%;pointer-events:none}
 .turn-label{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;color:#f1dbff;background:#34184ce8;border:1px solid #b776e4;border-radius:7px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 7px;margin-bottom:1px}
 .turn-label i{color:#d69aff}
-@keyframes violetOrbit{from{--turn-glow-angle:0deg}to{--turn-glow-angle:360deg}}
+
 @media(prefers-reduced-motion:reduce){.turn-flames,.turn-flames::before,.turn-label i{animation:none!important}.combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none!important}}
 
 /* Одна строка инструментов; меню всегда остаётся в пределах экрана. */
@@ -3075,5 +3074,6 @@ function findSpellById(id) {
     });
 })();
 </script>
+<script src="turn-flames.js?v=1"></script>
 </body>
 </html>
