@@ -20,6 +20,7 @@ function effectSource(effect,all){
  const source=all.find(c=>String(c.id)===String(effect.casterId));
  return source?label(source):effect.casterName?effect.casterName+' (вне боя)':'Заклинатель вне боя';
 }
-function effectTooltip(effect,all){return effect.name+' · Наложил: '+effectSource(effect,all)+(effect.duration?' · Длительность: '+effect.duration:'')+(effect.concentration?' · Концентрация':'')+' · Нажмите ×, чтобы снять';}
+function durationLabel(value){const words={minute:'мин.',minutes:'мин.',hour:'ч.',hours:'ч.',day:'дн.',days:'дн.',round:'раунд',rounds:'раундов',inst:'Мгновенно',instantaneous:'Мгновенно',special:'Особая'};return String(value||'').replace(/\b[a-z]+\b/gi,v=>words[v.toLowerCase()]||v);}
+function effectTooltip(effect,all){return effect.name+' · Наложил: '+effectSource(effect,all)+(effect.duration?' · Длительность: '+durationLabel(effect.duration):'')+(effect.concentration?' · Концентрация':'')+' · Нажмите ×, чтобы снять';}
 const api={ensure,label,effectSource,effectTooltip};root.CombatLabels=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof globalThis==='object'?globalThis:window);
