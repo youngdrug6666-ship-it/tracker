@@ -41,14 +41,14 @@
     const length=2*(cw+ch-4*r)+2*Math.PI*r, samples=Math.ceil(length/3);
     const time=motion.matches?0:now/1000;
     // Filled, tapered flames instead of a stroked perimeter.
-    const count=Math.ceil(length/11);
-    ctx.globalCompositeOperation='lighter';
+    const count=Math.ceil(length/7);
+    ctx.globalCompositeOperation='source-over';
     for(let i=0;i<count;i++) {
       const phase=i*2.399963;
       const pulse=.5+.5*Math.sin(time*2.7+phase);
       const sway=Math.sin(time*3.3+phase)*3.5+Math.sin(time*1.4+i)*2;
-      const tall=6+9*pulse+2*Math.sin(time*4.1+phase);
-      const base=3.4+1.8*(.5+.5*Math.sin(time*2.1+phase));
+      const tall=3+15*pulse*pulse*(.65+.35*Math.sin(i*7.13))+2*Math.sin(time*4.1+phase);
+      const base=3.6+1.4*(.5+.5*Math.sin(time*2.1+phase));
       const distance=(i/count*length+2*Math.sin(time*1.5+phase)+length)%length;
       const [x,y,nx,ny]=point(distance,cw,ch,r);
       ctx.save();ctx.translate(x+margin,y+margin);
@@ -70,7 +70,7 @@
       tongue(1,body,2);
       const core=ctx.createLinearGradient(0,-1,0,tall*.6);
       core.addColorStop(0,'rgba(250,221,255,.88)');core.addColorStop(.35,'rgba(227,179,255,.65)');core.addColorStop(1,'rgba(194,123,255,0)');
-      tongue(.56,core,0);
+      tongue(.36,core,0);
       ctx.restore();
     }
     ctx.globalCompositeOperation='source-over';ctx.shadowBlur=0;
