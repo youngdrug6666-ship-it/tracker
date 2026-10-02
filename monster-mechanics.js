@@ -11,7 +11,7 @@ function text(value){
 function casting(m){
  const entries=['features','actions','bonus_actions','reactions','legendary_actions'].flatMap(k=>m[k]||[]).filter(e=>/заклинан|колдовство|spellcasting/i.test(e.name));
  const result=[];
- for(const e of entries){const source=text(e._displayDescription??e.description);const dc=source.match(/(?:СЛ(?:\s+(?:спасброск[аиов]*|испытани[яйе])(?:\s+(?:против|от)\s+заклинани[яй])?)?|сложность спасброска|spell save DC)\s*[:=]?\s*(\d+)/i);const attack=source.match(/([+−-]\d+)\s*\)?\s*(?:к попаданию|к броск(?:ам|у) атаки|к атаке|to hit with spell)|(?:атака заклинаниями|spell attack(?: modifier)?)\s*[:=]?\s*([+−-]?\d+)/i);if(dc||attack)result.push({name:e.name,dc:dc?Number(dc[1]):null,attack:attack?Number((attack[1]||attack[2]).replace('−','-')):null});}
+ for(const e of entries){const source=text(e._displayDescription??e.description);const dc=source.match(/(?:СЛ(?:\s+(?:спасброск[аиов]*|испытани[яйе])(?:\s+(?:против|от)\s+заклинани[яй])?)?|сложность спасброска|spell save DC)\s*[:=]?\s*(\d+)/i)||source.match(/(?:^|[\s(])СЛ\s*[а-яёa-z \u2010-\u2014-]{0,65}[:=]?\s*(\d+)/i);const attack=source.match(/([+−-]\d+)\s*\)?\s*(?:к попаданию|к броск(?:ам|у) атаки|к атаке|to hit with spell)|(?:атака заклинаниями|spell attack(?: modifier)?)\s*[:=]?\s*([+−-]?\d+)/i);if(dc||attack)result.push({name:e.name,dc:dc?Number(dc[1]):null,attack:attack?Number((attack[1]||attack[2]).replace('−','-')):null});}
  if(!result.length&&(m.spellSaveDC||m.spellAttack!==undefined)&&(entries.length||m.spells?.length))result.push({name:'Заклинания',dc:m.spellSaveDC??null,attack:m.spellAttack??null});
  return result;
 }
