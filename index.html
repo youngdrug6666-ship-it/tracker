@@ -15,6 +15,8 @@
 
 	
     <style>
+.hero-item{display:flex;gap:8px;align-items:end;flex-wrap:wrap;padding:10px 0}.hero-item label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#b9cbd9}.hero-item label input{width:70px!important;min-width:0}.hero-item .hero-item-name{flex:1;min-width:160px}.hero-item .hero-item-enabled{align-self:center}
+
 .combat-name-row{display:flex;align-items:center;gap:5px;min-width:0}.combat-name-row .name-input{min-width:0;flex:1}.monster-number{flex:none;font-size:12px;font-weight:700;color:#ead5ff;background:#62417b99;border:1px solid #b78ed066;border-radius:8px;padding:3px 6px}.spell-effect-remove{background:#352645;color:#ead7ff;border:1px solid #8c65a6;border-radius:8px;padding:4px 7px;max-width:100%;white-space:normal;text-align:left}
 
         /* === Стили без изменений === */
@@ -977,7 +979,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="player-display.js?v=labels-7"></script>
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
-<script src="hero-card.js?v=7"></script>
+<script src="hero-card.js?v=items-8"></script>
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -2794,7 +2796,7 @@ function findSpellById(id) {
             let dc=c.spellSaveDC,attack=c.spellAttack;
             const casterModes=monsterFull?MonsterMechanics.casting(monsterFull):[];
             if(monsterFull){dc=casterModes[0]?.dc;attack=casterModes[0]?.attack;}
-            if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="${escapeHtml(casterModes.length?casterModes.map(m=>m.name+': СЛ '+(m.dc??'—')+', атака '+(m.attack??'—')).join('; '):'Сложность спасброска от заклинаний')}"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="Бонус атаки заклинанием"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
+            if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="${escapeHtml(casterModes.length?casterModes.map(m=>m.name+': СЛ '+(m.dc??'—')+', атака '+(m.attack??'—')).join('; '):c.isMonster?'Сложность спасброска от заклинаний':HeroCard.breakdown(c,'spellDC'))}"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="${escapeHtml(c.isMonster?'Бонус атаки заклинанием':HeroCard.breakdown(c,'spellAttack'))}"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
             let activeConditionsHtml = '';
             c.conditions.forEach(cond => { 
                 let display = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond; 
@@ -2828,7 +2830,7 @@ function findSpellById(id) {
                     </div>
                     <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; margin-top:4px;">
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <div class="ac-badge" data-tooltip="Класс Доспеха"><i class="fa-solid fa-shield"></i> <input class="ac-edit" data-id="${c.id}" value="${c.ac}"></div>
+                            <div class="ac-badge" data-tooltip="${escapeHtml(c.isMonster?'Класс Доспеха':HeroCard.breakdown(c,'ac'))}"><i class="fa-solid fa-shield"></i> <input class="ac-edit" data-id="${c.id}" value="${c.ac}"></div>
                             ${c.speed ? `<div class="ac-badge" title="Скорость" data-tooltip="Скорость"><i class="fa-solid fa-shoe-prints"></i> ${c.speed}</div>` : ''}
                         </div>
                         <div style="display:flex; gap:2px;"><input class="init-input" data-id="${c.id}" value="${c.initiative}" data-tooltip="Инициатива"><button class="init-roll-btn" data-id="${c.id}" data-tooltip="Бросить 1d20 + бонус"><i class="fa-solid fa-dice-d20"></i> d20</button></div>

@@ -114,6 +114,32 @@
         recalculate(hero);
         return hero;
     }
+    function itemTotal(hero,field){return (hero.heroControls?.items||[]).reduce((sum,item)=>sum+(item.enabled?num(item[field]):0),0);}
+    function saveValue(hero,key){const d=hero.heroData.saves[key];return hero.stats[key].mod+(d.isProf?hero.proficiency:0)+num(hero.heroControls.saveBonus)+num(d.bonus)+itemTotal(hero,'saveBonus');}
+    function breakdown(hero,kind,key){
+        const h=hero.heroControls,rows=[];
+        const itemField={ac:'bonus',save:'saveBonus',spellAttack:'spellAttackBonus',spellDC:'spellDcBonus'}[kind];
+        let total;
+        if(kind==='ac'){
+            const armored=(hero.activeSpellEffects||[]).find(e=>e.kind==='mageArmor');
+            rows.push(armored?'Доспехи мага: 13 + ЛОВ '+signed(hero.stats.dex.mod)+' = '+(13+hero.stats.dex.mod):'База КД (LSS / редактор): '+h.baseAc);
+            if(h.shield)rows.push('Щит: +2');total=hero.ac;
+        }else if(kind==='save'){
+            rows.push('Спасбросок '+abilities[key]+': характеристика '+signed(hero.stats[key].mod));
+            if(hero.heroData.saves[key].isProf)rows.push('Владение: '+signed(hero.proficiency));
+            if(num(hero.heroData.saves[key].bonus))rows.push('Поправка LSS: '+signed(num(hero.heroData.saves[key].bonus)));
+            if(num(h.saveBonus))rows.push('Доп. ко всем спасам: '+signed(num(h.saveBonus)));
+            total=saveValue(hero,key);
+        }else{
+            if(kind==='spellDC')rows.push('База СЛ: 8');
+            rows.push(abilities[h.spellAbility]+': '+signed(hero.stats[h.spellAbility].mod),'Владение: '+signed(hero.proficiency));
+            const extra=kind==='spellDC'?h.spellDcExtra:h.spellAttackExtra;
+            if(num(extra))rows.push('Поправка LSS / редактор: '+signed(num(extra)));
+            total=kind==='spellDC'?hero.spellSaveDC:hero.spellAttack;
+        }
+        for(const item of h.items||[])if(item.enabled&&num(item[itemField]))rows.push((item.name||'Предмет')+': '+signed(num(item[itemField])));
+        return rows.join(' · ')+' · Итого: '+(kind==='ac'||kind==='spellDC'?total:signed(total));
+    }
     function recalculate(hero) {
         const h=hero.heroControls;
         if (!h) return;
@@ -121,9 +147,9 @@
         hero.proficiency=h.proficiency;
         hero.initBonus=hero.stats.dex.mod+h.initiativeExtra;
         if(h.acFormula && root.LssEngine){try{h.baseAc=root.LssEngine.expression(h.acFormula,root.LssEngine.variables({...hero.heroData,stats:hero.stats,proficiency:h.proficiency}))+h.acExtra;}catch(e){}}
-        hero.ac=(root.SpellEffects?root.SpellEffects.armorBase(hero,h.baseAc):h.baseAc)+(h.shield?2:0)+h.items.reduce((sum,i)=>sum+(i.enabled?num(i.bonus):0),0);
+        hero.ac=(root.SpellEffects?root.SpellEffects.armorBase(hero,h.baseAc):h.baseAc)+(h.shield?2:0)+itemTotal(hero,'bonus');
         const attack=h.proficiency+hero.stats[h.spellAbility].mod;
-        hero.spellAttack=attack+h.spellAttackExtra; hero.spellSaveDC=8+attack+h.spellDcExtra;
+        hero.spellAttack=attack+h.spellAttackExtra+itemTotal(hero,'spellAttackBonus'); hero.spellSaveDC=8+attack+h.spellDcExtra+itemTotal(hero,'spellDcBonus');
     }
     function weaponAttack(hero,w) {
         return w.attackExtra+(w.ability?hero.stats[w.ability].mod:0)+(w.proficient?hero.proficiency:0);
@@ -138,7 +164,7 @@
     }
     function panel(hero,richText) {
         const h=hero.heroControls,d=hero.heroData;
-        const saves=Object.entries(abilities).map(([key,label])=>`<tr><td>${label}</td><td><input class="hero-save-prof" data-key="${key}" type="checkbox" ${d.saves[key].isProf?'checked':''} aria-label="Владение спасброском ${label}"></td><td>${signed(hero.stats[key].mod+(d.saves[key].isProf?hero.proficiency:0)+num(h.saveBonus)+num(d.saves[key].bonus))}</td></tr>`).join('');
+        const saves=Object.entries(abilities).map(([key,label])=>`<tr><td>${label}</td><td><input class="hero-save-prof" data-key="${key}" type="checkbox" ${d.saves[key].isProf?'checked':''} aria-label="Владение спасброском ${label}"></td><td data-tooltip="${esc(breakdown(hero,'save',key))}">${signed(saveValue(hero,key))}</td></tr>`).join('');
         const skillRows=Object.entries(abilities).map(([ability,label])=>`<section class="hero-skill-group"><h4>${label} <span>${signed(hero.stats[ability].mod)}</span></h4>${Object.entries(d.skills).filter(([key,v])=>(v.baseStat || skills[key]?.[1])===ability).map(([key,v])=>{
             const rank=v.isProf===2?2:v.isProf?1:0;
             return `<div class="hero-skill-row"><span>${esc(v.label||skills[key]?.[0]||key)}</span><select class="hero-skill-prof" data-key="${esc(key)}" aria-label="Владение ${esc(v.label||key)}">${['—','Влад.','Комп.'].map((label,i)=>`<option value="${i}" ${rank===i?'selected':''}>${label}</option>`).join('')}</select><b>${signed(hero.stats[ability].mod+rank*hero.proficiency+num(v.bonus))}</b></div>`;
@@ -151,13 +177,13 @@
         <details><summary>Владения</summary>${richText(d.text?.prof ?? d.prof)||''}${(d._trackerProficiencies||[]).map(p=>`<p>${esc({'prof.weapon-other':'Прочее оружие','prof.weapon-simple':'Простое оружие','prof.weapon-martial':'Воинское оружие','prof.armor-light':'Лёгкие доспехи','prof.armor-medium':'Средние доспехи','prof.armor-heavy':'Тяжёлые доспехи','prof.armor-shield':'Щиты'}[p.target]||p.target)}</p>`).join('')||(!d.text?.prof&&!d.prof?'Не заполнены':'')}</details>
         <details><summary>Оружие</summary>${weapons||'Нет оружия в листе'}</details>
         <details><summary>Заклинания: настройки</summary><label>Характеристика <select class="hero-spell-ability">${Object.entries(abilities).map(([key,label])=>`<option value="${key}" ${key===h.spellAbility?'selected':''}>${label}</option>`).join('')}</select></label><label>Доп. Сл <input class="hero-spell-dc-extra" type="number" value="${h.spellDcExtra}"></label><label>Доп. атака <input class="hero-spell-attack-extra" type="number" value="${h.spellAttackExtra}"></label>${h.swappedSpellFields?'<p>В исходном LSS Сл и атака были переставлены: применены значения по характеристике и владению.</p>':''}</details>
-        <details><summary>Предметы с бонусом КД</summary>${h.items.map((item,i)=>`<div class="hero-item"><input class="hero-item-enabled" data-index="${i}" type="checkbox" ${item.enabled?'checked':''} aria-label="Использовать предмет"><input class="hero-item-name" data-index="${i}" value="${esc(item.name)}" aria-label="Название предмета"><input class="hero-item-bonus" data-index="${i}" type="number" value="${num(item.bonus)}" aria-label="Бонус КД"><button class="hero-item-remove" data-index="${i}" aria-label="Удалить предмет">×</button></div>`).join('')}<button class="hero-item-add">+ Предмет с бонусом КД</button><p>Бонусы складываются; применимость предметов определяет мастер.</p></details></details>`;
+        <details><summary>Предметы: КД, спасброски и заклинания</summary>${h.items.map((item,i)=>`<div class="hero-item"><input class="hero-item-enabled" data-index="${i}" type="checkbox" ${item.enabled?'checked':''} aria-label="Использовать предмет"><input class="hero-item-name" data-index="${i}" value="${esc(item.name)}" aria-label="Название предмета"><label>КД<input class="hero-item-bonus" data-index="${i}" type="number" value="${num(item.bonus)}" aria-label="КД"></label><label>Все спасы<input class="hero-item-save-bonus" data-index="${i}" type="number" value="${num(item.saveBonus)}" aria-label="Все спасы"></label><label>Атака закл.<input class="hero-item-spell-attack" data-index="${i}" type="number" value="${num(item.spellAttackBonus)}" aria-label="Атака закл."></label><label>СЛ закл.<input class="hero-item-spell-dc" data-index="${i}" type="number" value="${num(item.spellDcBonus)}" aria-label="СЛ закл."></label><button class="hero-item-remove" data-index="${i}" aria-label="Удалить предмет">×</button></div>`).join('')}<button class="hero-item-add">+ Предмет</button> <button class="hero-item-cloak">+ Плащ защиты</button><p>Учитывайте предмет здесь один раз: если бонус уже включён в базовое значение LSS, уберите его из базы.</p></details></details>`;
     }
     function quick(hero) {
         return `<div class="hero-quick hero-quick-compact"><button class="hero-inspiration ${hero.inspiration?'equipped':''}" aria-pressed="${!!hero.inspiration}" title="Выдать или потратить вдохновение">✦ Вдохновение</button><button class="hero-shield ${hero.heroControls.shield?'equipped':''}" aria-pressed="${hero.heroControls.shield}" title="Взять или убрать щит">🛡 Щит</button></div>`;
     }
     function summaryStats(hero) {
-        return `<div class="hero-stat-summary">${Object.entries(abilities).map(([key,label])=>`<div><span>${label}</span><b>${hero.stats[key].score} (${signed(hero.stats[key].mod)})</b></div>`).join('')}</div>`;
+        return `<div class="hero-stat-summary">${Object.entries(abilities).map(([key,label])=>`<div data-tooltip="${esc(hero.isMonster?'Характеристика '+label:breakdown(hero,'save',key))}"><span>${label}</span><b>${hero.stats[key].score} (${signed(hero.stats[key].mod)})</b></div>`).join('')}</div>`;
     }
     function slots(hero) {
         return `<section class="hero-modal-section"><h3>Ячейки заклинаний</h3><div class="hero-modal-slots">${Object.entries(hero.spellSlots || {}).map(([key,slot])=>`<div class="hero-modal-slot"><span>${key.startsWith('pact-')?'Договор '+key.slice(5):key+' уровень'}</span><b>${slot.max-(slot.used||0)} / ${slot.max}</b><button class="hero-detail-use-slot" data-level="${esc(key)}" title="Потратить ячейку">−</button><button class="hero-detail-restore-slot" data-level="${esc(key)}" title="Восстановить ячейку">+</button><label>Всего <input class="hero-detail-slot-max" data-level="${esc(key)}" type="number" min="0" value="${slot.max}"></label></div>`).join('') || '<p>Нет ячеек в листе</p>'}</div></section>`;
@@ -192,15 +218,19 @@
         on('.hero-weapon-ability',el=>{const w=h.weapons[el.dataset.index];const old=weaponAttack(hero,w);w.damage=weaponDamage(hero,w);w.ability=el.value;w.originalMod=el.value?hero.stats[el.value].mod:0;w.attackExtra=old-w.originalMod-(w.proficient?hero.proficiency:0);});
         on('.hero-weapon-prof',el=>h.weapons[el.dataset.index].proficient=el.checked);
         on('.hero-weapon-extra',el=>h.weapons[el.dataset.index].attackExtra=num(el.value));
-        on('.hero-item-add',()=>h.items.push({name:'Магический предмет',bonus:1,enabled:true}),'click');
+        on('.hero-item-add',()=>h.items.push({name:'Магический предмет',bonus:0,saveBonus:0,spellAttackBonus:0,spellDcBonus:0,enabled:true}),'click');
+        on('.hero-item-cloak',()=>h.items.push({name:'Плащ защиты',bonus:1,saveBonus:1,spellAttackBonus:0,spellDcBonus:0,enabled:true}),'click');
         on('.hero-item-name',el=>h.items[el.dataset.index].name=el.value);
         on('.hero-item-bonus',el=>h.items[el.dataset.index].bonus=num(el.value));
+        on('.hero-item-save-bonus',el=>h.items[el.dataset.index].saveBonus=num(el.value));
+        on('.hero-item-spell-attack',el=>h.items[el.dataset.index].spellAttackBonus=num(el.value));
+        on('.hero-item-spell-dc',el=>h.items[el.dataset.index].spellDcBonus=num(el.value));
         on('.hero-item-enabled',el=>h.items[el.dataset.index].enabled=el.checked);
         on('.hero-item-remove',el=>h.items.splice(Number(el.dataset.index),1),'click');
         card.querySelector('.hero-sheet')?.addEventListener('toggle',e=>{hero.heroPanelOpen=e.target.open;});
         card.addEventListener('dragstart',e=>{if(e.target.closest('input,button,select,summary,table'))e.preventDefault();});
     }
-    const api={ensure,recalculate,statInputs,panel,quick,summaryStats,slots,details,bind,weaponAttack,weaponDamage};
+    const api={ensure,recalculate,statInputs,panel,quick,summaryStats,slots,details,bind,weaponAttack,weaponDamage,itemTotal,saveValue,breakdown};
     root.HeroCard=api;
     if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:window);

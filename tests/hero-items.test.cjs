@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),H=require('../hero-card');
+const c={name:'Герой LSS',ac:14,proficiency:3,spellAttack:7,spellSaveDC:15,stats:{dex:{score:14},wis:{score:18},con:{score:12}},heroData:{spellsInfo:{base:{code:'wis'}},saves:{wis:{isProf:true,bonus:2}}}};
+H.ensure(c);const original={ac:c.ac,attack:c.spellAttack,dc:c.spellSaveDC,save:H.saveValue(c,'wis')};
+c.heroControls.items.push({name:'Плащ защиты',bonus:1,saveBonus:1,enabled:true},{name:'Жезл +2',spellAttackBonus:2,spellDcBonus:2,enabled:true});
+H.recalculate(c);assert.equal(c.ac,original.ac+1);assert.equal(c.spellAttack,original.attack+2);assert.equal(c.spellSaveDC,original.dc+2);assert.equal(H.saveValue(c,'wis'),original.save+1);
+assert.match(H.breakdown(c,'ac'),/Плащ защиты: \+1/);assert.match(H.breakdown(c,'save','wis'),/Плащ защиты: \+1/);assert.match(H.breakdown(c,'spellAttack'),/Жезл \+2: \+2/);assert(!H.breakdown(c,'spellAttack').includes('Плащ защиты'));
+const saved=JSON.parse(JSON.stringify(c));H.ensure(saved);assert.equal(saved.spellAttack,c.spellAttack);assert.equal(H.saveValue(saved,'wis'),H.saveValue(c,'wis'));
+c.heroControls.items.forEach(i=>i.enabled=false);H.recalculate(c);assert.equal(c.ac,original.ac);assert.equal(c.spellAttack,original.attack);assert.equal(H.saveValue(c,'wis'),original.save);
+c.heroControls.items.push({name:'Старое кольцо',bonus:1,enabled:true});H.recalculate(c);assert.equal(c.ac,original.ac+1);assert.equal(H.saveValue(c,'wis'),original.save);
+console.log('PASS independent named item bonuses, totals, tooltip provenance, toggling, old AC items and save/load without double counting');
