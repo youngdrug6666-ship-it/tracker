@@ -864,6 +864,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 #appTooltip{position:fixed;z-index:2147483647;pointer-events:none;box-sizing:border-box;width:max-content;max-width:min(300px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:hidden;white-space:normal;overflow-wrap:anywhere;background:#152532;color:#f0e5ce;border:1px solid #8e7955;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:500;line-height:1.5;box-shadow:0 8px 24px #0007}
 #appTooltip[hidden]{display:none!important}
 .monster-defenses{display:flex;gap:4px;flex-wrap:wrap;margin:3px 0}.monster-defenses:empty{display:none}.monster-defenses button{display:flex;align-items:center;gap:4px;background:#223440;border:1px solid #536579;border-radius:8px;color:#e1eaf2;padding:3px 6px;font-size:10px}.monster-card .hero-stat-summary{margin:4px 0}.monster-card .spell-stats{gap:8px}
+.legendary-resources{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.legendary-resources:empty{display:none}.legendary-resources>div{display:flex;align-items:center;gap:4px;background:#172333dd;border:1px solid #74658a;border-radius:8px;padding:3px 6px;font-size:10px}.legendary-resources button{background:#34465b;border:0;color:#eae4f6;border-radius:5px;width:20px;height:20px;cursor:pointer}.legendary-resources button:disabled{opacity:.35;cursor:default}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -967,6 +968,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="spell-effects.js?v=3"></script>
 <script src="combat-history.js?v=1"></script>
 <script src="monster-builder.js?v=4"></script>
+<script src="monster-mechanics.js?v=1"></script>
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
 <script src="hero-card.js?v=7"></script>
@@ -1824,6 +1826,7 @@ async function loadCustomMonstersTXT() {
     }
     function extractString(value) {
         if (!value) return '';
+        if (typeof value === 'string') value=MonsterMechanics.text(value);
         if (typeof value === 'string') return cleanText(value);
         if (Array.isArray(value)) return value.map(v => extractString(v)).join(', ');
         if (value instanceof Set) return Array.from(value).map(v => extractString(v)).join(', ');
@@ -2777,8 +2780,9 @@ function findSpellById(id) {
             if(monsterFull){const defenses=[['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(monsterFull[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
             let spellHtml = '';
             let dc=c.spellSaveDC,attack=c.spellAttack;
-            if(monsterFull&&!monsterFull._customMonster){dc=monsterFull.spellSaveDC;attack=monsterFull.spellAttack;const casting=(monsterFull.features||[]).filter(e=>/заклинан|колдовство|spellcasting/i.test(e.name)).map(e=>cleanText(e._displayDescription??e.description)).join(' ');const dcMatch=casting.match(/(?:СЛ(?:\s+(?:спасброска|испытаний)(?:\s+(?:против|от)\s+заклинаний)?)?|сложность спасброска|spell save DC)\s*(\d+)/i);const attackMatch=casting.match(/([+−-]\d+)\s*(?:к попаданию|к броск(?:ам|у) атаки|к атаке|to hit with spell)|(?:атака заклинаниями|spell attack)\s*([+−-]?\d+)/i);if(dcMatch)dc=Number(dcMatch[1]);if(attackMatch)attack=Number((attackMatch[1]||attackMatch[2]).replace('−','-'));}
-            if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="Сложность спасброска от заклинаний"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="Бонус атаки заклинанием"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
+            const casterModes=monsterFull?MonsterMechanics.casting(monsterFull):[];
+            if(monsterFull){dc=casterModes[0]?.dc;attack=casterModes[0]?.attack;}
+            if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="${escapeHtml(casterModes.length?casterModes.map(m=>m.name+': СЛ '+(m.dc??'—')+', атака '+(m.attack??'—')).join('; '):'Сложность спасброска от заклинаний')}"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="Бонус атаки заклинанием"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
             let activeConditionsHtml = '';
             c.conditions.forEach(cond => { 
                 let display = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond; 
@@ -2798,6 +2802,8 @@ function findSpellById(id) {
                 }
                 slotsHtml += '</div>';
             }
+            let legendaryHtml='';
+            if(monsterFull){const resources=MonsterMechanics.ensure(c,monsterFull,currentRound);legendaryHtml='<div class="legendary-resources">'+Object.entries(resources).map(([key,r])=>`<div><span data-tooltip="${key==='actions'?'Восстанавливаются в новом раунде':'Расходуются за день; восстановить можно кнопкой ↺'}">${key==='actions'?'Лег. действия':'Лег. сопротивл.'} <b>${r.max-r.used}/${r.max}</b></span><button class="legendary-spend" data-id="${c.id}" data-resource="${key}" ${r.used>=r.max?'disabled':''} data-tooltip="Потратить один заряд">−</button><button class="legendary-restore" data-id="${c.id}" data-resource="${key}" data-tooltip="Восстановить один заряд">+</button></div>`).join('')+'</div>';}
             let randomHpTooltip = c.hpFormula ? `Бросить ${c.hpFormula}` : 'Бросить ХП по формуле';
             html += `<div class="combat-card ${c.isMonster ? 'monster-card' : 'hero-card'} ${turnClass}" data-combat-id="${c.id}">
                 ${c.avatar ? `<div class="card-bg" style="${bgStyle}"></div><div class="card-overlay"></div>` : ''}
@@ -2825,10 +2831,10 @@ function findSpellById(id) {
                         <div><span><i class="fa-solid fa-heart-circle-plus"></i> Врем </span><input class="temp-input" data-id="${c.id}" value="${c.tempHp}" data-tooltip="Временные хиты"></div>
                         <button class="remove-btn" data-id="${c.id}" data-tooltip="Удалить персонажа"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                    ${slotsHtml}
+                    ${slotsHtml}${legendaryHtml}
                     <div class="conditions-header" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
                     <div class="conditions-list" id="conds-${c.id}" style="display:none;"></div>
-                    <div class="log-area">${c.log.slice(0,3).map(l=>`<div title="${escapeHtml(l)}">${escapeHtml(l)}</div>`).join('')}</div>
+                    <div class="log-area">${c.log.slice(0,2).map(l=>`<div title="${escapeHtml(l)}">${escapeHtml(l)}</div>`).join('')}</div>
                 </div>
             </div>`;
         });
@@ -2837,6 +2843,7 @@ function findSpellById(id) {
             const cardDiv = document.querySelector(`.combat-card[data-combat-id="${c.id}"]`);
             if (cardDiv) attachDragEvents(cardDiv, c.id);
             if (cardDiv && !c.isMonster) HeroCard.bind(cardDiv, c, () => { renderCombat(); saveCurrentStateToSession(); });
+            for(const btn of cardDiv.querySelectorAll('.legendary-spend,.legendary-restore'))btn.onclick=()=>{const key=btn.dataset.resource;if(btn.classList.contains('legendary-spend')){if(!MonsterMechanics.spend(c,key))return;addLog(c,key==='actions'?'✨ Легендарное действие: −1':'🛡 Легендарное сопротивление: −1');}else{const r=c.legendaryResources[key];if(!r.used)return;r.used--;addLog(c,'✨ Восстановлен легендарный заряд');}renderCombat();saveCurrentStateToSession();};
             const burger = cardDiv.querySelector('.info-burger');
             if (burger) burger.onclick = (e) => { e.stopPropagation(); if (c.isMonster) showMonsterDetails(c.name); else showHeroDetails(c); };
             document.querySelectorAll(`.name-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.name = e.target.value; renderCombat(); saveCurrentStateToSession(); });
