@@ -859,6 +859,10 @@ html,body{max-width:100%;box-sizing:border-box}
 .combat-card .card-content{height:100%;gap:3px}
 .combat-card .log-area{margin-top:auto;padding:5px 7px;border-radius:9px;font-size:10px;line-height:1.4;display:grid;gap:2px}
 .combat-card .log-area>div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;display:none!important}
+#appTooltip{position:fixed;z-index:2147483647;pointer-events:none;box-sizing:border-box;width:max-content;max-width:min(300px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:hidden;white-space:normal;overflow-wrap:anywhere;background:#152532;color:#f0e5ce;border:1px solid #8e7955;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:500;line-height:1.5;box-shadow:0 8px 24px #0007}
+#appTooltip[hidden]{display:none!important}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -962,6 +966,7 @@ html,body{max-width:100%;box-sizing:border-box}
 <script src="spell-effects.js?v=3"></script>
 <script src="combat-history.js?v=1"></script>
 <script src="monster-builder.js?v=1"></script>
+<script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=1">
 <script src="hero-card.js?v=7"></script>
 <script>
