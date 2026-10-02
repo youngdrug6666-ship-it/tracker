@@ -52,7 +52,7 @@
         const artSpace=make('div','art-space'),art=make('div','art-frame '+chosen.health);
         if(chosen.image){
           const portrait=make('img','portrait');portrait.src=chosen.image;portrait.alt=chosen.name;
-          const fit=()=>{const box=artSpace.getBoundingClientRect();const ratio=portrait.naturalWidth&&portrait.naturalHeight?portrait.naturalWidth/portrait.naturalHeight:.72;const width=Math.min(box.width,box.height*ratio);art.style.width=width+'px';art.style.height=(width/ratio)+'px';};
+          const fit=()=>{const box={width:artSpace.clientWidth,height:artSpace.clientHeight};const ratio=portrait.naturalWidth&&portrait.naturalHeight?portrait.naturalWidth/portrait.naturalHeight:.72;const width=Math.min(box.width,box.height*ratio);art.style.width=width+'px';art.style.height=(width/ratio)+'px';};
           portrait.onload=fit;portrait.onerror=()=>{portrait.remove();art.prepend(make('div','placeholder',chosen.isMonster?'◆':'✦'));};art.append(portrait);
           fitObserver=new ResizeObserver(fit);fitObserver.observe(artSpace);
         }else art.append(make('div','placeholder',chosen.isMonster?'◆':'✦'));
