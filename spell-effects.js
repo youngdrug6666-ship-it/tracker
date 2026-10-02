@@ -6,7 +6,7 @@ function isMageArmor(s){return identity(s)==='mage armor';}
 function remove(all,id){
  for(const c of all){c.activeSpellEffects=(c.activeSpellEffects||[]).filter(e=>e.id!==id);updateMonsterArmor(c);if(c.concentrationEffect===id){delete c.concentrationEffect;c.conditions?.delete('Концентрация');}}
 }
-function endConcentration(all,caster){if(caster.concentrationEffect)remove(all,caster.concentrationEffect);caster.conditions?.delete('Концентрация');}
+function endConcentration(all,caster){caster.concentrationChecks=[];if(caster.concentrationEffect)remove(all,caster.concentrationEffect);caster.conditions?.delete('Концентрация');}
 function cast(all,{spell,casterId,targetId,slotLevel=null,unarmored=false}){
  const caster=all.find(c=>String(c.id)===String(casterId)),target=all.find(c=>String(c.id)===String(targetId));
  if(!caster||!target)throw Error('Выберите заклинателя и цель.');

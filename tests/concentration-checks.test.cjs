@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');const SpellEffects=require('../spell-effects.js');
+const source=fs.readFileSync('index.html','utf8');const code=source.slice(source.indexOf('    function applyDamage('),source.indexOf('    function applyHeal('));
+const caster={id:1,currentHp:80,maxHp:80,tempHp:50,conditions:new Set(['Концентрация']),concentrationEffect:'a'},target={id:2,conditions:new Set(),activeSpellEffects:[{id:'a'}]};
+const ctx={combatants:[caster,target],SpellEffects,Math,Number,addLog:()=>{},renderCombat:()=>{},saveCurrentStateToSession:()=>{}};vm.createContext(ctx);vm.runInContext(code,ctx);
+ctx.applyDamage(caster,41);assert.equal(caster.currentHp,80);assert.equal(caster.tempHp,9);assert.equal(caster.concentrationChecks[0].dc,20);
+ctx.applyDamage(caster,3);assert.equal(caster.concentrationChecks.length,2);assert.equal(caster.concentrationChecks[1].dc,10);
+ctx.resolveConcentration(caster,true);assert(caster.conditions.has('Концентрация'));assert.equal(caster.concentrationChecks.length,1);
+ctx.resolveConcentration(caster,false);assert(!caster.conditions.has('Концентрация'));assert.equal(target.activeSpellEffects.length,0);assert.equal(caster.concentrationChecks.length,0);
+caster.conditions.add('Концентрация');caster.currentHp=5;caster.tempHp=0;ctx.applyDamage(caster,5);assert.equal(caster.currentHp,0);assert(!caster.conditions.has('Концентрация'));assert.equal(caster.concentrationChecks.length,0);
+caster.currentHp=10;ctx.applyDamage(caster,-5);assert.equal(caster.currentHp,10);
+console.log('PASS concentration DC includes temporary HP, separate hits, pass/fail cleanup, zero HP and negative damage');

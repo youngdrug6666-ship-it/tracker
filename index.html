@@ -789,6 +789,29 @@ select option,select optgroup{background:#172532;color:#e3edf5}
 #monsterList::-webkit-scrollbar-thumb,.spell-list::-webkit-scrollbar-thumb,.modal-content::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:2px solid var(--scroll-track)}
 .modal-content{box-sizing:border-box;overflow-x:hidden!important;max-width:min(900px,calc(100vw - 24px));scrollbar-gutter:stable;padding-right:16px!important}
 .bestiary-panel{box-sizing:border-box;min-width:0;max-width:100vw}
+
+/* Компактные карточки: спокойный контраст и единые контролы. */
+.card-overlay{background:linear-gradient(to bottom,rgba(8,16,25,.46),rgba(8,16,25,.6) 60%,rgba(8,16,25,.8))}
+.combat-card .name-input{background:#172532dd;color:#f5f0e5;border-color:#8e7951}
+.combat-card .ac-badge,.combat-card .init-input{background:#172532ed;color:#f5f0e5}
+.combat-card .hp-input,.combat-card .max-hp-input,.combat-card .temp-input{background:#172532;color:#f5f0e5;border-color:#526a7b}
+.combat-card .dmg-quick{background:#172532;color:#f5f0e5;border:1px solid #86565a}
+.combat-card .dmg-quick::placeholder{color:#b4bec7}
+.combat-card .info-burger,.combat-card .init-roll-btn{background:#243442;color:#e8d6b0}
+.combat-card .card-content{gap:4px}
+#undoCombatBtn:disabled{opacity:.42;cursor:default}
+.concentration-check{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;background:#26323fee;border:1px solid #b79b63;border-radius:10px;padding:6px 8px;font-size:11px;color:#f3e8cc}
+.concentration-check div{display:flex;gap:5px}.concentration-check button{border:1px solid #567b70;border-radius:6px;background:#233d35;color:#e1f3ea;padding:3px 7px;cursor:pointer;font-size:11px}.concentration-check .concentration-fail{background:#422a30;border-color:#8d626c;color:#f8e5e9}
+
+/* Фиолетовое пламя только у текущего участника. */
+.combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none;transform:none;box-shadow:0 0 0 2px #c997ff,0 0 20px #9d48dc88}
+.turn-flames{position:absolute;inset:-7px;border-radius:29px;padding:7px;z-index:2;pointer-events:none;background:conic-gradient(from 30deg,#7133bb,#deaaff,#9e42e2,#f0d1ff,#7835cb,#ce85ff,#7133bb);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;filter:drop-shadow(0 0 5px #bc63fa);animation:violetEmbers 2.8s ease-in-out infinite alternate}
+.turn-flames::before{content:'';position:absolute;inset:-12px;background:radial-gradient(ellipse at 50% 90%,#f5d8ff 0 10%,#c66bff 20%,#7733b4 40%,transparent 65%);background-size:27px 42px;opacity:.65;animation:violetFlames 1.6s linear infinite}
+.turn-label{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;color:#f1dbff;background:#34184ce8;border:1px solid #b776e4;border-radius:7px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 7px;margin-bottom:1px}
+.turn-label i{color:#d69aff;animation:violetEmbers 1.8s ease-in-out infinite alternate}
+@keyframes violetFlames{from{background-position:0 0}to{background-position:13px -42px}}
+@keyframes violetEmbers{from{opacity:.62}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.turn-flames,.turn-flames::before,.turn-label i{animation:none!important}.combat-card.current-turn-hero,.combat-card.current-turn-monster{animation:none!important}}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -806,6 +829,7 @@ select option,select optgroup{background:#172532;color:#e3edf5}
             <button class="btn" id="prevTurnBtnTop" data-tooltip="Предыдущий ход"><i class="fa-solid fa-angle-left fa-icon"></i></button>
             <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход"><span class="btn-label"><i class="fa-solid fa-angle-right fa-icon"></i>Следующий ход</span></button>
             <button class="btn btn-primary" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Сортировать по иниц</span></button>
+            <button class="btn" id="undoCombatBtn" disabled aria-label="Отменить последнее действие"><i class="fa-solid fa-rotate-left"></i> Отменить</button>
             <button class="btn" id="rollAllInitBtn" style="background:#91220b;" data-tooltip="Один бросок инициативы для всех монстров с одинаковым названием"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
             <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
             <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания"><span class="btn-label"><i class="fa-solid fa-scroll fa-icon"></i>Заклинания</span></button>
@@ -886,7 +910,8 @@ select option,select optgroup{background:#172532;color:#e3edf5}
 <script src="bestiary.js?v=6"></script>
 <script src="foundry-data.js?v=3"></script>
 <script src="lss-engine.js?v=2"></script>
-<script src="spell-effects.js?v=2"></script>
+<script src="spell-effects.js?v=3"></script>
+<script src="combat-history.js?v=1"></script>
 <script src="hero-card.js?v=7"></script>
 <script>
    (function(){
@@ -969,6 +994,24 @@ async function loadUuidMap() {
     // ========== Сессии ==========
     let sessions = {};
     let currentSessionId = "default";
+    const combatHistory=CombatHistory.create(30);
+    let historyPending=false,historyGeneration=0;
+    function combatSnapshot(){return {combatants,currentTurnIndex,currentRound,nextId};}
+    function updateUndoButton(){const btn=document.getElementById('undoCombatBtn');if(btn){btn.disabled=!combatHistory.size;btn.title=combatHistory.size?'Отменить последнее изменение боя (Ctrl+Z)':'Нет изменений для отмены';}}
+    function flushCombatHistory(){if(!historyPending)return;historyPending=false;combatHistory.commit(combatSnapshot());updateUndoButton();}
+    function queueCombatHistory(){if(historyPending)return;historyPending=true;const generation=historyGeneration;queueMicrotask(()=>{if(generation===historyGeneration)flushCombatHistory();});}
+    function undoCombatAction(){
+        flushCombatHistory();
+        const state=combatHistory.undo();if(!state)return;
+        historyGeneration++;historyPending=false;
+        ({combatants,currentTurnIndex,currentRound,nextId}=state);
+        renderCombat();document.getElementById('roundNumberTop').innerText=currentRound;
+        saveCurrentStateToSession();updateUndoButton();
+        const hero=combatants.find(c=>c.id===activeHeroDetailsId);
+        if(document.getElementById('heroDetailModal').style.display==='flex'&&hero)showHeroDetails(hero);
+        const spellForm=document.getElementById('spellCastForm');
+        if(spellForm){document.getElementById('spellDetailModal').style.display='none';}
+    }
     function saveCurrentStateToSession() {
         if (!sessions[currentSessionId]) sessions[currentSessionId] = { name: currentSessionId, combatants: [], currentTurnIndex: 0, currentRound: 1, nextId: 1 };
         sessions[currentSessionId].combatants = JSON.parse(JSON.stringify(combatants, (_, value) => value instanceof Set ? {__type:"Set",values:[...value]} : value));
@@ -977,9 +1020,11 @@ async function loadUuidMap() {
         sessions[currentSessionId].nextId = nextId;
         localStorage.setItem("dnd_sessions", JSON.stringify(sessions));
         localStorage.setItem("dnd_current_session", currentSessionId);
+        queueCombatHistory();
     }
     function loadSession(sessionId) {
         if (!sessions[sessionId]) return;
+        historyGeneration++;historyPending=false;
         currentSessionId = sessionId;
         const data = sessions[sessionId];
         combatants = data.combatants.map(c => {
@@ -993,6 +1038,7 @@ async function loadUuidMap() {
         nextId = data.nextId || 1;
         document.getElementById('roundNumberTop').innerText = currentRound;
         renderCombat();
+        combatHistory.reset(combatSnapshot());updateUndoButton();
         saveCurrentStateToSession();
         updateSessionSelect();
     }
@@ -2385,7 +2431,24 @@ function findSpellById(id) {
     function addHero() { 
         addCombatant({ name: `Герой ${nextId}`, race: "", class: "", ac: 14, hpFormula: "5d8+10", initBonus: 2, isMonster: false, maxHp: 30, stats: { str:{score:10,mod:0}, dex:{score:10,mod:0}, con:{score:10,mod:0}, int:{score:10,mod:0}, wis:{score:10,mod:0}, cha:{score:10,mod:0} } }); 
     }
-    function applyDamage(c, dmg) { let remaining = dmg; if (c.tempHp > 0) { let absorb = Math.min(c.tempHp, remaining); c.tempHp -= absorb; remaining -= absorb; addLog(c, `🛡️ Врем.ХП поглотило ${absorb}`); } if (remaining > 0) { c.currentHp = Math.max(0, c.currentHp - remaining); addLog(c, `Урон ${dmg} → ❤️ ${c.currentHp}/${c.maxHp}`); } renderCombat(); saveCurrentStateToSession(); }
+    function applyDamage(c, dmg) {
+        dmg=Math.max(0,Math.floor(Number(dmg)||0));if(!dmg)return;
+        let remaining=dmg;
+        if(c.tempHp>0){const absorb=Math.min(c.tempHp,remaining);c.tempHp-=absorb;remaining-=absorb;addLog(c,`🛡️ Врем.ХП поглотило ${absorb}`);}
+        if(remaining>0)c.currentHp=Math.max(0,c.currentHp-remaining);
+        if(c.conditions.has('Концентрация')){
+            if(c.currentHp===0){SpellEffects.endConcentration(combatants,c);c.concentrationChecks=[];addLog(c,'Концентрация завершена: 0 ХП');}
+            else{c.concentrationChecks||=[];c.concentrationChecks.push({damage:dmg,dc:Math.max(10,Math.floor(dmg/2))});}
+        }
+        addLog(c,`Урон ${dmg} → ❤️ ${c.currentHp}/${c.maxHp}`);
+        renderCombat();saveCurrentStateToSession();
+    }
+    function resolveConcentration(c,passed){
+        const check=c.concentrationChecks?.shift();if(!check)return;
+        if(!passed){SpellEffects.endConcentration(combatants,c);c.concentrationChecks=[];}
+        addLog(c,`Концентрация · СЛ ${check.dc}: ${passed?'успех':'провал'}`);
+        renderCombat();saveCurrentStateToSession();
+    }
     function applyHeal(c, amount) { c.currentHp = Math.min(c.maxHp, c.currentHp + amount); addLog(c, `💚 Лечение +${amount} → ${c.currentHp}/${c.maxHp}`); renderCombat(); saveCurrentStateToSession(); }
     function randomizeHealth(c) { 
         if (!c.isMonster || !c.hpFormula) return; 
@@ -2633,6 +2696,9 @@ function findSpellById(id) {
         combatants.forEach((c, idx) => {
             if (!c.isMonster) HeroCard.ensure(c);
             else {const full=fullMonstersMap.get(c.name.toLowerCase());if(full){c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const entry of [...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);}
+            if(!c.conditions.has('Концентрация'))c.concentrationChecks=[];
+            const check=c.concentrationChecks?.[0];
+            const concentrationHtml=check?`<div class="concentration-check" role="status"><span>Концентрация · ТЕЛ <b>СЛ ${check.dc}</b>${c.concentrationChecks.length>1?` · ещё ${c.concentrationChecks.length-1}`:''}</span><div><button class="concentration-pass" data-id="${c.id}">Успех</button><button class="concentration-fail" data-id="${c.id}">Провал</button></div></div>`:'';
             const isCurrent = idx === currentTurnIndex;
             let turnClass = isCurrent ? (c.isMonster ? 'current-turn-monster' : 'current-turn-hero') : '';
             const activeConds = c.conditions.size + (c.exhaustion > 0 ? 1 : 0);
@@ -2663,7 +2729,9 @@ function findSpellById(id) {
             let randomHpTooltip = c.hpFormula ? `Бросить ${c.hpFormula}` : 'Бросить ХП по формуле';
             html += `<div class="combat-card ${c.isMonster ? 'monster-card' : 'hero-card'} ${turnClass}" data-combat-id="${c.id}">
                 ${c.avatar ? `<div class="card-bg" style="${bgStyle}"></div><div class="card-overlay"></div>` : ''}
+                ${isCurrent?'<div class="turn-flames" aria-hidden="true"></div>':''}
                 <div class="card-content">
+                    ${isCurrent?'<div class="turn-label"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> Сейчас ходит</div>':''}
                     <input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)">
                     <div class="card-header">
                         <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе"><i class="fa-brands fa-buffer"></i></button>
@@ -2678,6 +2746,7 @@ function findSpellById(id) {
                     ${raceClassHtml}${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
                     <div class="active-conditions">${activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" title="Завершить эффект">✨ ${escapeHtml(effect.name)} ×</button>`).join('')}</div>
+                    ${concentrationHtml}
                     <div class="hp-panel">
                         <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}"><i class="fa-solid fa-dice"></i></button>` : ''}</div>
                         <div><span>❤️ </span><input class="hp-input" data-id="${c.id}" value="${c.currentHp}" data-tooltip="Текущие хиты">/<input class="max-hp-input" data-id="${c.id}" value="${c.maxHp}" data-tooltip="Максимум хитов"></div>
@@ -2709,6 +2778,8 @@ function findSpellById(id) {
             document.querySelectorAll(`.hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.currentHp = Math.min(c.maxHp, Math.max(0, parseInt(e.target.value)||0)); renderCombat(); saveCurrentStateToSession(); });
             document.querySelectorAll(`.max-hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.maxHp = parseInt(e.target.value)||0; if(c.currentHp > c.maxHp) c.currentHp = c.maxHp; renderCombat(); saveCurrentStateToSession(); });
             document.querySelectorAll(`.temp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.tempHp = Math.max(0, parseInt(e.target.value)||0); renderCombat(); saveCurrentStateToSession(); });
+            document.querySelector(`.concentration-pass[data-id="${c.id}"]`)?.addEventListener('click',()=>resolveConcentration(c,true));
+            document.querySelector(`.concentration-fail[data-id="${c.id}"]`)?.addEventListener('click',()=>resolveConcentration(c,false));
             const dmgField = document.getElementById(`dmgVal-${c.id}`);
             if (dmgField) {
                 document.querySelector(`.apply-dmg[data-id="${c.id}"]`).onclick = () => { let val = parseInt(dmgField.value); if(val) applyDamage(c, val); else applyDamage(c, 0); dmgField.value = ''; };
@@ -2774,6 +2845,8 @@ function findSpellById(id) {
     document.getElementById('sortInitBtn').onclick = sortByInitiative;
     document.getElementById('addHeroBtn').onclick = addHero;
     document.getElementById('clearMonstersBtn').onclick = () => { combatants = combatants.filter(c => !c.isMonster); currentTurnIndex=0; renderCombat(); saveCurrentStateToSession(); };
+    document.getElementById('undoCombatBtn').onclick=undoCombatAction;
+    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!e.shiftKey&&!e.target.closest('input,textarea,select,[contenteditable="true"]')){e.preventDefault();undoCombatAction();}});
     document.getElementById('rollAllInitBtn').onclick = rollGroupedMonsterInitiative;
     document.getElementById('nextTurnBtnTop').onclick = nextTurn;
     document.getElementById('prevTurnBtnTop').onclick = prevTurn;
