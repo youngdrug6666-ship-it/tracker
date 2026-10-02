@@ -769,6 +769,9 @@ a.btn[href="translator.html"]:hover {
 #spellCastForm select{padding:5px 7px;min-height:32px;font-size:12px;border-radius:7px}#spellCastForm .spell-cast-fields{gap:8px}#spellCastForm .spell-cast-fields label{font-size:11px;gap:3px}
 #spellCastForm .spell-cast-check{font-size:11px;margin-top:8px;display:flex;gap:5px;align-items:center}#spellCastForm p{font-size:11px;margin:6px 0;color:#97aaba}#spellCastForm .spell-cast-footer{display:flex;align-items:center;gap:8px}#spellCastForm button{font-size:12px;padding:5px 12px;border-radius:7px}#spellCastStatus{margin:0;font-size:11px}
 @media(max-width:600px){#spellCastForm .spell-cast-fields{grid-template-columns:1fr 1fr}#spellCastForm .spell-cast-fields label:last-child{grid-column:1/-1}}
+
+.catalogue-search{margin:0 0 10px}.catalogue-search input{width:100%;box-sizing:border-box;background:#152331;color:#edf2f7;border:1px solid #40576b;border-radius:10px;padding:9px 12px;font-size:13px}
+.catalogue-filters{display:grid;gap:8px;margin-bottom:8px}.bestiary-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.spell-filters{grid-template-columns:repeat(4,minmax(0,1fr))}.catalogue-filters label{display:grid;gap:3px;font-size:10px;color:#a8bdcc;min-width:0}.catalogue-filters select{width:100%;min-width:0;box-sizing:border-box;background:#1c2b39;color:#e2eaf1;border:1px solid #3b5267;border-radius:8px;padding:6px 8px;min-height:31px;font-size:12px;color-scheme:dark}.catalogue-tools{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;color:#a5b9c8}.catalogue-tools button{border:1px solid #3f5669;border-radius:7px;background:transparent;color:#c5d5e1;padding:4px 9px;cursor:pointer}#bestiaryPanel h2{margin-bottom:12px!important}.catalogue-filters select:focus,.catalogue-search input:focus{outline:2px solid #799ab8;outline-offset:1px}@media(max-width:650px){.spell-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -822,11 +825,12 @@ a.btn[href="translator.html"]:hover {
 <div class="bestiary-panel" id="bestiaryPanel">
     <button class="close-bestiary-mobile" id="closeBestiaryMobileBtn">&times;</button>
     <h2 style="margin-bottom:20px;"><i "></i> Бестиарий</h2>
-    <div class="search-row">
-        <input type="text" id="searchInput" placeholder="🔍 Имя монстра...">
-        <select id="crFilter"></select>
-        <select id="folderSelect"></select>
-    </div>
+    <div class="catalogue-search"><input type="search" id="searchInput" placeholder="Поиск по названию" aria-label="Поиск существ"></div>
+    <div class="catalogue-filters bestiary-filters">
+      <label>Вид<select id="monsterTypeFilter"></select></label><label>Размер<select id="monsterSizeFilter"></select></label>
+      <label>Мировоззрение<select id="monsterAlignmentFilter"></select></label><label>Опасность (CR)<select id="crFilter"></select></label>
+      <label>Источник<select id="monsterSourceFilter"></select></label><label>Группа<select id="folderSelect"></select></label>
+    </div><div class="catalogue-tools"><span id="monsterResultCount" aria-live="polite"></span><button id="resetBestiaryFilters" type="button">Сбросить</button></div>
     <div id="monsterList" style="flex:1; overflow-y:auto;"></div>
     <button id="addCustomMonsterBtn" class="btn" style="margin-top:20px; background:#3e5a48;" data-tooltip="Создать своего монстра"><i class="fa-solid fa-plus fa-icon"></i> Создать монстра</button>
 </div>
@@ -857,7 +861,7 @@ a.btn[href="translator.html"]:hover {
     </div>
 </div>
 <div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><section class="bestiary-section"><h3>Особенности</h3><ul id="detailFeatures"></ul></section><section class="bestiary-section"><h3>Действия</h3><ul id="detailActions"></ul></section><section class="bestiary-section"><h3>Бонусные действия</h3><ul id="detailBonusActions"></ul></section><section class="bestiary-section"><h3>Реакции</h3><ul id="detailReactions"></ul></section><section class="bestiary-section"><h3>Легендарные действия</h3><ul id="detailLegendary"></ul></section><section class="bestiary-section"><h3>Действия логова</h3><ul id="detailLairActions"></ul></section><section class="bestiary-section"><h3>Местные эффекты</h3><ul id="detailRegionalEffects"></ul></section><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
-<div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><input type="text" id="spellSearchInput" placeholder="🔍 Поиск..." style="width:100%; padding:8px 16px; border-radius:60px; margin-bottom:16px; background:#1e2838; border:1px solid #0db9e7; color:white;"><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
+<div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><div class="catalogue-search"><input type="search" id="spellSearchInput" placeholder="Поиск по названию" aria-label="Поиск заклинаний"></div><div class="catalogue-filters spell-filters"><label>Уровень<select id="spellLevelFilter"></select></label><label>Класс<select id="spellClassFilter"></select></label><label>Школа<select id="spellSchoolFilter"></select></label><label>Источник<select id="spellSourceFilter"></select></label></div><div class="catalogue-tools"><span id="spellResultCount" aria-live="polite"></span><button id="resetSpellFilters" type="button">Сбросить</button></div><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
 
@@ -1138,24 +1142,19 @@ function getFolderPlainName(type) {
         renderBestiary();
     }
 
+    const sourceTitles={MM:'MM — Бестиарий',PHB:'PHB — Книга игрока',DMG:'DMG — Руководство мастера',XGE:'XGE — Руководство Занатара',TCE:'TCE — Котёл Таши',VGM:'VGM — Руководство Воло',MTF:'MTF — Том Морденкайнена',MPMM:'MPMM — Монстры мультивселенной',CoS:'CoS — Проклятие Страда'};
+    function sourceKey(value){return typeof value==='object'?String(value?.book||value?.name||'Не указан'):String(value||'Не указан');}
+    function fillCatalogueFilter(id,values,title,label=x=>x){const select=document.getElementById(id),previous=select.value;const unique=[...new Set(values.filter(v=>v!==''&&v!=null))].sort((a,b)=>String(a).localeCompare(String(b),'ru',{numeric:true}));select.innerHTML='<option value="all">'+title+'</option>'+unique.map(v=>'<option value="'+escapeHtml(String(v))+'">'+escapeHtml(String(label(v)))+'</option>').join('');if(unique.some(v=>String(v)===previous))select.value=previous;}
+    function monsterFilterData(m){const full=fullMonstersMap.get(m.name.toLowerCase())||{};return {type:normalizeMonsterInlineText(full.type)||'Не указан',size:translateSize(full.size),alignment:translateAlignment(full.alignment),source:sourceKey(full.source)};}
     function initFilters() {
-    const folders = [...new Set(monstersLibrary.map(m => m.folder))];
-
-    const sel = document.getElementById('folderSelect');
-    const folderOptions = folders.map(f => {
-        return `<option value="${f}">${f}</option>`;   // ← чисто и без HTML
-    }).join('');
-
-    sel.innerHTML = '<option value="all">Все папки</option>' + folderOptions;
-
-    const crSel = document.getElementById('crFilter');
-    const uniqueCrs = [...new Set(monstersLibrary.map(m => m.cr))].sort((a,b)=>a-b);
-    crSel.innerHTML = '<option value="all">Все CR</option>' + uniqueCrs.map(cr => `<option value="${cr}">CR ${cr}</option>`).join('');
-
-    document.getElementById('searchInput').oninput = () => renderBestiary();
-    sel.onchange = () => renderBestiary();
-    crSel.onchange = () => renderBestiary();
-}
+        fillCatalogueFilter('folderSelect',monstersLibrary.map(m=>m.folder),'Все группы');
+        fillCatalogueFilter('crFilter',monstersLibrary.map(m=>m.cr),'Любая опасность',x=>'CR '+x);
+        const data=monstersLibrary.map(monsterFilterData);
+        for(const [id,key,title] of [['monsterTypeFilter','type','Все виды'],['monsterSizeFilter','size','Все размеры'],['monsterAlignmentFilter','alignment','Любое мировоззрение'],['monsterSourceFilter','source','Все источники']])fillCatalogueFilter(id,data.map(m=>m[key]),title,key==='source'?x=>sourceTitles[x]||x:x=>x);
+        document.getElementById('searchInput').oninput=renderBestiary;
+        for(const id of ['folderSelect','crFilter','monsterTypeFilter','monsterSizeFilter','monsterAlignmentFilter','monsterSourceFilter'])document.getElementById(id).onchange=renderBestiary;
+        document.getElementById('resetBestiaryFilters').onclick=()=>{document.getElementById('searchInput').value='';for(const select of document.querySelectorAll('.bestiary-filters select'))select.value='all';renderBestiary();};
+    }
 
     function makeFolderId(name) {
         return name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_');
@@ -1165,15 +1164,18 @@ function getFolderPlainName(type) {
         const search = document.getElementById('searchInput').value.trim().toLowerCase();
         const folder = document.getElementById('folderSelect').value;
         const crVal = document.getElementById('crFilter').value;
+        const extra={type:document.getElementById('monsterTypeFilter').value,size:document.getElementById('monsterSizeFilter').value,alignment:document.getElementById('monsterAlignmentFilter').value,source:document.getElementById('monsterSourceFilter').value};
         let filtered = monstersLibrary.filter(m => {
             if (folder !== 'all' && m.folder !== folder) return false;
             if (search && !m.name.toLowerCase().includes(search)) return false;
-            if (crVal !== 'all') return m.cr == parseFloat(crVal);
+            if (crVal !== 'all' && m.cr != parseFloat(crVal)) return false;
+            const meta=monsterFilterData(m);for(const [key,value] of Object.entries(extra))if(value && value!=='all' && meta[key]!==value)return false;
             return true;
         });
 
         const container = document.getElementById('monsterList');
-        if (search) {
+        document.getElementById('monsterResultCount').textContent='Найдено: '+filtered.length;
+        if (search || folder!=='all' || crVal!=='all' || Object.values(extra).some(v=>v&&v!=='all')) {
             let html = '';
             filtered.forEach(m => {
                 html += `<div class="monster-item">
@@ -2228,10 +2230,17 @@ function findSpellById(id) {
     function showAllSpells() {
         const container = document.getElementById('allSpellsList');
         const searchInput = document.getElementById('spellSearchInput');
+        fillCatalogueFilter('spellLevelFilter',allSpellsList.map(s=>s.level),'Все уровни',x=>Number(x)===0?'Заговоры':x+' уровень');
+        fillCatalogueFilter('spellClassFilter',allSpellsList.flatMap(s=>s.classes||[]),'Все классы');
+        fillCatalogueFilter('spellSchoolFilter',allSpellsList.map(s=>s.school||'Не указана'),'Все школы');
+        fillCatalogueFilter('spellSourceFilter',allSpellsList.map(s=>sourceKey(s.source)),'Все источники',x=>sourceTitles[x]||x);
+        const selected=()=>({level:document.getElementById('spellLevelFilter').value,class:document.getElementById('spellClassFilter').value,school:document.getElementById('spellSchoolFilter').value,source:document.getElementById('spellSourceFilter').value});
         function render(filter = '') {
-            const filtered = allSpellsList.filter(s => s.spellName.toLowerCase().includes(filter.toLowerCase()));
+            const f=selected();
+            const filtered = allSpellsList.filter(s => s.spellName.toLowerCase().includes(filter.trim().toLowerCase()) && (f.level==='all'||Number(s.level)===Number(f.level)) && (f.class==='all'||(s.classes||[]).includes(f.class)) && (f.school==='all'||(s.school||'Не указана')===f.school) && (f.source==='all'||sourceKey(s.source)===f.source));
+            document.getElementById('spellResultCount').textContent='Найдено: '+filtered.length;
             container.innerHTML = '';
-            if (filter.trim() !== '') {
+            if (filter.trim() !== '' || Object.values(f).some(v=>v!=='all')) {
                 filtered.forEach(spell => {
                     const div = document.createElement('div');
                     div.className = `spell-item spell-school-${spell.school}`;
@@ -2280,6 +2289,8 @@ function findSpellById(id) {
         searchInput.value = '';
         render('');
         searchInput.oninput = (e) => render(e.target.value);
+        for(const select of document.querySelectorAll('.spell-filters select'))select.onchange=()=>render(searchInput.value);
+        document.getElementById('resetSpellFilters').onclick=()=>{searchInput.value='';for(const select of document.querySelectorAll('.spell-filters select'))select.value='all';render('');};
         document.getElementById('allSpellsModal').style.display = 'flex';
     }
 
@@ -2809,6 +2820,7 @@ function findSpellById(id) {
         loadSpells(),
         loadUuidMap()   // <-- обязательно!
      ]).then(() => {
+        initFilters();renderBestiary();
         initSessions();
         adjustMobileSticky();
         adjustTopBarOffset();
