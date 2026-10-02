@@ -1,7 +1,7 @@
 /* Explicit public projection: no monster mechanics or pending participants. */
 (function(root){
   function image(value){
-    if(typeof value!=='string')return '';
+    if(typeof value!=='string'||!value.trim())return '';
     if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;
     try{const url=new URL(value,typeof location==='object'?location.href:'https://example.invalid/');return /^https?:$/.test(url.protocol)?url.href:'';}catch{return '';}
   }

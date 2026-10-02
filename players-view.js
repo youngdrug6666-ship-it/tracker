@@ -5,7 +5,7 @@
   const healthLabels={healthy:'Невредим',wounded:'Ранен',bloodied:'Окровавлен',down:'Выведен из боя',unknown:''};
   const channel=typeof BroadcastChannel==='function'?new BroadcastChannel(key):null;
   function make(tag,className,text){const el=document.createElement(tag);if(className)el.className=className;if(text!==undefined)el.textContent=text;return el;}
-  function safeImage(value){if(typeof value!=='string')return '';if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;try{const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return '';}}
+  function safeImage(value){if(typeof value!=='string'||!value.trim())return '';if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;try{const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return '';}}
   function receive(message){
     if(message?.version!==1 || !Array.isArray(message.participants))return;
     const participants=message.participants.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&Number.isFinite(p.initiative)&&p.initiative!==0).map(p=>{
@@ -26,12 +26,11 @@
   function render(){
     const list=state?.participants||[],chosen=list.find(p=>p.id===selected),active=!!chosen&&chosen.id===state.currentId;
     document.getElementById('round').textContent='Раунд '+(state?state.round:'—');
-    const nextSignature=JSON.stringify([chosen||null,active,!!state,list.length]);
+    const nextSignature=JSON.stringify([chosen||null,active,!!state,list.map(p=>[p.id,p.name,p.image])]);
     if(signature!==nextSignature){
       signature=nextSignature;fitObserver?.disconnect();stage.replaceChildren();
       if(chosen){
         const deck=make('div','fan-deck');deck.setAttribute('aria-label','Другие участники');
-        const index=list.findIndex(p=>p.id===chosen.id);
         const others=list.filter(p=>p.id!==chosen.id).slice(0,10);
         others.forEach((p,i)=>{
           const offset=i-(others.length-1)/2;
