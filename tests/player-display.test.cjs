@@ -5,6 +5,12 @@ assert.deepEqual(step(party,0,1),{index:2,wrapped:false});assert.deepEqual(step(
 console.log('Player display: hidden zero initiative, public fields only, safe images, turn navigation passed');
 const enemy={id:7,name:'Враг',isMonster:true,initiative:12,currentHp:50,maxHp:100,ac:19,tempHp:3,conditions:new Set(['Концентрация','Отравленный']),features:['Секрет']};
 let exposed=project([enemy],0,1).participants[0];assert.equal(exposed.health,'bloodied');assert.deepEqual(exposed.conditions,['Концентрация','Отравленный']);assert(!('metrics' in exposed));assert(!('ac' in exposed));assert(!('currentHp' in exposed));assert(!('maxHp' in exposed));assert(!JSON.stringify(exposed).includes('Секрет'));
-assert.equal(project([{...enemy,currentHp:75}],0,1).participants[0].health,'wounded');assert.equal(project([{...enemy,currentHp:100}],0,1).participants[0].health,'healthy');assert.equal(project([{...enemy,currentHp:0}],0,1).participants[0].health,'down');
+assert.equal(project([{...enemy,currentHp:75}],0,1).participants[0].health,'injured');assert.equal(project([{...enemy,currentHp:100}],0,1).participants[0].health,'healthy');assert.equal(project([{...enemy,currentHp:0}],0,1).participants[0].health,'down');
 const hero=project([{...enemy,isMonster:false,conditions:{__type:'Set',values:['Концентрация']}}],0,1).participants[0];assert.deepEqual(hero.metrics,{hp:50,maxHp:100,tempHp:3,ac:19});assert.deepEqual(hero.conditions,['Концентрация']);const ally=project([{...enemy,isAlly:true}],0,1).participants[0];assert.equal(ally.metrics.ac,19);
 console.log('Public statuses: qualitative enemy wounds, conditions, ally HP/AC, pending creature privacy passed');
+
+assert.equal(project([{...enemy,currentHp:25}],0,1).participants[0].health,'critical');assert.equal(project([{...enemy,currentHp:26}],0,1).participants[0].health,'bloodied');
+
+assert.equal(project([{...enemy,currentHp:76}],0,1).participants[0].health,'wounded');
+const marked=project([{id:700,name:'Секретный заклинатель',isMonster:true,initiative:0},{id:701,name:'Цель',isMonster:true,initiative:10,currentHp:10,maxHp:10,activeSpellEffects:[{name:'Благословение',casterId:700}]}],1,1);
+assert.equal(marked.participants[0].effects[0].casterName,'Источник скрыт');assert(!JSON.stringify(marked).includes('Секретный заклинатель'));

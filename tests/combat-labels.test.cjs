@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),L=require('../combat-labels'),E=require('../spell-effects');
+const monster=id=>({id,isMonster:true,name:'Фанатик культа / Cult Fanatic',conditions:new Set()});
+let all=[1,2,3,4].map(monster);L.ensure(all);assert.deepEqual(all.map(c=>c.monsterNumber),[1,2,3,4]);
+all.splice(1,1);all.push(monster(5));L.ensure(all);assert.deepEqual(all.map(c=>c.monsterNumber),[1,3,4,2]);
+L.ensure(all);assert.equal(L.label(all[2]),'Фанатик культа №4');
+all=JSON.parse(JSON.stringify(all));L.ensure(all);assert.deepEqual(all.map(c=>c.monsterNumber),[1,3,4,2]);
+all=[];all.push(monster(100));L.ensure(all);assert.equal(all[0].monsterNumber,1);
+all.push(monster(101));L.ensure(all);const target={id:200,name:'Герой',conditions:new Set()};all.push(target);
+const a=E.cast(all,{spell:{name:'Благословение / Bless',duration:'1 minute',concentration:true},casterId:100,targetId:200});
+const b=E.cast(all,{spell:{name:'Благословение / Bless',duration:'1 minute',concentration:true},casterId:101,targetId:200});
+assert.equal(target.activeSpellEffects.length,2);
+assert.match(L.effectTooltip(target.activeSpellEffects[0],all),/№1/);assert.match(L.effectTooltip(target.activeSpellEffects[1],all),/№2/);
+E.remove(all,a.id);assert.equal(target.activeSpellEffects.length,1);assert.equal(target.activeSpellEffects[0].id,b.id);
+assert.match(L.effectTooltip(target.activeSpellEffects[0],all.filter(c=>c.id!==101)),/№2 \(вне боя\)/);
+console.log('PASS stable/reused/reset monster numbering, saved numbers, independent same-spell sources and deleted caster provenance');

@@ -19,7 +19,7 @@ function cast(all,{spell,casterId,targetId,slotLevel=null,unarmored=false,round=
  const persistent=spell.concentration||isMageArmor(spell)||!/^\s*(inst|instantaneous|мгновенно)(?:\s|$)/i.test(spell.duration||'inst');
  if(persistent){target.activeSpellEffects||=[];
   if(isMageArmor(spell))target.activeSpellEffects=target.activeSpellEffects.filter(e=>e.kind!=='mageArmor');
-  target.activeSpellEffects.push({id,name:name(spell),casterId:caster.id,concentration:!!spell.concentration,kind:isMageArmor(spell)?'mageArmor':'marker',duration:spell.duration||'',createdAt:Date.now(),expiresRound:Number.isFinite(round)&&durationRounds(spell.duration)?round+durationRounds(spell.duration):null});
+  target.activeSpellEffects.push({id,name:name(spell),casterId:caster.id,casterName:root.CombatLabels?.label(caster)||String(caster.name||'Заклинатель'),concentration:!!spell.concentration,kind:isMageArmor(spell)?'mageArmor':'marker',duration:spell.duration||'',createdAt:Date.now(),expiresRound:Number.isFinite(round)&&durationRounds(spell.duration)?round+durationRounds(spell.duration):null});
  }
  if(spell.concentration){caster.conditions||=new Set();caster.conditions.add('Концентрация');caster.concentrationEffect=id;}
  updateMonsterArmor(target);
