@@ -21,7 +21,8 @@ function limits(m){
  const actionsMax=m.legendary_actions?.length?Number(m.legendaryCount||m._sourceLegendaryCount)||Number(text(m.legendary_actions).match(/(?:совершить|совершает|использовать|take)\s+(\d+)\s+(?:легендарн|legendary)/i)?.[1])||0:0;
  return {resistance:resistanceMax,actions:actionsMax};
 }
-function ensure(c,m,round){const max=limits(m);c.legendaryResources||={};for(const [key,limit] of Object.entries(max)){if(!limit){delete c.legendaryResources[key];continue;}const r=c.legendaryResources[key]||={used:0};r.max=limit;r.used=Math.min(limit,Math.max(0,r.used||0));if(key==='actions'&&r.round!==round){r.used=0;r.round=round;}}return c.legendaryResources;}
+function ensure(c,m,round){const max=limits(m);c.legendaryResources||={};for(const [key,limit] of Object.entries(max)){if(!limit){delete c.legendaryResources[key];continue;}const r=c.legendaryResources[key]||={used:0};r.max=limit;r.used=Math.min(limit,Math.max(0,r.used||0));if(key==='actions'&&r.round==null)r.round=round;else if(key==='actions'&&round>r.round){r.used=0;r.round=round;}}return c.legendaryResources;}
 function spend(c,key,amount=1){const r=c.legendaryResources?.[key];if(!r||r.used+amount>r.max||amount<1)return false;r.used+=amount;return true;}
-root.MonsterMechanics={text,casting,limits,ensure,spend};if(typeof module!=='undefined')module.exports=root.MonsterMechanics;
+function syncSlots(previous,declared){return Object.fromEntries(Object.entries(declared||{}).map(([key,slot])=>[key,{max:slot.max,used:Math.min(previous?.[key]?.used||0,slot.max)}]));}
+root.MonsterMechanics={syncSlots,text,casting,limits,ensure,spend};if(typeof module!=='undefined')module.exports=root.MonsterMechanics;
 })(typeof window==='undefined'?globalThis:window);

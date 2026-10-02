@@ -7,7 +7,7 @@ function remove(all,id){
  for(const c of all){c.activeSpellEffects=(c.activeSpellEffects||[]).filter(e=>e.id!==id);updateMonsterArmor(c);if(c.concentrationEffect===id){delete c.concentrationEffect;c.conditions?.delete('Концентрация');}}
 }
 function endConcentration(all,caster){caster.concentrationChecks=[];if(caster.concentrationEffect)remove(all,caster.concentrationEffect);caster.conditions?.delete('Концентрация');}
-function cast(all,{spell,casterId,targetId,slotLevel=null,unarmored=false}){
+function cast(all,{spell,casterId,targetId,slotLevel=null,unarmored=false,round=null}){
  const caster=all.find(c=>String(c.id)===String(casterId)),target=all.find(c=>String(c.id)===String(targetId));
  if(!caster||!target)throw Error('Выберите заклинателя и цель.');
  if(isMageArmor(spell)&&!unarmored)throw Error('Для Доспехов мага выберите цель без доспеха и подтвердите это.');
@@ -19,15 +19,17 @@ function cast(all,{spell,casterId,targetId,slotLevel=null,unarmored=false}){
  const persistent=spell.concentration||isMageArmor(spell)||!/^\s*(inst|instantaneous|мгновенно)(?:\s|$)/i.test(spell.duration||'inst');
  if(persistent){target.activeSpellEffects||=[];
   if(isMageArmor(spell))target.activeSpellEffects=target.activeSpellEffects.filter(e=>e.kind!=='mageArmor');
-  target.activeSpellEffects.push({id,name:name(spell),casterId:caster.id,concentration:!!spell.concentration,kind:isMageArmor(spell)?'mageArmor':'marker',duration:spell.duration||'',createdAt:Date.now()});
+  target.activeSpellEffects.push({id,name:name(spell),casterId:caster.id,concentration:!!spell.concentration,kind:isMageArmor(spell)?'mageArmor':'marker',duration:spell.duration||'',createdAt:Date.now(),expiresRound:Number.isFinite(round)&&durationRounds(spell.duration)?round+durationRounds(spell.duration):null});
  }
  if(spell.concentration){caster.conditions||=new Set();caster.conditions.add('Концентрация');caster.concentrationEffect=id;}
  updateMonsterArmor(target);
  return {id,persistent};
 }
+function durationRounds(value){const m=String(value||'').match(/(\d+)\s*(round|раунд|minute|мин|hour|час|day|день|дня|дней)/i);if(!m)return null;const unit=m[2].toLowerCase();return Number(m[1])*(/round|раунд/.test(unit)?1:/minute|мин/.test(unit)?10:/hour|час/.test(unit)?600:14400);}
+function advance(all,round){const ids=new Set(all.flatMap(c=>c.activeSpellEffects||[]).filter(e=>Number.isFinite(e.expiresRound)&&round>=e.expiresRound).map(e=>e.id));for(const id of ids)remove(all,id);return ids.size;}
 function armorBase(c,base){return (c.activeSpellEffects||[]).some(e=>e.kind==='mageArmor')?13+Math.floor((Number(c.stats?.dex?.score||10)-10)/2):base;}
 function updateMonsterArmor(c){if(!c.isMonster)return;if((c.activeSpellEffects||[]).some(e=>e.kind==='mageArmor')){c.ac=armorBase(c,c.ac);}else if(c.spellEffectBaseAc!=null){c.ac=c.spellEffectBaseAc;delete c.spellEffectBaseAc;}}
 function availableSlots(caster,spell){return Object.entries(caster.spellSlots||{}).filter(([key,s])=>Number(spell.level)>0&&Number(key.replace('pact-',''))>=Number(spell.level)&&s.max-(s.used||0)>0).sort(([a],[b])=>Number(a.replace('pact-',''))-Number(b.replace('pact-',''))||Number(a.startsWith('pact-'))-Number(b.startsWith('pact-')));}
 function defaultSlot(caster,spell){return availableSlots(caster,spell)[0]?.[0]||'';}
-root.SpellEffects={cast,remove,endConcentration,armorBase,isMageArmor,updateMonsterArmor,availableSlots,defaultSlot};if(typeof module!=='undefined'&&module.exports)module.exports=root.SpellEffects;
+root.SpellEffects={durationRounds,advance,cast,remove,endConcentration,armorBase,isMageArmor,updateMonsterArmor,availableSlots,defaultSlot};if(typeof module!=='undefined'&&module.exports)module.exports=root.SpellEffects;
 })(typeof globalThis!=='undefined'?globalThis:window);
