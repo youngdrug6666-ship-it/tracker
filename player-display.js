@@ -8,7 +8,7 @@
   function participant(c){
     const isAlly=!c.isMonster||c.isAlly===true;
     const hp=Number(c.currentHp),max=Number(c.maxHp);
-    const health=Number.isFinite(hp)&&Number.isFinite(max)&&max>0?(hp<=0?'down':hp<=max/4?'critical':hp<=max/2?'bloodied':hp<max?'wounded':'healthy'):'unknown';
+    const health=Number.isFinite(hp)&&Number.isFinite(max)&&max>0?(hp<=0?'down':hp<=max/4?'critical':hp<=max/2?'bloodied':hp<=max*.75?'injured':hp<max?'wounded':'healthy'):'unknown';
     const raw=c.conditions instanceof Set?[...c.conditions]:Array.isArray(c.conditions)?c.conditions:Array.isArray(c.conditions?.values)?c.conditions.values:[];
     const conditions=raw.filter(v=>typeof v==='string');
     if(Number(c.exhaustion)>0&&!conditions.some(v=>v.startsWith('Истощ')))conditions.push('Истощение '+Number(c.exhaustion));

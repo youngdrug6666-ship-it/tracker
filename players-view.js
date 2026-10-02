@@ -2,7 +2,7 @@
   const key='dnd_player_display_v1',stage=document.getElementById('stage'),order=document.getElementById('order');
   let state=null,selected=null,following=true,signature='',orderSignature='',received=0,renderedId=null,deckDirection=1;
   let fitObserver=null;
-  const healthLabels={healthy:'Невредим',wounded:'Ранен',bloodied:'Окровавлен',critical:'Тяжёлая травма',down:'Выведен из боя',unknown:''};
+  const healthLabels={healthy:'Невредим',wounded:'Ранен',injured:'Сильно ранен',bloodied:'Окровавлен',critical:'Тяжёлая травма',down:'Выведен из боя',unknown:''};
   const channel=typeof BroadcastChannel==='function'?new BroadcastChannel(key):null;
   function make(tag,className,text){const el=document.createElement(tag);if(className)el.className=className;if(text!==undefined)el.textContent=text;return el;}
   function safeImage(value){if(typeof value!=='string'||!value.trim())return '';if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;try{const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return '';}}
@@ -82,7 +82,7 @@
         if(p.id===state.currentId)button.setAttribute('aria-current','true');
         button.append(make('span','order-number',index+1));
         if(p.image){const img=make('img','order-image');img.src=p.image;img.alt='';img.onerror=()=>{img.replaceWith(make('span','order-image','◆'));};button.append(img);}else button.append(make('span','order-image',p.isMonster?'◆':'✦'));
-        const copy=make('span','order-copy');copy.append(make('span','order-name',p.name));if(p.health==='wounded'||p.health==='bloodied'||p.health==='critical'||p.health==='down')copy.append(make('span','order-health '+p.health,healthLabels[p.health]));if(p.conditions.length)copy.append(make('span','order-conditions',p.conditions.join(' · ')));button.append(copy,make('span','order-init',p.initiative));button.onclick=()=>{following=false;selected=p.id;render();};li.append(button);order.append(li);
+        const copy=make('span','order-copy');copy.append(make('span','order-name',p.name));if(p.health==='wounded'||p.health==='injured'||p.health==='bloodied'||p.health==='critical'||p.health==='down')copy.append(make('span','order-health '+p.health,healthLabels[p.health]));if(p.conditions.length)copy.append(make('span','order-conditions',p.conditions.join(' · ')));button.append(copy,make('span','order-init',p.initiative));button.onclick=()=>{following=false;selected=p.id;render();};li.append(button);order.append(li);
       });
       order.querySelector('[aria-current="true"]')?.scrollIntoView({block:'nearest'});
     }
