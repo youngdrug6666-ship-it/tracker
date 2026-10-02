@@ -1,95 +1,114 @@
-/* Continuous procedural fire: one clock survives card redraws, no video loop. */
+/* Portal rim adapted from Binbun's Portal VFX (CC0).
+ * https://binbun3d.itch.io/godot-portal-vfx
+ * Retains layered noise/overlay shaping; uses a rounded-box distance field
+ * and procedural noise instead of Godot's scene textures and 3D parallax.
+ */
 (() => {
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  let canvas, ctx, frame = 0, width = 0, height = 0, last = 0;
-  const margin = 22;
-  function point(distance, w, h, r) {
-    const straight = [w - 2*r, h - 2*r, w - 2*r, h - 2*r];
-    const arc = Math.PI*r/2;
-    const starts = [[r,0,1,0],[w,r,0,1],[w-r,h,-1,0],[0,h-r,0,-1]];
-    const centers = [[w-r,r],[w-r,h-r],[r,h-r],[r,r]];
-    for (let side=0; side<4; side++) {
-      if (distance <= straight[side]) {
-        const [x,y,dx,dy] = starts[side];
-        return [x+dx*distance,y+dy*distance,dy,-dx];
-      }
-      distance -= straight[side];
-      if (distance <= arc) {
-        const angle = -Math.PI/2 + side*Math.PI/2 + distance/r;
-        const [x,y] = centers[side];
-        return [x+r*Math.cos(angle),y+r*Math.sin(angle),Math.cos(angle),Math.sin(angle)];
-      }
-      distance -= arc;
+  const canvas = document.createElement('canvas');
+  canvas.setAttribute('aria-hidden', 'true');
+  const gl = canvas.getContext('webgl', {alpha:true, premultipliedAlpha:true, antialias:false, depth:false, stencil:false, preserveDrawingBuffer:false});
+  let frame=0, host=null, program=null, sizeLocation, timeLocation, last=0, lost=false;
+  const vertex = `attribute vec2 position; void main(){gl_Position=vec4(position,0.0,1.0);}`;
+  const fragment = `
+    precision highp float;
+    uniform vec2 resolution;
+    uniform float clock;
+    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    float noise(vec2 p){
+      vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0)),f.x),f.y);
     }
-    return [r,0,0,-1];
+    float fbm(vec2 p){
+      float n=0.0,a=0.55;
+      for(int i=0;i<4;i++){n+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p+vec2(7.1,3.4);a*=0.5;}
+      return n;
+    }
+    float overlay(float a,float b){return mix(2.0*a*b,1.0-2.0*(1.0-a)*(1.0-b),step(0.5,a));}
+    float boxDistance(vec2 p,vec2 halfSize,float radius){
+      vec2 q=abs(p)-halfSize+radius;
+      return length(max(q,0.0))+min(max(q.x,q.y),0.0)-radius;
+    }
+    void main(){
+      // Coordinates in CSS pixels: thickness stays consistent on every screen.
+      vec2 p=gl_FragCoord.xy/resolution*resolution-resolution*0.5;
+      vec2 halfSize=resolution*0.5-vec2(22.0);
+      float distance=boxDistance(p,halfSize,24.0);
+      // Empty centre. Border texture never covers the character controls.
+      if(distance < -2.5 || distance > 21.0){gl_FragColor=vec4(0.0);return;}
+      vec2 pos=p*0.055;
+      vec2 drift=vec2(clock*0.16,-clock*0.32);
+      vec2 warp=vec2(fbm(pos+drift),fbm(pos+vec2(23.7,9.2)-drift*0.7));
+      float field=0.0;
+      // Binbun's layer/fade and overlay approach, adapted to a narrow rim.
+      for(int i=0;i<4;i++){
+        float depth=float(i)/4.0;
+        vec2 uv=pos+warp*1.65+vec2(depth*7.0,depth*3.0)+drift*(1.0+depth);
+        float n=fbm(uv);
+        float shape=clamp(1.0-max(distance,0.0)/(6.0+depth*12.0),0.0,1.0);
+        float energy=overlay(shape,n);
+        float layer=smoothstep(0.43,0.82,energy)*(1.0-depth*0.55);
+        field=max(field,layer);
+      }
+      float n=fbm(pos*2.0+warp*2.5+drift*1.8);
+      // Break up the outer silhouette into flowing, translucent wisps.
+      float extent=3.5+15.0*pow(fbm(pos+warp*2.0+drift),1.4);
+      float tip=1.0-smoothstep(extent-4.0,extent+1.0,distance);
+      float inner=smoothstep(-2.5,-0.5,distance);
+      float body=field*tip*inner;
+      float core=exp(-abs(distance-0.6)*0.7)*(0.45+0.55*n)*inner;
+      float halo=exp(-max(distance,0.0)*0.17)*0.16*inner;
+      float alpha=clamp(body*0.85+core*0.6+halo,0.0,0.92);
+      vec3 color=mix(vec3(0.30,0.045,0.62),vec3(0.65,0.24,0.98),smoothstep(0.0,0.75,body));
+      color=mix(color,vec3(0.94,0.73,1.0),clamp(core*0.95+pow(body,4.0)*0.35,0.0,0.85));
+      gl_FragColor=vec4(color*alpha,alpha);
+    }`;
+  function compile(type,source){
+    const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(shader);gl.deleteShader(shader);throw new Error(error);}
+    return shader;
   }
-  function draw(now) {
-    frame = 0;
-    if (!canvas?.isConnected || document.hidden) return;
-    if (!motion.matches && now-last < 1000/45) { frame=requestAnimationFrame(draw); return; }
+  function setup(){
+    if(!gl)return false;
+    try{
+      const v=compile(gl.VERTEX_SHADER,vertex), f=compile(gl.FRAGMENT_SHADER,fragment);
+      program=gl.createProgram();gl.attachShader(program,v);gl.attachShader(program,f);gl.linkProgram(program);
+      gl.deleteShader(v);gl.deleteShader(f);
+      if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));
+      gl.useProgram(program);
+      const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+      const position=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+      sizeLocation=gl.getUniformLocation(program,'resolution');timeLocation=gl.getUniformLocation(program,'clock');
+      return true;
+    }catch(error){console.warn('Эффект портала недоступен:',error.message);return false;}
+  }
+  let ready=setup();
+  function draw(now){
+    frame=0;
+    if(!ready || lost || !host?.isConnected || document.hidden)return;
+    if(!motion.matches && now-last<1000/40){frame=requestAnimationFrame(draw);return;}
     last=now;
-    const box=canvas.parentElement.getBoundingClientRect();
-    const w=box.width, h=box.height, ratio=Math.min(devicePixelRatio || 1,1.5);
-    if (width!==w || height!==h) {
-      width=w; height=h;
-      canvas.width=Math.ceil(w*ratio);canvas.height=Math.ceil(h*ratio);
-      ctx.setTransform(ratio,0,0,ratio,0,0);
-    }
-    ctx.clearRect(0,0,w,h);
-    const cw=w-2*margin,ch=h-2*margin,r=Math.min(24,cw/2,ch/2);
-    if(cw<=0 || ch<=0)return;
-    const length=2*(cw+ch-4*r)+2*Math.PI*r, samples=Math.ceil(length/3);
-    const time=motion.matches?0:now/1000;
-    // Filled, tapered flames instead of a stroked perimeter.
-    const count=Math.ceil(length/7);
-    ctx.globalCompositeOperation='source-over';
-    for(let i=0;i<count;i++) {
-      const phase=i*2.399963;
-      const pulse=.5+.5*Math.sin(time*2.7+phase);
-      const sway=Math.sin(time*3.3+phase)*3.5+Math.sin(time*1.4+i)*2;
-      const tall=3+15*pulse*pulse*(.65+.35*Math.sin(i*7.13))+2*Math.sin(time*4.1+phase);
-      const base=3.6+1.4*(.5+.5*Math.sin(time*2.1+phase));
-      const distance=(i/count*length+2*Math.sin(time*1.5+phase)+length)%length;
-      const [x,y,nx,ny]=point(distance,cw,ch,r);
-      ctx.save();ctx.translate(x+margin,y+margin);
-      // Local x follows the edge, local y points outwards.
-      ctx.transform(-ny,nx,nx,ny,0,0);
-      function tongue(scale,color,blur) {
-        ctx.beginPath();
-        ctx.moveTo(-base*scale,-1);
-        ctx.bezierCurveTo(-base*1.5*scale,tall*.28*scale,sway-4*scale,tall*.65*scale,sway,tall*scale);
-        ctx.bezierCurveTo(sway+1.7*scale,tall*.61*scale,base*1.6*scale,tall*.34*scale,base*scale,-1);
-        ctx.quadraticCurveTo(0,-2,-base*scale,-1);
-        ctx.closePath();ctx.fillStyle=color;ctx.shadowColor='#9b35ff';ctx.shadowBlur=blur;ctx.fill();
-      }
-      const halo=ctx.createLinearGradient(0,-2,0,tall);
-      halo.addColorStop(0,'rgba(129,31,229,.55)');halo.addColorStop(.4,'rgba(157,52,246,.36)');halo.addColorStop(1,'rgba(120,34,230,0)');
-      tongue(1.15,halo,7);
-      const body=ctx.createLinearGradient(0,-1,0,tall);
-      body.addColorStop(0,'rgba(217,157,255,.85)');body.addColorStop(.28,'rgba(185,94,255,.75)');body.addColorStop(.72,'rgba(146,47,238,.48)');body.addColorStop(1,'rgba(129,30,224,0)');
-      tongue(1,body,2);
-      const core=ctx.createLinearGradient(0,-1,0,tall*.6);
-      core.addColorStop(0,'rgba(250,221,255,.88)');core.addColorStop(.35,'rgba(227,179,255,.65)');core.addColorStop(1,'rgba(194,123,255,0)');
-      tongue(.36,core,0);
-      ctx.restore();
-    }
-    ctx.globalCompositeOperation='source-over';ctx.shadowBlur=0;
+    const rect=host.getBoundingClientRect();
+    // Render at CSS resolution to keep a single active effect inexpensive.
+    const w=Math.round(rect.width),h=Math.round(rect.height);
+    if(canvas.width!==w || canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
+    gl.uniform2f(sizeLocation,w,h);gl.uniform1f(timeLocation,motion.matches?0:now/1000);
+    gl.drawArrays(gl.TRIANGLES,0,6);
     if(!motion.matches)frame=requestAnimationFrame(draw);
   }
-  function sync() {
-    const host=document.querySelector('.turn-flames');
-    if(host && canvas?.parentElement===host)return;
-    cancelAnimationFrame(frame);frame=0;
-    canvas?.remove();canvas=null;
-    if(!host)return;
-    canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');host.append(canvas);
-    ctx=canvas.getContext('2d');width=height=0;
-    frame=requestAnimationFrame(draw);
+  function sync(){
+    const next=document.querySelector('.turn-flames');
+    if(next===host)return;
+    cancelAnimationFrame(frame);frame=0;host=next;
+    // One GPU context is reused across turns and all card redraws.
+    if(host && ready){host.append(canvas);frame=requestAnimationFrame(draw);}else canvas.remove();
   }
-  const observer=new MutationObserver(sync);
-  observer.observe(document.getElementById('combatantsGrid') || document.body,{childList:true,subtree:true});
+  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();lost=true;cancelAnimationFrame(frame);});
+  canvas.addEventListener('webglcontextrestored',()=>{lost=false;ready=setup();if(ready && host)frame=requestAnimationFrame(draw);});
+  new MutationObserver(sync).observe(document.getElementById('combatantsGrid') || document.body,{childList:true,subtree:true});
   document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(frame);if(!document.hidden)frame=requestAnimationFrame(draw);});
   motion.addEventListener('change',()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(draw);});
-  window.addEventListener('resize',()=>{if(motion.matches)frame=requestAnimationFrame(draw);});
+  window.addEventListener('resize',()=>{if(motion.matches){cancelAnimationFrame(frame);frame=requestAnimationFrame(draw);}});
   sync();
 })();
