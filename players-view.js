@@ -91,7 +91,7 @@
         if(p.image){const img=make('img','order-image');img.src=p.image;img.alt='';img.onerror=()=>{img.replaceWith(make('span','order-image','◆'));};button.append(img);}else button.append(make('span','order-image',p.isMonster?'◆':'✦'));
         const copy=make('span','order-copy');copy.append(make('span','order-name',p.name));if(p.health==='wounded'||p.health==='injured'||p.health==='bloodied'||p.health==='critical'||p.health==='down')copy.append(make('span','order-health '+p.health,healthLabels[p.health]));if(p.conditions.length)copy.append(make('span','order-conditions',p.conditions.join(' · ')));button.append(copy,make('span','order-init',p.initiative));button.onclick=()=>{following=false;selected=p.id;render();};li.append(button);order.append(li);
       });
-      if(order.dataset.currentId!==String(state?.currentId)){order.querySelector('[aria-current="true"]')?.scrollIntoView({block:'nearest'});order.dataset.currentId=String(state?.currentId);}
+      const currentItem=order.querySelector('[aria-current="true"]');if(currentItem){const changed=order.dataset.currentId!==String(state?.currentId);order.style.paddingBottom=Math.max(0,order.clientHeight-currentItem.offsetHeight-8)+'px';const top=currentItem.getBoundingClientRect().top-order.getBoundingClientRect().top+order.scrollTop;order.scrollTo({top,behavior:changed&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'});}order.dataset.currentId=String(state?.currentId);
     }
     const index=list.findIndex(p=>p.id===selected);
     document.getElementById('position').textContent=list.length?(index>=0?index+1:'—')+' / '+list.length:'—';

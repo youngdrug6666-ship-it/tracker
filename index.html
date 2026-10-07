@@ -907,7 +907,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
                         <button id="deleteSessionBtn" class="btn" style="background:#7a3e2a;" data-tooltip="Удалить текущую кампанию"><span class="btn-label"><i class="fa-solid fa-trash-can fa-icon"></i>Удалить сессию</span></button>
                         <button id="resetAllSessionsBtn" class="btn" style="background:#b85c5c;" data-tooltip="Сбросить все сессии и начать заново"><span class="btn-label"><i class="fa-solid fa-arrows-rotate fa-icon"></i>Сброс сессий</span></button>
             <a href="players.html" target="_blank" rel="noopener" class="btn" id="openPlayerDisplayBtn">Экран игроков / ТВ</a>
-            <a id="exportBackupBtn" class="btn" download="tracker-backup.json" href="#">Скачать резервную копию</a><button id="importBackupBtn" class="btn">Восстановить из копии</button><input id="backupFileInput" type="file" accept="application/json,.json" hidden><div id="backupStatus" role="status" style="font-size:12px;color:#c8bdde;padding:6px"></div>
+            <a id="exportBackupBtn" class="btn" download="tracker-backup.json" href="#">Скачать полную копию (с музыкой)</a><button id="importBackupBtn" class="btn">Восстановить из копии</button><input id="backupFileInput" type="file" accept="application/json,.json,application/zip,.zip" hidden><div id="backupStatus" role="status" style="font-size:12px;color:#c8bdde;padding:6px"></div>
             <div class="right-panel-links">
                 <a href="https://t.me/dnd_ekb_ekaterinburg" target="_blank">
                     <svg class="telegram-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.02-.13-.05-.18-.07-.05-.17-.03-.25-.02-.1.01-1.7 1.08-4.8 3.17-.45.31-.86.46-1.23.45-.4-.01-1.18-.23-1.76-.42-.71-.23-1.27-.35-1.22-.74.03-.2.3-.41.83-.63 3.2-1.39 5.34-2.31 6.42-2.76 3.05-1.28 3.69-1.5 4.1-1.51.09 0 .29.02.42.13.11.09.14.22.15.32.01.13-.01.3-.03.46z"/></svg>
@@ -978,6 +978,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="monster-builder.js?v=defenses-5"></script>
 <script src="monster-mechanics.js?v=3"></script>
 <script src="tracker-backup.js?v=1"></script>
+<script src="full-backup.js?v=1"></script>
 <script src="player-display.js?v=states-8"></script>
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
@@ -3078,19 +3079,20 @@ function findSpellById(id) {
             if(addToCombat)addCombatant({name:full.name,ac:full.ac,hpFormula:full.hpFormula,initBonus:full.initBonus,isMonster:true,avatar:full.image||null,speed:extractSpeedValue(full.speed),stats:full.stats,spellSaveDC:full.spellSaveDC,spellAttack:full.spellAttack});
         }});
     }
-    document.getElementById('exportBackupBtn').onclick=()=>{saveCurrentStateToSession();const backup=TrackerBackup.create(sessions,currentSessionId,JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]'));const url=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));const a=document.getElementById('exportBackupBtn');a.href=url;a.download='tracker-backup-'+new Date().toISOString().slice(0,10)+'.json';setTimeout(()=>URL.revokeObjectURL(url),60000);document.getElementById('backupStatus').textContent='Копия включает кампании, участников, эффекты и свой бестиарий.';};
+    document.getElementById('exportBackupBtn').onclick=async e=>{e.preventDefault();const status=document.getElementById('backupStatus'),button=e.currentTarget;if(button.dataset.busy)return;button.dataset.busy='true';try{saveCurrentStateToSession();const backup=TrackerBackup.create(sessions,currentSessionId,JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]'));status.textContent='Подготавливаю полную копию…';const result=await FullBackup.create(backup,(i,total)=>status.textContent='Сохранение архива: '+i+' / '+total);const url=URL.createObjectURL(result.blob),link=document.createElement('a');link.href=url;link.download='tracker-full-backup-'+new Date().toISOString().slice(0,10)+'.zip';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);status.textContent='Архив скачан: все кампании, герои, свои монстры, изображения и '+result.count+' аудиофайлов с папками и настройками.';}catch(error){status.textContent='Не удалось создать копию: '+error.message;}finally{delete button.dataset.busy;}};
     document.getElementById('importBackupBtn').onclick=()=>document.getElementById('backupFileInput').click();
     document.getElementById('backupFileInput').onchange=async e=>{
         const file=e.target.files[0];if(!file)return;const status=document.getElementById('backupStatus');
         try{
-            const restored=TrackerBackup.merge(sessions,JSON.parse(await file.text()));
+            status.textContent='Проверяю резервную копию…';const full=/\.zip$/i.test(file.name)?await FullBackup.read(file):null;const restored=TrackerBackup.merge(sessions,full?full.campaigns:JSON.parse(await file.text()));
+            if(full){status.textContent='Восстанавливаю аудиофайлы…';await FullBackup.restoreAudio(full);}
             const monsters=JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]'),renames=new Map(),occupied=new Set(fullMonstersMap.keys());
             for(const m of restored.monsters){let name=m.name;if(occupied.has(name.toLowerCase())){let n=1;while(occupied.has((name+' · копия '+n).toLowerCase()))n++;name+=' · копия '+n;}occupied.add(name.toLowerCase());renames.set(m.name,name);m.name=name;if(m._builderDraft)m._builderDraft.name=name;monsters.push(m);}
             for(const [id,s] of Object.entries(restored.sessions))if(!Object.hasOwn(sessions,id))for(const c of s.combatants)if(c.isMonster&&renames.has(c.name))c.name=renames.get(c.name);
             const previousKeys=Object.fromEntries(['dnd_custom_monsters_v1','dnd_sessions','dnd_current_session'].map(key=>[key,localStorage.getItem(key)]));
             try{localStorage.setItem('dnd_custom_monsters_v1',JSON.stringify(monsters));localStorage.setItem('dnd_sessions',JSON.stringify(restored.sessions));localStorage.setItem('dnd_current_session',restored.currentSession);}catch(error){for(const [key,value] of Object.entries(previousKeys))if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);throw error;}
             for(const m of restored.monsters)registerCustomMonster(m);
-            sessions=restored.sessions;loadSession(restored.currentSession);initFilters();renderBestiary();status.textContent='Кампании восстановлены. Прежние сохранения оставлены.';
+            sessions=restored.sessions;loadSession(restored.currentSession);initFilters();renderBestiary();if(full&&typeof full.settings?.dnd_audio_settings_v1==='string'){const incoming=JSON.parse(full.settings.dnd_audio_settings_v1),existing=JSON.parse(localStorage.getItem('dnd_audio_settings_v1')||'{}');localStorage.setItem('dnd_audio_settings_v1',JSON.stringify({...incoming,...existing,folders:[...new Set([...(incoming.folders||[]),...(existing.folders||[])])],gains:{...incoming.gains,...existing.gains},loops:{...incoming.loops,...existing.loops}}));}status.textContent=full?'Кампании и аудиобаза восстановлены. Прежние данные сохранены. Обнови страницу для загрузки музыки в плеер.':'Кампании восстановлены. Прежние сохранения оставлены.';
         }catch(error){status.textContent='Не удалось восстановить: '+error.message;}finally{e.target.value='';}
     };
     document.getElementById('addCustomMonsterBtn').onclick=()=>openCustomMonsterBuilder();
