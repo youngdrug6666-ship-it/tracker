@@ -868,6 +868,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 #appTooltip[hidden]{display:none!important}
 .monster-defenses{display:flex;gap:4px;flex-wrap:wrap;margin:3px 0}.monster-defenses:empty{display:none}.monster-defenses button{display:flex;align-items:center;gap:4px;background:#223440;border:1px solid #536579;border-radius:8px;color:#e1eaf2;padding:3px 6px;font-size:10px}.monster-card .hero-stat-summary{margin:4px 0}.monster-card .spell-stats{gap:8px}
 .legendary-resources{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.legendary-resources:empty{display:none}.legendary-resources>div{display:flex;align-items:center;gap:4px;background:#172333dd;border:1px solid #74658a;border-radius:8px;padding:3px 6px;font-size:10px}.legendary-resources button{background:#34465b;border:0;color:#eae4f6;border-radius:5px;width:20px;height:20px;cursor:pointer}.legendary-resources button:disabled{opacity:.35;cursor:default}
+.hero-condition-icons{gap:4px!important;background:transparent!important;padding:3px 0!important;border-radius:0!important}.hero-condition-icons .cond-item{width:26px;height:26px;display:grid;place-items:center;position:relative;padding:0;border:1px solid #64748b66;border-radius:8px;background:#111827bb!important;color:#a4adbd;font-size:12px;cursor:pointer}.hero-condition-icons .cond-item.active{background:#7545b2!important;color:#fff;border-color:#d0a5ff;box-shadow:0 0 8px #a855f755}.hero-condition-icons .cond-item small{position:absolute;right:1px;bottom:0;font-size:8px}.hero-condition-icons .cond-item:hover{border-color:#d0a5ff}.hero-portrait-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.hero-portrait-controls label{cursor:pointer}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -961,7 +962,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
         <p style="margin-top:15px; text-align:right;"><em>Приятной игры! 🐉</em></p>
     </div>
 </div>
-<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Уязвимости:</strong> <span id="detailVulner"></span></div><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><section class="bestiary-section"><h3>Особенности</h3><ul id="detailFeatures"></ul></section><section class="bestiary-section"><h3>Действия</h3><ul id="detailActions"></ul></section><section class="bestiary-section"><h3>Бонусные действия</h3><ul id="detailBonusActions"></ul></section><section class="bestiary-section"><h3>Реакции</h3><ul id="detailReactions"></ul></section><section class="bestiary-section"><h3>Легендарные действия</h3><ul id="detailLegendary"></ul></section><section class="bestiary-section"><h3>Действия логова</h3><ul id="detailLairActions"></ul></section><section class="bestiary-section"><h3>Местные эффекты</h3><ul id="detailRegionalEffects"></ul></section><button type="button" class="btn" id="editMonsterBtn" style="margin:12px 0">Редактор монстра</button><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
+<div id="detailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="detailName"></h2><img id="detailImage" style="max-width:200px; border-radius:20px; margin:0 auto; display:block;"><div class="monster-summary-row"><span class="monster-summary-pill"><strong>КД</strong> <span id="detailAC"></span></span><span class="monster-summary-pill"><strong><i class="fa-solid fa-shoe-prints"></i> Скорость</strong> <span id="detailSpeed"></span></span><span class="monster-summary-pill"><strong>Хиты</strong> <span id="detailHP"></span></span><span class="monster-summary-pill"><strong>CR</strong> <span id="detailCR"></span></span><span class="monster-summary-pill"><strong>Тип</strong> <span id="detailType"></span></span></div><div><strong>Размер/Мировоззрение:</strong> <span id="detailSizeAlign"></span></div><div><strong>Чувства:</strong> <span id="detailSenses"></span></div><div><strong>Языки:</strong> <span id="detailLanguages"></span></div><div><strong>Спасброски:</strong> <span id="detailSaves"></span></div><div><strong>Навыки:</strong> <span id="detailSkills"></span></div><div><strong>Бонус мастерства:</strong> <span id="detailProfBonus"></span></div><div><strong>Опыт:</strong> <span id="detailXP"></span></div><hr><div><strong>Характеристики:</strong><div id="detailStats" class="monster-stats-grid"></div></div><hr><div><strong>Уязвимости:</strong> <span id="detailVulner"></span></div><div><strong>Сопротивления:</strong> <span id="detailResist"></span></div><div><strong>Иммунитеты (урон):</strong> <span id="detailImmun"></span></div><div><strong>Иммунитеты (состояния):</strong> <span id="detailCondImmun"></span></div><hr><section class="bestiary-section"><h3>Особенности</h3><ul id="detailFeatures"></ul></section><section class="bestiary-section"><h3>Действия</h3><ul id="detailActions"></ul></section><section class="bestiary-section"><h3>Бонусные действия</h3><ul id="detailBonusActions"></ul></section><section class="bestiary-section"><h3>Реакции</h3><ul id="detailReactions"></ul></section><section class="bestiary-section"><h3>Легендарные действия</h3><ul id="detailLegendary"></ul></section><section class="bestiary-section"><h3>Действия логова</h3><ul id="detailLairActions"></ul></section><section class="bestiary-section"><h3>Местные эффекты</h3><ul id="detailRegionalEffects"></ul></section><button type="button" class="btn" id="editMonsterBtn" style="margin:12px 0">Редактор монстра</button><button type="button" class="btn" id="hagCovenInfoBtn" hidden>✦ Шабаш карг · заклинания</button><button type="button" class="btn" id="deleteCustomMonsterBtn" hidden>Удалить своего монстра из бестиария</button><div id="detailDescription"></div><hr><h3><i class="fa-solid fa-scroll fa-icon"></i> Заклинания</h3><div id="spellsContainer" class="spell-list">Загрузка...</div></div></div><div id="spellDetailModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h2 id="spellDetailName"></h2><div id="spellDetailContent"></div></div></div>
 <div id="allSpellsModal" class="modal"><div class="modal-content"><span class="close-modal">&times;</span><h3>📚 Все заклинания</h3><div class="catalogue-search"><input type="search" id="spellSearchInput" placeholder="Поиск по названию" aria-label="Поиск заклинаний"></div><div class="catalogue-filters spell-filters"><label>Уровень<select id="spellLevelFilter"></select></label><label>Класс<select id="spellClassFilter"></select></label><label>Школа<select id="spellSchoolFilter"></select></label><label>Источник<select id="spellSourceFilter"></select></label></div><div class="catalogue-tools"><span id="spellResultCount" aria-live="polite"></span><button id="resetSpellFilters" type="button">Сбросить</button></div><div id="allSpellsList" class="spell-list" style="max-height:60vh;"></div></div></div>
 <div id="heroDetailModal" class="modal"><div class="modal-content hero-modal-content"><span class="close-modal">&times;</span><div id="heroDetailsContent"></div></div></div>
 <div class="modal" id="customModal" style="display:none;"><div class="modal-inner" style="background:#202b33; padding:28px; border-radius:48px; width:420px;"><h3>🐉 Создание монстра</h3><input id="customName" placeholder="Имя"><div><label>КД</label><input id="customAC" type="number" value="14"></div><div><label>Формула ХП</label><input id="customHPFormula" value="6d8+12"></div><div><label>Бонус иниц</label><input id="customInit" type="number" value="1"></div><button id="customCancel">Отмена</button><button id="customAdd">Добавить</button></div></div>
@@ -971,7 +972,8 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="foundry-data.js?v=4"></script>
 <script src="lss-engine.js?v=2"></script>
 <script src="combat-labels.js?v=2"></script>
-<script src="spell-effects.js?v=source-4"></script>
+<script src="hag-coven.js?v=1"></script>
+<script src="spell-effects.js?v=coven-5"></script>
 <script src="combat-history.js?v=1"></script>
 <script src="monster-builder.js?v=defenses-5"></script>
 <script src="monster-mechanics.js?v=3"></script>
@@ -980,6 +982,8 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
 <script src="hero-card.js?v=items-8"></script>
+<script defer src="audio-player.js?v=1"></script>
+<link rel="stylesheet" href="audio-player.css?v=1">
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -2001,6 +2005,8 @@ function findSpellById(id) {
             img.style.display = 'none';
         }
         document.getElementById('editMonsterBtn').onclick=()=>openCustomMonsterBuilder(full);
+        const hagBtn=document.getElementById('hagCovenInfoBtn');hagBtn.hidden=!HagCoven.isHag({isMonster:true,name:full.name});hagBtn.onclick=()=>showCovenEditor(combatants.find(c=>c.isMonster&&c.name===full.name)||null);
+        const deleteBtn=document.getElementById('deleteCustomMonsterBtn');deleteBtn.hidden=!full._customMonster;deleteBtn.onclick=()=>{const saved=JSON.parse(localStorage.getItem('dnd_custom_monsters_v1')||'[]').filter(m=>m.name!==full.name);localStorage.setItem('dnd_custom_monsters_v1',JSON.stringify(saved));fullMonstersMap.delete(full.name.toLowerCase());monstersLibrary=monstersLibrary.filter(m=>m.name!==full.name);document.getElementById('detailModal').style.display='none';initFilters();renderBestiary();};
          document.getElementById('detailAC').innerText = full.ac ?? '?';
         document.getElementById('detailSpeed').innerHTML = Bestiary.chips(full.speed);
         document.getElementById('detailHP').innerText = full.hp ?? '?';
@@ -2317,6 +2323,17 @@ function findSpellById(id) {
         });return html+'</div>'+(note?'<p class="spellcasting-note"><strong>*</strong> '+Bestiary.esc(note.replace(/1 круга/i,'1-го уровня'))+'</p>':'');
     }
     function refreshSpellEffects(){renderCombat();saveCurrentStateToSession();if(document.getElementById('heroDetailModal').style.display==='flex'){const hero=combatants.find(c=>c.id===activeHeroDetailsId);if(hero)showHeroDetails(hero);}}
+    function showCovenEditor(anchor=null){
+        document.getElementById('covenEditor')?.remove();
+        const dialog=document.createElement('div');dialog.id='covenEditor';dialog.className='modal';dialog.style.display='flex';dialog.style.zIndex='1400';
+        const current=anchor?HagCoven.members(combatants,anchor):[],hags=combatants.filter(HagCoven.isHag);
+        dialog.innerHTML=`<div class="modal-content" style="max-width:580px"><button class="close-modal" aria-label="Закрыть шабаш">×</button><h2>✦ Шабаш карг</h2><p>Выберите трёх карг в инициативе. Для общей магии все трое должны находиться в пределах 30 футов друг от друга. Расстояние подтверждает мастер; при 0 ХП или удалении участницы доступ к общим ячейкам прекращается.</p><form id="covenForm"><div style="display:grid;gap:8px">${hags.map(c=>`<label><input type="checkbox" name="member" value="${c.id}" ${current.includes(c)?'checked':''} ${c.covenGroup&&!current.includes(c)?'disabled':''}> ${escapeHtml(CombatLabels.label(c))}</label>`).join('')||'Сначала добавьте карг из бестиария.'}</div><label style="display:block;margin:12px 0"><input type="checkbox" name="enabled" ${!anchor||anchor.covenActive?'checked':''}> Все трое в пределах 30 футов · общая магия активна</label><button class="btn">Сохранить шабаш</button>${current.length?'<button type="button" class="btn" id="dissolveCoven">Расформировать</button><button type="button" class="btn" id="restoreCoven">Восстановить общие ячейки</button>':''}<p id="covenStatus" role="status"></p></form><h3>Общие заклинания · D&D 2014</h3><p>Интеллект · СЛ 12 + модификатор ИНТ · атака +4 + модификатор ИНТ. Ячейки общие, не отдельные для каждой карги.</p>${Array.from({length:6},(_,i)=>`<div class="spellcasting-row"><strong>${i+1} уровень · ${[4,3,3,3,2,1][i]} ячеек</strong><div>${HagCoven.spells.filter(x=>x[2]===i+1).map(([en,ru])=>`<button type="button" class="btn" data-coven-spell="${en}" style="font-size:12px;margin:3px">${escapeHtml(findSpellByName(en)?.spellName.split(/\s+\/\s+/)[0]||ru)}</button>`).join('')}</div></div>`).join('')}</div>`;
+        document.body.append(dialog);dialog.querySelector('.close-modal').onclick=()=>dialog.remove();dialog.onclick=e=>{if(e.target===dialog)dialog.remove();};
+        dialog.querySelector('form').onsubmit=e=>{e.preventDefault();try{HagCoven.configure(combatants,[...dialog.querySelectorAll('[name="member"]:checked')].map(x=>x.value),dialog.querySelector('[name="enabled"]').checked);renderCombat();saveCurrentStateToSession();dialog.remove();}catch(error){dialog.querySelector('#covenStatus').textContent=error.message;}};
+        dialog.querySelector('#dissolveCoven')?.addEventListener('click',()=>{HagCoven.dissolve(combatants,anchor);renderCombat();saveCurrentStateToSession();dialog.remove();});
+        dialog.querySelector('#restoreCoven')?.addEventListener('click',()=>{for(const slot of Object.values(anchor.covenSlots||{}))slot.used=0;renderCombat();saveCurrentStateToSession();dialog.querySelector('#covenStatus').textContent='Общие ячейки восстановлены';});
+        for(const btn of dialog.querySelectorAll('[data-coven-spell]'))btn.onclick=()=>{const spell=findSpellByName(btn.dataset.covenSpell);if(!spell){dialog.querySelector('#covenStatus').textContent='Заклинание отсутствует в каталоге';return;}dialog.style.zIndex='999';showSpellDetail(spell);const caster=document.querySelector('#spellCastForm [name="caster"]');if(caster&&anchor){caster.value=anchor.id;caster.dispatchEvent(new Event('change'));const slot=document.querySelector('#spellCastForm [name="slot"]');if(slot&&HagCoven.active(combatants,anchor)){const available=Object.keys(anchor.spellSlots).filter(k=>k.startsWith('coven-')&&Number(k.slice(6))>=spell.level&&anchor.spellSlots[k].used<anchor.spellSlots[k].max);slot.value=available[0]||'';}}};
+    }
     function spellCastControls(spell){
         if(!combatants.length)return '<div class="spellcasting-note">Добавьте участника в инициативу, чтобы применить заклинание.</div>';
         const current=combatants[currentTurnIndex]||combatants[0];
@@ -2325,7 +2342,7 @@ function findSpellById(id) {
     }
     function bindSpellCast(spell){
         const form=document.getElementById('spellCastForm');if(!form)return;
-        const updateSlots=()=>{const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);const slots=SpellEffects.availableSlots(caster,spell);form.elements.slot.innerHTML='<option value="">'+(spell.level===0?'Заговор · без ячейки':slots.length?'Без расхода ячейки':'Нет ячеек · без расхода')+'</option>'+slots.map(([key,slot])=>'<option value="'+key+'">'+(key.startsWith('pact-')?'Договор ':'')+key.replace('pact-','')+' круг · '+(slot.max-(slot.used||0))+' осталось</option>').join('');form.elements.slot.value=SpellEffects.defaultSlot(caster,spell);};
+        const updateSlots=()=>{const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);const slots=SpellEffects.availableSlots(caster,spell);form.elements.slot.innerHTML='<option value="">'+(spell.level===0?'Заговор · без ячейки':slots.length?'Без расхода ячейки':'Нет ячеек · без расхода')+'</option>'+slots.map(([key,slot])=>'<option value="'+key+'">'+(key.startsWith('coven-')?'Шабаш ':key.startsWith('pact-')?'Договор ':'')+key.replace(/^(?:pact|coven)-/,'')+' круг · '+(slot.max-(slot.used||0))+' осталось</option>').join('');form.elements.slot.value=SpellEffects.defaultSlot(caster,spell);};
         form.elements.caster.onchange=()=>{form.elements.target.value=form.elements.caster.value;updateSlots();};updateSlots();
         form.onsubmit=e=>{e.preventDefault();const status=document.getElementById('spellCastStatus');try{SpellEffects.cast(combatants,{spell,casterId:form.elements.caster.value,targetId:form.elements.target.value,slotLevel:form.elements.slot.value||null,round:currentRound,unarmored:!!form.elements.unarmored?.checked});const caster=combatants.find(c=>String(c.id)===form.elements.caster.value);addLog(caster,'✨ '+spell.spellName.split(/\s+\/\s+/)[0]);refreshSpellEffects();status.textContent='Применено';updateSlots();}catch(error){status.textContent=error.message;}};
     }
@@ -2751,6 +2768,9 @@ function findSpellById(id) {
         const content = document.getElementById('heroDetailsContent');
         const openSections = Array.from(content.querySelectorAll('details')).map(section => section.open);
         content.innerHTML = `<header class="hero-modal-header"><div><span class="hero-modal-eyebrow">ЛИСТ МАСТЕРА</span><h2>${lssEscape(hero.name)}</h2><p>${lssEscape(hero.race || '')} · ${lssEscape(hero.class || '')}${hero.heroData.info?.level?.value ? ` · ${lssEscape(hero.heroData.info.level.value)} уровень` : ''}</p></div>${HeroCard.quick(hero)}</header>${HeroCard.details(hero, renderLssText)}`;
+        content.insertAdjacentHTML('afterbegin',`<div class="hero-portrait-controls"><label class="btn">📷 Портрет<input type="file" accept="image/*" hidden id="heroPortraitUpload"></label><button class="btn" id="heroPortraitClear" type="button">Убрать портрет</button><span id="heroPortraitStatus" role="status"></span></div>`);
+        content.querySelector('#heroPortraitClear').onclick=()=>{hero.avatar=null;renderCombat();saveCurrentStateToSession();showHeroDetails(hero);};
+        content.querySelector('#heroPortraitUpload').onchange=async e=>{const file=e.target.files[0];if(!file)return;const status=content.querySelector('#heroPortraitStatus');try{if(!file.type.startsWith('image/')||file.size>10*1024*1024)throw Error('Выберите изображение до 10 МБ');const url=URL.createObjectURL(file);try{const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('Не удалось прочитать изображение'));image.src=url;});const scale=Math.min(1,720/Math.max(image.width,image.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);const previous=hero.avatar;hero.avatar=canvas.toDataURL('image/webp',.82);try{saveCurrentStateToSession();}catch(error){hero.avatar=previous;throw Error('Недостаточно места для портрета');}renderCombat();showHeroDetails(hero);}finally{URL.revokeObjectURL(url);}}catch(error){status.textContent=error.message;}};
         content.querySelectorAll('details').forEach((section, index) => section.open = !!openSections[index]);
         HeroCard.bind(content, hero, () => {
             renderCombat(); saveCurrentStateToSession(); showHeroDetails(hero);
@@ -2758,6 +2778,7 @@ function findSpellById(id) {
         document.getElementById('heroDetailModal').style.display = 'flex';
     }
 
+    const conditionIcons={"Бессознательный":"fa-bed","Испуганный":"fa-ghost","Истощённый":"fa-battery-quarter","Невидимый":"fa-user-secret","Недееспособный":"fa-ban","Оглохший":"fa-ear-deaf","Окаменевший":"fa-mountain","Опутанный":"fa-link","Ослеплённый":"fa-eye-slash","Отравленный":"fa-flask","Очарованный":"fa-heart","Ошеломлённый":"fa-star","Парализованный":"fa-hand","Сбитый с ног":"fa-person-falling","Схваченный":"fa-hand-fist","Концентрация":"fa-brain"};
     function getConditionClass(cond) {
         const map = {
             "Бессознательный": "cond-unconscious", "Испуганный": "cond-frightened", "Истощённый": "cond-exhaustion",
@@ -2772,6 +2793,7 @@ function findSpellById(id) {
 
     function renderCombat() {
         CombatLabels.ensure(combatants);
+        HagCoven.sync(combatants);
         const grid = document.getElementById('combatantsGrid');
         SpellEffects.advance(combatants,currentRound);
         PlayerDisplay.publish(combatants,currentTurnIndex,currentRound);
@@ -2780,7 +2802,7 @@ function findSpellById(id) {
         let html = '';
         combatants.forEach((c, idx) => {
             if (!c.isMonster) HeroCard.ensure(c);
-            else {const full=monstersReady?fullMonstersMap.get(c.name.toLowerCase()):null;if(full){c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const [key,slot] of Object.entries(full.spellSlots||{}))if(!c.spellSlots[key])c.spellSlots[key]=structuredClone(slot);if(full._customMonster){c.spellSlots=MonsterMechanics.syncSlots(c.spellSlots,full.spellSlots);c.spellSaveDC=full.spellSaveDC;c.spellAttack=full.spellAttack;}for(const entry of full._customMonster?[]:[...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);}
+            else {const full=monstersReady?fullMonstersMap.get(c.name.toLowerCase()):null;if(full){c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const [key,slot] of Object.entries(full.spellSlots||{}))if(!c.spellSlots[key])c.spellSlots[key]=structuredClone(slot);if(full._customMonster){c.spellSlots={...MonsterMechanics.syncSlots(c.spellSlots,full.spellSlots),...Object.fromEntries(Object.entries(c.spellSlots).filter(([k])=>k.startsWith('coven-')))};c.spellSaveDC=full.spellSaveDC;c.spellAttack=full.spellAttack;}for(const entry of full._customMonster?[]:[...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);}
             if(!c.conditions.has('Концентрация'))c.concentrationChecks=[];
             const check=c.concentrationChecks?.[0];
             const concentrationHtml=check?`<div class="concentration-check" role="status"><span>Концентрация · ТЕЛ <b>СЛ ${check.dc}</b>${c.concentrationChecks.length>1?` · ещё ${c.concentrationChecks.length-1}`:''}</span><div><button class="concentration-pass" data-id="${c.id}">Успех</button><button class="concentration-fail" data-id="${c.id}">Провал</button></div></div>`:'';
@@ -2794,7 +2816,7 @@ function findSpellById(id) {
             if(monsterFull){const defenses=[['damage_vulnerabilities','Уязвимости','fa-heart-crack','damage'],['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(monsterFull[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Уязвимости'?'Уязв.':label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
             let spellHtml = '';
             let dc=c.spellSaveDC,attack=c.spellAttack;
-            const casterModes=monsterFull?MonsterMechanics.casting(monsterFull):[];
+            const casterModes=monsterFull?MonsterMechanics.casting(monsterFull):[];if(HagCoven.active(combatants,c))casterModes.unshift({name:'Шабаш · Интеллект',...HagCoven.casting(c)});
             if(monsterFull){dc=casterModes[0]?.dc;attack=casterModes[0]?.attack;}
             if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="${escapeHtml(casterModes.length?casterModes.map(m=>m.name+': СЛ '+(m.dc??'—')+', атака '+(m.attack??'—')).join('; '):c.isMonster?'Сложность спасброска от заклинаний':HeroCard.breakdown(c,'spellDC'))}"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="${escapeHtml(c.isMonster?'Бонус атаки заклинанием':HeroCard.breakdown(c,'spellAttack'))}"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
             let activeConditionsHtml = '';
@@ -2809,7 +2831,7 @@ function findSpellById(id) {
                 for (let level in c.spellSlots) {
                     const slot = c.spellSlots[level];
                     const remaining = slot.max - (slot.used || 0);
-                    slotsHtml += `<div class="slot-level">${String(level).startsWith('pact-') ? 'Договор ' + String(level).slice(5) : level} ур: ${remaining}/${c.isMonster ? slot.max : `<input class="hero-slot-max" data-id="${c.id}" data-level="${level}" type="number" min="0" value="${slot.max}" aria-label="Максимум ячеек">`}
+                    slotsHtml += `<div class="slot-level">${String(level).startsWith('coven-') ? 'Шабаш ' + String(level).slice(6) : String(level).startsWith('pact-') ? 'Договор ' + String(level).slice(5) : level} ур: ${remaining}/${c.isMonster ? slot.max : `<input class="hero-slot-max" data-id="${c.id}" data-level="${level}" type="number" min="0" value="${slot.max}" aria-label="Максимум ячеек">`}
                         <button class="use-slot" data-id="${c.id}" data-level="${level}" data-tooltip="Потратить ячейку">-</button>
                         <button class="restore-slot" data-id="${c.id}" data-level="${level}" data-tooltip="Восстановить ячейку">+</button>
                     </div>`;
@@ -2837,7 +2859,7 @@ function findSpellById(id) {
                     </div>
                     ${raceClassHtml}${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
-                    <div class="active-conditions">${activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
+                    <div class="active-conditions">${c.isMonster?activeConditionsHtml:''}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
                     ${concentrationHtml}
                     <div class="hp-panel">
                         <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}"><i class="fa-solid fa-dice"></i></button>` : ''}</div>
@@ -2845,9 +2867,9 @@ function findSpellById(id) {
                         <div><span><i class="fa-solid fa-heart-circle-plus"></i> Врем </span><input class="temp-input" data-id="${c.id}" value="${c.tempHp}" data-tooltip="Временные хиты"></div>
                         <button class="remove-btn" data-id="${c.id}" data-tooltip="Удалить персонажа"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                    ${slotsHtml}${legendaryHtml}
-                    <div class="conditions-header" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
-                    <div class="conditions-list" id="conds-${c.id}" style="display:none;"></div>
+                    ${HagCoven.isHag(c)?`<button class="btn coven-manage" data-id="${c.id}" style="font-size:11px;padding:4px 8px">✦ Шабаш карг${HagCoven.active(combatants,c)?' · активен':''}</button>`:''}${slotsHtml}${legendaryHtml}
+                    <div class="conditions-header" style="${c.isMonster?'':'display:none'}" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
+                    <div id="conds-${c.id}" style="${c.isMonster?'display:none':'display:flex'}" class="conditions-list ${c.isMonster?'':'hero-condition-icons'}"></div>
                     <div class="log-area">${c.log.slice(0,2).map(l=>`<div title="${escapeHtml(l)}">${escapeHtml(l)}</div>`).join('')}</div>
                 </div>
             </div>`;
@@ -2858,6 +2880,7 @@ function findSpellById(id) {
             if (cardDiv) attachDragEvents(cardDiv, c.id);
             if (cardDiv && !c.isMonster) HeroCard.bind(cardDiv, c, () => { renderCombat(); saveCurrentStateToSession(); });
             for(const btn of cardDiv.querySelectorAll('.legendary-spend,.legendary-restore'))btn.onclick=()=>{const key=btn.dataset.resource;if(btn.classList.contains('legendary-spend')){if(!MonsterMechanics.spend(c,key))return;addLog(c,key==='actions'?'✨ Легендарное действие: −1':'🛡 Легендарное сопротивление: −1');}else{const r=c.legendaryResources[key];if(!r.used)return;r.used--;addLog(c,'✨ Восстановлен легендарный заряд');}renderCombat();saveCurrentStateToSession();};
+            cardDiv.querySelector('.coven-manage')?.addEventListener('click',()=>showCovenEditor(c));
             const burger = cardDiv.querySelector('.info-burger');
             if (burger) burger.onclick = (e) => { e.stopPropagation(); if (c.isMonster) showMonsterDetails(c.name); else showHeroDetails(c); };
             document.querySelectorAll(`.name-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.name = e.target.value; renderCombat(); saveCurrentStateToSession(); });
@@ -2904,20 +2927,21 @@ function findSpellById(id) {
                 condDiv.innerHTML = '';
                 CONDITIONS.forEach(cond => {
                     let active = c.conditions.has(cond) || (cond==="Истощённый" && c.exhaustion>0);
-                    let span = document.createElement('div'); 
+                    let span = document.createElement(c.isMonster?'div':'button');
                     span.className = `cond-item ${getConditionClass(cond)} ${active ? 'active' : ''}`;
                     span.innerText = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond;
+                    if(!c.isMonster){span.type='button';span.dataset.tooltip=span.innerText+' · нажмите для переключения';span.setAttribute('aria-label',span.innerText);span.setAttribute('aria-pressed',String(active));span.innerHTML='<i class="fa-solid '+conditionIcons[cond]+'"></i>'+(cond==='Истощённый'&&c.exhaustion?'<small>'+c.exhaustion+'</small>':'');}
                     span.onclick = (e) => { e.stopPropagation(); toggleCondition(c, cond); };
                     condDiv.appendChild(span);
                 });
                 let reset = document.createElement('div'); reset.className = 'cond-item'; reset.innerText = '❌ Сбросить всё'; reset.style.background = '#562626'; 
                 reset.onclick = () => { SpellEffects.endConcentration(combatants,c); c.conditions.clear(); c.exhaustion=0; renderCombat(); saveCurrentStateToSession(); };
-                condDiv.appendChild(reset);
+                if(c.isMonster)condDiv.appendChild(reset);
             }
         });
         document.addEventListener('click', function closeCondPanels(e) {
             if (!e.target.closest('.conditions-header') && !e.target.closest('.conditions-list')) {
-                document.querySelectorAll('.conditions-list').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.conditions-list:not(.hero-condition-icons)').forEach(el => el.style.display = 'none');
             }
         });
     }
@@ -2978,6 +3002,7 @@ function findSpellById(id) {
         document.documentElement.style.setProperty('--top-bar-offset', `${offset}px`);
     }
     function closeOneModal(modal) {
+        if(modal.id==='covenEditor'){modal.remove();return;}
         if(modal.id==='detailModal' && monsterHistory.length){const previous=monsterHistory.pop();showMonsterDetails(previous.name,true);const inner=modal.querySelector('.modal-content');if(inner)inner.scrollTop=previous.scroll;return;}
         modal.style.display='none';if(modal.id==='detailModal'){activeMonsterName=null;monsterHistory.length=0;}
     }
@@ -2985,7 +3010,7 @@ function findSpellById(id) {
     const windowObserver=new MutationObserver(records=>{for(const record of records){const el=record.target;if(!el.classList.contains('modal'))continue;const i=openedWindows.indexOf(el);if(i>=0)openedWindows.splice(i,1);if(getComputedStyle(el).display!=='none')openedWindows.push(el);}});
     windowObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
     function closeTopModal(){
-        const top=[...openedWindows].reverse().find(el=>getComputedStyle(el).display!=='none');
+        const top=[...openedWindows].reverse().find(el=>el.isConnected&&getComputedStyle(el).display!=='none');
         const modal=top||['diceResultModal','customModal','spellDetailModal','heroDetailModal','detailModal','allSpellsModal','helpModal'].map(id=>document.getElementById(id)).find(el=>el&&getComputedStyle(el).display!=='none');
         if(modal){closeOneModal(modal);return;}
         if(burgerMenu?.classList.contains('open')){burgerMenu.classList.remove('open');burgerMenuBtn.setAttribute('aria-expanded','false');return;}

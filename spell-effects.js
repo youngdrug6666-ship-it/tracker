@@ -10,8 +10,9 @@ function endConcentration(all,caster){caster.concentrationChecks=[];if(caster.co
 function cast(all,{spell,casterId,targetId,slotLevel=null,unarmored=false,round=null}){
  const caster=all.find(c=>String(c.id)===String(casterId)),target=all.find(c=>String(c.id)===String(targetId));
  if(!caster||!target)throw Error('Выберите заклинателя и цель.');
+ if(String(slotLevel||'').startsWith('coven-')&&!root.HagCoven?.active(all,caster))throw Error('Шабаш неактивен: нужны три карги в пределах 30 футов.');
  if(isMageArmor(spell)&&!unarmored)throw Error('Для Доспехов мага выберите цель без доспеха и подтвердите это.');
- let slot;if(slotLevel!=null){slot=caster.spellSlots?.[slotLevel];if(!slot||slot.max-(slot.used||0)<=0||Number(String(slotLevel).replace('pact-',''))<Number(spell.level))throw Error('Нет подходящей свободной ячейки.');}
+ let slot;if(slotLevel!=null){slot=caster.spellSlots?.[slotLevel];if(!slot||slot.max-(slot.used||0)<=0||slotNumber(slotLevel)<Number(spell.level))throw Error('Нет подходящей свободной ячейки.');}
  if(isMageArmor(spell)&&target.isMonster&&target.spellEffectBaseAc==null)target.spellEffectBaseAc=target.ac;
  if(spell.concentration)endConcentration(all,caster);
  if(slot)slot.used=(slot.used||0)+1;
@@ -29,7 +30,8 @@ function durationRounds(value){const m=String(value||'').match(/(\d+)\s*(round|�
 function advance(all,round){const ids=new Set(all.flatMap(c=>c.activeSpellEffects||[]).filter(e=>Number.isFinite(e.expiresRound)&&round>=e.expiresRound).map(e=>e.id));for(const id of ids)remove(all,id);return ids.size;}
 function armorBase(c,base){return (c.activeSpellEffects||[]).some(e=>e.kind==='mageArmor')?13+Math.floor((Number(c.stats?.dex?.score||10)-10)/2):base;}
 function updateMonsterArmor(c){if(!c.isMonster)return;if((c.activeSpellEffects||[]).some(e=>e.kind==='mageArmor')){c.ac=armorBase(c,c.ac);}else if(c.spellEffectBaseAc!=null){c.ac=c.spellEffectBaseAc;delete c.spellEffectBaseAc;}}
-function availableSlots(caster,spell){return Object.entries(caster.spellSlots||{}).filter(([key,s])=>Number(spell.level)>0&&Number(key.replace('pact-',''))>=Number(spell.level)&&s.max-(s.used||0)>0).sort(([a],[b])=>Number(a.replace('pact-',''))-Number(b.replace('pact-',''))||Number(a.startsWith('pact-'))-Number(b.startsWith('pact-')));}
+function slotNumber(key){return Number(String(key).replace(/^(?:pact|coven)-/,''));}
+function availableSlots(caster,spell){return Object.entries(caster.spellSlots||{}).filter(([key,s])=>Number(spell.level)>0&&slotNumber(key)>=Number(spell.level)&&s.max-(s.used||0)>0).sort(([a],[b])=>slotNumber(a)-slotNumber(b)||Number(a.startsWith('pact-'))-Number(b.startsWith('pact-')));}
 function defaultSlot(caster,spell){return availableSlots(caster,spell)[0]?.[0]||'';}
 root.SpellEffects={durationRounds,advance,cast,remove,endConcentration,armorBase,isMageArmor,updateMonsterArmor,availableSlots,defaultSlot};if(typeof module!=='undefined'&&module.exports)module.exports=root.SpellEffects;
 })(typeof globalThis!=='undefined'?globalThis:window);
