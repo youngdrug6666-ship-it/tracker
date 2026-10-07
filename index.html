@@ -982,8 +982,9 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
 <script src="hero-card.js?v=hp-9"></script>
-<script defer src="audio-player.js?v=1"></script>
-<link rel="stylesheet" href="audio-player.css?v=1">
+<script src="audio-mixer.js?v=1"></script>
+<script defer src="audio-player.js?v=mixer-2"></script>
+<link rel="stylesheet" href="audio-player.css?v=mixer-2">
 <script>
    (function(){
     // ========== Глобальные данные ==========
@@ -2901,6 +2902,7 @@ function findSpellById(id) {
             document.querySelector(`.concentration-fail[data-id="${c.id}"]`)?.addEventListener('click',()=>resolveConcentration(c,false));
             const dmgField = document.getElementById(`dmgVal-${c.id}`);
             if (dmgField) {
+                dmgField.onkeydown=e=>{if(e.key==='Enter'&&!e.repeat&&!e.isComposing){e.preventDefault();e.stopPropagation();const value=Number(dmgField.value.trim());if(Number.isFinite(value)&&value>0){const damage=Math.floor(value);dmgField.value='';applyDamage(c,damage);}}};
                 document.querySelector(`.apply-dmg[data-id="${c.id}"]`).onclick = () => { let val = parseInt(dmgField.value); if(val) applyDamage(c, val); else applyDamage(c, 0); dmgField.value = ''; };
                 document.querySelector(`.half-dmg[data-id="${c.id}"]`).onclick = () => { let val = parseInt(dmgField.value); if(val) applyDamage(c, Math.floor(val/2)); dmgField.value = ''; };
                 document.querySelector(`.quarter-dmg[data-id="${c.id}"]`).onclick = () => { let val = parseInt(dmgField.value); if(val) applyDamage(c, Math.floor(val/4)); dmgField.value = ''; };
