@@ -2778,6 +2778,7 @@ function findSpellById(id) {
         document.getElementById('heroDetailModal').style.display = 'flex';
     }
 
+    const conditionHints={"Бессознательный":"Не может действовать; роняет предметы и падает. Атаки с преимуществом, попадание с 5 футов — критическое.","Испуганный":"Помеха на проверки и атаки, пока виден источник страха; нельзя добровольно приближаться к нему.","Истощённый":"1: помеха проверкам; 2: половина скорости; 3: помеха атакам и спасам; 4: половина максимума ХП; 5: скорость 0; 6: смерть. Эффекты суммируются; кнопка меняет уровень.","Невидимый":"Не виден без особых чувств. Его атаки с преимуществом, атаки по нему с помехой.","Недееспособный":"Не может совершать действия и реакции.","Оглохший":"Не слышит; автоматически проваливает проверки, требующие слуха.","Окаменевший":"Превращён в камень, недееспособен; сопротивление всему урону, иммунитет к яду и болезням.","Опутанный":"Скорость 0; его атаки с помехой, атаки по нему с преимуществом; помеха спасброскам Ловкости.","Ослеплённый":"Не видит; его атаки с помехой, атаки по нему с преимуществом.","Отравленный":"Помеха на атаки и проверки характеристик.","Очарованный":"Не может атаковать очаровавшего; тот получает преимущество на социальные проверки.","Ошеломлённый":"Недееспособен, не двигается; проваливает спасы Силы и Ловкости; атаки по нему с преимуществом.","Парализованный":"Недееспособен; проваливает спасы Силы и Ловкости. Атаки с преимуществом, попадание с 5 футов — критическое.","Сбитый с ног":"Собственные атаки с помехой; атаки с 5 футов с преимуществом, издалека с помехой; подъём — половина скорости.","Схваченный":"Скорость 0; состояние заканчивается, если захватчик недееспособен или цель вне досягаемости.","Концентрация":"При уроне спасбросок Телосложения: СЛ 10 или половина урона. Новая концентрация завершает прежнюю."};
     const conditionIcons={"Бессознательный":"fa-bed","Испуганный":"fa-ghost","Истощённый":"fa-battery-quarter","Невидимый":"fa-user-secret","Недееспособный":"fa-ban","Оглохший":"fa-ear-deaf","Окаменевший":"fa-mountain","Опутанный":"fa-link","Ослеплённый":"fa-eye-slash","Отравленный":"fa-flask","Очарованный":"fa-heart","Ошеломлённый":"fa-star","Парализованный":"fa-hand","Сбитый с ног":"fa-person-falling","Схваченный":"fa-hand-fist","Концентрация":"fa-brain"};
     function getConditionClass(cond) {
         const map = {
@@ -2930,7 +2931,7 @@ function findSpellById(id) {
                     let span = document.createElement(c.isMonster?'div':'button');
                     span.className = `cond-item ${getConditionClass(cond)} ${active ? 'active' : ''}`;
                     span.innerText = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond;
-                    if(!c.isMonster){span.type='button';span.dataset.tooltip=span.innerText+' · нажмите для переключения';span.setAttribute('aria-label',span.innerText);span.setAttribute('aria-pressed',String(active));span.innerHTML='<i class="fa-solid '+conditionIcons[cond]+'"></i>'+(cond==='Истощённый'&&c.exhaustion?'<small>'+c.exhaustion+'</small>':'');}
+                    if(!c.isMonster){span.type='button';span.dataset.tooltip=span.innerText+' · '+(conditionHints[cond]||'')+' · нажмите для переключения';span.setAttribute('aria-label',span.innerText);span.setAttribute('aria-pressed',String(active));span.innerHTML='<i class="fa-solid '+conditionIcons[cond]+'"></i>'+(cond==='Истощённый'&&c.exhaustion?'<small>'+c.exhaustion+'</small>':'');}
                     span.onclick = (e) => { e.stopPropagation(); toggleCondition(c, cond); };
                     condDiv.appendChild(span);
                 });
@@ -2939,12 +2940,12 @@ function findSpellById(id) {
                 if(c.isMonster)condDiv.appendChild(reset);
             }
         });
+    }
         document.addEventListener('click', function closeCondPanels(e) {
             if (!e.target.closest('.conditions-header') && !e.target.closest('.conditions-list')) {
                 document.querySelectorAll('.conditions-list:not(.hero-condition-icons)').forEach(el => el.style.display = 'none');
             }
         });
-    }
 
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'>'); }
 
