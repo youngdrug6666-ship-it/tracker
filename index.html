@@ -978,10 +978,10 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="monster-builder.js?v=defenses-5"></script>
 <script src="monster-mechanics.js?v=3"></script>
 <script src="tracker-backup.js?v=1"></script>
-<script src="player-display.js?v=labels-7"></script>
+<script src="player-display.js?v=states-8"></script>
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
-<script src="hero-card.js?v=items-8"></script>
+<script src="hero-card.js?v=hp-9"></script>
 <script defer src="audio-player.js?v=1"></script>
 <link rel="stylesheet" href="audio-player.css?v=1">
 <script>
@@ -2579,9 +2579,10 @@ function findSpellById(id) {
         saveCurrentStateToSession();
     }
     function sortByInitiative() { combatants.sort((a,b)=>b.initiative - a.initiative); currentTurnIndex = Math.max(0,combatants.findIndex(c=>Number.isFinite(Number(c.initiative))&&Number(c.initiative)!==0)); renderCombat(); scrollToCurrentTurn(); saveCurrentStateToSession(); }
+    function compactConditions(c){return !c.isMonster||!Object.values(c.spellSlots||{}).some(slot=>Number(slot?.max)>0);}
     function toggleCondition(c, cond) { 
         if (cond === "Истощённый") { 
-            let newLevel = (c.exhaustion || 0) + 1; 
+            let newLevel = Math.max(0,Math.min(6,Math.floor(Number(c.exhaustion)||0))) + 1;
             if (newLevel > 6) newLevel = 0; 
             c.exhaustion = newLevel; 
             if (c.exhaustion === 0) c.conditions.delete("Истощённый"); 
@@ -2798,8 +2799,7 @@ function findSpellById(id) {
         HagCoven.sync(combatants);
         const grid = document.getElementById('combatantsGrid');
         SpellEffects.advance(combatants,currentRound);
-        PlayerDisplay.publish(combatants,currentTurnIndex,currentRound);
-        if (!combatants.length) { grid.innerHTML = '<div style="padding:60px;text-align:center;"><i class="fa-solid fa-user-plus"></i> Добавьте героев или монстров из бестиария</div>'; return; }
+        if (!combatants.length) { PlayerDisplay.publish(combatants,currentTurnIndex,currentRound);grid.innerHTML = '<div style="padding:60px;text-align:center;"><i class="fa-solid fa-user-plus"></i> Добавьте героев или монстров из бестиария</div>'; return; }
         SpellEffects.advance(combatants,currentRound);
         let html = '';
         combatants.forEach((c, idx) => {
@@ -2861,7 +2861,7 @@ function findSpellById(id) {
                     </div>
                     ${raceClassHtml}${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
-                    <div class="active-conditions">${c.isMonster?activeConditionsHtml:''}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
+                    <div class="active-conditions">${compactConditions(c)?'':activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
                     ${concentrationHtml}
                     <div class="hp-panel">
                         <div style="display:flex; gap:4px; flex-wrap:wrap;"><input type="text" id="dmgVal-${c.id}" class="dmg-quick" placeholder="урон" data-tooltip="Введите значение урона/лечения"><button class="action-icon apply-dmg" data-id="${c.id}" data-tooltip="Нанести урон">⚔️</button><button class="action-icon half-dmg" data-id="${c.id}" data-tooltip="Половина урона">½</button><button class="action-icon quarter-dmg" data-id="${c.id}" data-tooltip="Четверть урона">¼</button><button class="action-icon double-dmg" data-id="${c.id}" data-tooltip="Двойной урон">×2</button><button class="action-icon heal-btn" data-id="${c.id}" data-tooltip="Лечение">💚</button>${c.isMonster ? `<button class="action-icon random-hp" data-id="${c.id}" data-tooltip="${randomHpTooltip}"><i class="fa-solid fa-dice"></i></button>` : ''}</div>
@@ -2870,12 +2870,13 @@ function findSpellById(id) {
                         <button class="remove-btn" data-id="${c.id}" data-tooltip="Удалить персонажа"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     ${HagCoven.isHag(c)?`<button class="btn coven-manage" data-id="${c.id}" style="font-size:11px;padding:4px 8px">✦ Шабаш карг${HagCoven.active(combatants,c)?' · активен':''}</button>`:''}${slotsHtml}${legendaryHtml}
-                    <div class="conditions-header" style="${c.isMonster?'':'display:none'}" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
-                    <div id="conds-${c.id}" style="${c.isMonster?'display:none':'display:flex'}" class="conditions-list ${c.isMonster?'':'hero-condition-icons'}"></div>
+                    <div class="conditions-header" style="${compactConditions(c)?'display:none':''}" data-id="${c.id}" data-tooltip="Управление состояниями">📋 Состояния (${activeConds}) ▼</div>
+                    <div id="conds-${c.id}" style="${compactConditions(c)?'display:flex':'display:none'}" class="conditions-list ${compactConditions(c)?'hero-condition-icons':''}"></div>
                     <div class="log-area">${c.log.slice(0,2).map(l=>`<div title="${escapeHtml(l)}">${escapeHtml(l)}</div>`).join('')}</div>
                 </div>
             </div>`;
         });
+        PlayerDisplay.publish(combatants,currentTurnIndex,currentRound);
         grid.innerHTML = html;
         combatants.forEach(c => {
             const cardDiv = document.querySelector(`.combat-card[data-combat-id="${c.id}"]`);
@@ -2893,8 +2894,8 @@ function findSpellById(id) {
                 saveCurrentStateToSession();
             });
             document.querySelectorAll(`.init-roll-btn[data-id="${c.id}"]`).forEach(btn => btn.onclick = () => rollInitiative(c));
-            document.querySelectorAll(`.hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.currentHp = Math.min(c.maxHp, Math.max(0, parseInt(e.target.value)||0)); renderCombat(); saveCurrentStateToSession(); });
-            document.querySelectorAll(`.max-hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.maxHp = parseInt(e.target.value)||0; if(c.currentHp > c.maxHp) c.currentHp = c.maxHp; renderCombat(); saveCurrentStateToSession(); });
+            document.querySelectorAll(`.hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { const value=e.target.value.trim();if(!/^\d+$/.test(value)){e.target.value=c.currentHp;return;}c.currentHp = Math.min(c.maxHp, Number(value)); renderCombat(); saveCurrentStateToSession(); });
+            document.querySelectorAll(`.max-hp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { const value=e.target.value.trim();if(!/^\d+$/.test(value)||Number(value)<1){e.target.value=c.maxHp;return;}c.maxHp = Number(value); if(c.currentHp > c.maxHp) c.currentHp = c.maxHp; renderCombat(); saveCurrentStateToSession(); });
             document.querySelectorAll(`.temp-input[data-id="${c.id}"]`).forEach(inp => inp.onchange = e => { c.tempHp = Math.max(0, parseInt(e.target.value)||0); renderCombat(); saveCurrentStateToSession(); });
             document.querySelector(`.concentration-pass[data-id="${c.id}"]`)?.addEventListener('click',()=>resolveConcentration(c,true));
             document.querySelector(`.concentration-fail[data-id="${c.id}"]`)?.addEventListener('click',()=>resolveConcentration(c,false));
@@ -2929,16 +2930,16 @@ function findSpellById(id) {
                 condDiv.innerHTML = '';
                 CONDITIONS.forEach(cond => {
                     let active = c.conditions.has(cond) || (cond==="Истощённый" && c.exhaustion>0);
-                    let span = document.createElement(c.isMonster?'div':'button');
+                    let span = document.createElement(compactConditions(c)?'button':'div');
                     span.className = `cond-item ${getConditionClass(cond)} ${active ? 'active' : ''}`;
                     span.innerText = cond==="Истощённый" && c.exhaustion>0 ? `Истощённый (${c.exhaustion})` : cond;
-                    if(!c.isMonster){span.type='button';span.dataset.tooltip=span.innerText+' · '+(conditionHints[cond]||'')+' · нажмите для переключения';span.setAttribute('aria-label',span.innerText);span.setAttribute('aria-pressed',String(active));span.innerHTML='<i class="fa-solid '+conditionIcons[cond]+'"></i>'+(cond==='Истощённый'&&c.exhaustion?'<small>'+c.exhaustion+'</small>':'');}
+                    if(compactConditions(c)){span.type='button';span.dataset.tooltip=span.innerText+' · '+(conditionHints[cond]||'')+' · нажмите для переключения';span.setAttribute('aria-label',span.innerText);span.setAttribute('aria-pressed',String(active));span.innerHTML='<i class="fa-solid '+conditionIcons[cond]+'"></i>'+(cond==='Истощённый'&&c.exhaustion?'<small>'+c.exhaustion+'</small>':'');}
                     span.onclick = (e) => { e.stopPropagation(); toggleCondition(c, cond); };
                     condDiv.appendChild(span);
                 });
                 let reset = document.createElement('div'); reset.className = 'cond-item'; reset.innerText = '❌ Сбросить всё'; reset.style.background = '#562626'; 
                 reset.onclick = () => { SpellEffects.endConcentration(combatants,c); c.conditions.clear(); c.exhaustion=0; renderCombat(); saveCurrentStateToSession(); };
-                if(c.isMonster)condDiv.appendChild(reset);
+                if(!compactConditions(c))condDiv.appendChild(reset);
             }
         });
     }

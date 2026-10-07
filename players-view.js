@@ -8,6 +8,7 @@
   function safeImage(value){if(typeof value!=='string'||!value.trim())return '';if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;try{const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return '';}}
   function receive(message){
     if(message?.version!==1 || !Array.isArray(message.participants))return;
+    try{const owner=localStorage.getItem(key+'_owner');if(owner&&message.sourceId!==owner)return;}catch{}
     const participants=message.participants.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&Number.isFinite(p.initiative)&&p.initiative!==0).map(p=>{
       const isAlly=!p.isMonster||p.isAlly===true;
       const result={id:p.id,name:p.name,initiative:p.initiative,image:safeImage(p.image),isMonster:!!p.isMonster,isAlly,health:Object.hasOwn(healthLabels,p.health)?p.health:'unknown',conditions:Array.isArray(p.conditions)?p.conditions.filter(v=>typeof v==='string').slice(0,24):[]};
@@ -28,10 +29,16 @@
     render();connection();
   }
   function connection(){const live=received>0&&Date.now()-received<16000;const el=document.getElementById('connection');el.textContent=live?'Связь с мастером':received?'Мастер не на связи':'Ожидание мастера';el.classList.toggle('connected',live);}
+  function fillBadges(badges,person){badges.replaceChildren();
+        if(healthLabels[person.health])badges.append(make('span','health-badge '+person.health,((person.health==='bloodied'||person.health==='critical')?'🩸 ':person.health==='wounded'?'✚ ':'')+healthLabels[person.health]));
+        if(person.metrics){const m=person.metrics;badges.append(make('span','ally-metric','♥ '+(m.hp??'—')+' / '+(m.maxHp??'—')+(m.tempHp?' · +'+m.tempHp+' врем.':'')),make('span','ally-metric','🛡 КД '+(m.ac??'—')));}
+        person.conditions.forEach(condition=>badges.append(make('span','state-badge'+(/концентра/i.test(condition)?' concentration':''),(/концентра/i.test(condition)?'◎ ':'◈ ')+condition)));
+        person.effects.forEach(effect=>{const badge=make('span','state-badge','✨ '+effect.name);badge.title='Наложил: '+effect.casterName;badges.append(badge);});
+  }
   function render(){
     const list=state?.participants||[],chosen=list.find(p=>p.id===selected),active=!!chosen&&chosen.id===state.currentId;
     document.getElementById('round').textContent='Раунд '+(state?state.round:'—');
-    const nextSignature=JSON.stringify([chosen||null,active,!!state,list.map(p=>[p.id,p.name,p.image])]);
+    const nextSignature=JSON.stringify([chosen?[chosen.id,chosen.name,chosen.image,chosen.initiative,chosen.isMonster,chosen.isAlly]:null,active,!!state,list.map(p=>[p.id,p.name,p.image])]);
     if(signature!==nextSignature){
       const changing=!!chosen&&renderedId!==chosen.id;
       const previous=changing?stage.querySelector('.public-card:not(.deck-exit)')?.cloneNode(true):null;
@@ -63,10 +70,7 @@
         const status=make('div','card-status',active?'СЕЙЧАС ХОДИТ':'ПРОСМОТР УЧАСТНИКА');art.append(status);artSpace.append(art);card.append(artSpace);
         const heading=make('div','card-heading');heading.append(make('h2','',chosen.name));
         const badges=make('div','public-badges');
-        if(healthLabels[chosen.health])badges.append(make('span','health-badge '+chosen.health,((chosen.health==='bloodied'||chosen.health==='critical')?'🩸 ':chosen.health==='wounded'?'✚ ':'')+healthLabels[chosen.health]));
-        if(chosen.metrics){const m=chosen.metrics;badges.append(make('span','ally-metric','♥ '+(m.hp??'—')+' / '+(m.maxHp??'—')+(m.tempHp?' · +'+m.tempHp+' врем.':'')),make('span','ally-metric','🛡 КД '+(m.ac??'—')));}
-        chosen.conditions.forEach(condition=>badges.append(make('span','state-badge'+(/концентра/i.test(condition)?' concentration':''),(/концентра/i.test(condition)?'◎ ':'◈ ')+condition)));
-        chosen.effects.forEach(effect=>{const badge=make('span','state-badge','✨ '+effect.name);badge.title='Наложил: '+effect.casterName;badges.append(badge);});
+        fillBadges(badges,chosen);
         heading.append(badges);card.append(heading);stage.append(card);
       }else{
         const empty=make('div','empty');empty.append(make('h2','',list.length?'Ожидание следующего хода':'Стол готов к приключению'));
@@ -75,6 +79,7 @@
         stage.append(empty);
       }
     }
+    const liveBadges=stage.querySelector('.public-card:not(.deck-exit) .public-badges');if(chosen&&liveBadges)fillBadges(liveBadges,chosen);
     const nextOrder=JSON.stringify([list,state?.currentId,selected]);
     if(nextOrder!==orderSignature){
       orderSignature=nextOrder;order.replaceChildren();
@@ -86,7 +91,7 @@
         if(p.image){const img=make('img','order-image');img.src=p.image;img.alt='';img.onerror=()=>{img.replaceWith(make('span','order-image','◆'));};button.append(img);}else button.append(make('span','order-image',p.isMonster?'◆':'✦'));
         const copy=make('span','order-copy');copy.append(make('span','order-name',p.name));if(p.health==='wounded'||p.health==='injured'||p.health==='bloodied'||p.health==='critical'||p.health==='down')copy.append(make('span','order-health '+p.health,healthLabels[p.health]));if(p.conditions.length)copy.append(make('span','order-conditions',p.conditions.join(' · ')));button.append(copy,make('span','order-init',p.initiative));button.onclick=()=>{following=false;selected=p.id;render();};li.append(button);order.append(li);
       });
-      order.querySelector('[aria-current="true"]')?.scrollIntoView({block:'nearest'});
+      if(order.dataset.currentId!==String(state?.currentId)){order.querySelector('[aria-current="true"]')?.scrollIntoView({block:'nearest'});order.dataset.currentId=String(state?.currentId);}
     }
     const index=list.findIndex(p=>p.id===selected);
     document.getElementById('position').textContent=list.length?(index>=0?index+1:'—')+' / '+list.length:'—';

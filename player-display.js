@@ -10,7 +10,7 @@
     const hp=Number(c.currentHp),max=Number(c.maxHp);
     const health=Number.isFinite(hp)&&Number.isFinite(max)&&max>0?(hp<=0?'down':hp<=max/4?'critical':hp<=max/2?'bloodied':hp<=max*.75?'injured':hp<max?'wounded':'healthy'):'unknown';
     const raw=c.conditions instanceof Set?[...c.conditions]:Array.isArray(c.conditions)?c.conditions:Array.isArray(c.conditions?.values)?c.conditions.values:[];
-    const conditions=raw.filter(v=>typeof v==='string');
+    const conditions=raw.filter(v=>typeof v==='string').map(v=>/^Истощ/i.test(v)&&Number(c.exhaustion)>0?'Истощение '+Number(c.exhaustion):v);
     if(Number(c.exhaustion)>0&&!conditions.some(v=>v.startsWith('Истощ')))conditions.push('Истощение '+Number(c.exhaustion));
     const result={id:String(c.id),name:(root.CombatLabels?.label(c)||String(c.name||'Участник').split(/\s+\/\s+/)[0]+(c.isMonster&&c.monsterNumber?' №'+c.monsterNumber:'')),initiative:Number(c.initiative),image:image(c.avatar),isMonster:!!c.isMonster,isAlly,health,conditions};
     result.effects=(c.activeSpellEffects||[]).map(e=>{const caster=visible?.find(x=>String(x.id)===String(e.casterId));return {name:String(e.name||'Эффект'),casterName:caster?(root.CombatLabels?.label(caster)||String(caster.name).split(/\s+\/\s+/)[0]+(caster.isMonster&&caster.monsterNumber?' №'+caster.monsterNumber:'')):'Источник скрыт'};});
@@ -39,9 +39,10 @@
   if(typeof window!=='object')return;
   let state=null;
   const key='dnd_player_display_v1';
+  const sourceId='master-'+Date.now()+'-'+Math.random().toString(36).slice(2),ownerKey=key+'_owner';
   const channel=typeof BroadcastChannel==='function'?new BroadcastChannel(key):null;
-  function send(){if(!state)return;const message={...state,sentAt:Date.now()};channel?.postMessage(message);try{localStorage.setItem(key,JSON.stringify(message));}catch{}}
-  api.publish=(combatants,index,round)=>{state=project(combatants,index,round);send();};
+  function send(){if(!state)return;try{if(localStorage.getItem(ownerKey)!==sourceId)return;}catch{}const message={...state,sourceId,sentAt:Date.now()};channel?.postMessage(message);try{localStorage.setItem(key,JSON.stringify(message));}catch{}}
+  api.publish=(combatants,index,round)=>{state=project(combatants,index,round);try{localStorage.setItem(ownerKey,sourceId);}catch{}send();};
   channel?.addEventListener('message',event=>{if(event.data?.type==='request')send();});
   setInterval(send,5000);
   root.PlayerDisplay=api;

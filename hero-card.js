@@ -33,7 +33,7 @@
                 for(const key of Object.keys(abilities))hero.stats[key].mod=mod(num(hero.stats[key].score,10));
                 hero.heroData = resolved;
                 hero.ac = num(resolved.vitality.ac,10) + (resolved.vitality.shield?.value ? 2 : 0);
-                hero.maxHp = num(resolved.vitality['hp-max'],hero.maxHp);
+                if(raw.vitality?.['hp-max']!=null){const maximum=num(resolved.vitality['hp-max'],hero.maxHp);if(maximum>0)hero.maxHp=maximum;}
                 hero.speed = num(resolved.vitality.speed,30);
                 hero.initBonus = resolved._trackerInitiative;
                 hero.spellAttack = resolved._trackerSpellAttack;
