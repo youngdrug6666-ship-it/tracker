@@ -5,6 +5,7 @@
     if(/^data:image\/(?:png|jpeg|webp|gif);base64,/i.test(value))return value;
     try{const url=new URL(value,typeof location==='object'?location.href:'https://example.invalid/');return /^https?:$/.test(url.protocol)?url.href:'';}catch{return '';}
   }
+  function publicName(c){return root.CombatLabels?.publicLabel(c)||(c.isMonster&&c.nameKnown!==true?'Неизвестное существо'+(c.monsterNumber?' №'+c.monsterNumber:''):String(c.name||'Участник').split(/\s+\/\s+/)[0]+(c.isMonster&&c.monsterNumber?' №'+c.monsterNumber:''));}
   function participant(c,visible){
     const isAlly=!c.isMonster||c.isAlly===true;
     const hp=Number(c.currentHp),max=Number(c.maxHp);
@@ -12,8 +13,8 @@
     const raw=c.conditions instanceof Set?[...c.conditions]:Array.isArray(c.conditions)?c.conditions:Array.isArray(c.conditions?.values)?c.conditions.values:[];
     const conditions=raw.filter(v=>typeof v==='string').map(v=>/^Истощ/i.test(v)&&Number(c.exhaustion)>0?'Истощение '+Number(c.exhaustion):v);
     if(Number(c.exhaustion)>0&&!conditions.some(v=>v.startsWith('Истощ')))conditions.push('Истощение '+Number(c.exhaustion));
-    const result={id:String(c.id),name:(root.CombatLabels?.label(c)||String(c.name||'Участник').split(/\s+\/\s+/)[0]+(c.isMonster&&c.monsterNumber?' №'+c.monsterNumber:'')),initiative:Number(c.initiative),image:image(c.avatar),isMonster:!!c.isMonster,isAlly,health,conditions};
-    result.effects=(c.activeSpellEffects||[]).map(e=>{const caster=visible?.find(x=>String(x.id)===String(e.casterId));return {name:String(e.name||'Эффект'),casterName:caster?(root.CombatLabels?.label(caster)||String(caster.name).split(/\s+\/\s+/)[0]+(caster.isMonster&&caster.monsterNumber?' №'+caster.monsterNumber:'')):'Источник скрыт'};});
+    const result={id:String(c.id),name:publicName(c),initiative:Number(c.initiative),image:image(c.avatar),isMonster:!!c.isMonster,isAlly,health,conditions};
+    result.effects=(c.activeSpellEffects||[]).map(e=>{const caster=visible?.find(x=>String(x.id)===String(e.casterId));return {name:String(e.name||'Эффект'),casterName:caster?publicName(caster):'Источник скрыт'};});
     if(isAlly)result.metrics={hp:Number.isFinite(hp)?hp:null,maxHp:Number.isFinite(max)?max:null,tempHp:Number(c.tempHp)||0,ac:Number.isFinite(Number(c.ac))?Number(c.ac):null};
     return result;
   }

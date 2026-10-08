@@ -17,7 +17,7 @@
     <style>
 .hero-item{display:flex;gap:8px;align-items:end;flex-wrap:wrap;padding:10px 0}.hero-item label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#b9cbd9}.hero-item label input{width:70px!important;min-width:0}.hero-item .hero-item-name{flex:1;min-width:160px}.hero-item .hero-item-enabled{align-self:center}
 
-.combat-name-row{display:flex;align-items:center;gap:5px;min-width:0}.combat-name-row .name-input{min-width:0;flex:1}.monster-number{flex:none;font-size:12px;font-weight:700;color:#ead5ff;background:#62417b99;border:1px solid #b78ed066;border-radius:8px;padding:3px 6px}.spell-effect-remove{background:#352645;color:#ead7ff;border:1px solid #8c65a6;border-radius:8px;padding:4px 7px;max-width:100%;white-space:normal;text-align:left}
+.monster-knowledge{flex:none;width:26px;height:26px;padding:0;border-radius:8px;background:#241b32;color:#b9a7ca;border:1px solid #695076;cursor:pointer}.monster-knowledge[aria-pressed=true]{color:#e5c4ff;background:#60417d;border-color:#b781e0}.monster-knowledge:hover{border-color:#d3a4f3}.combat-name-row{display:flex;align-items:center;gap:5px;min-width:0}.combat-name-row .name-input{min-width:0;flex:1}.monster-number{flex:none;font-size:12px;font-weight:700;color:#ead5ff;background:#62417b99;border:1px solid #b78ed066;border-radius:8px;padding:3px 6px}.spell-effect-remove{background:#352645;color:#ead7ff;border:1px solid #8c65a6;border-radius:8px;padding:4px 7px;max-width:100%;white-space:normal;text-align:left}
 
         /* === Стили без изменений === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Roboto', sans-serif; }
@@ -971,7 +971,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="bestiary.js?v=6"></script>
 <script src="foundry-data.js?v=4"></script>
 <script src="lss-engine.js?v=2"></script>
-<script src="combat-labels.js?v=2"></script>
+<script src="combat-labels.js?v=3"></script>
 <script src="hag-coven.js?v=1"></script>
 <script src="spell-effects.js?v=coven-5"></script>
 <script src="combat-history.js?v=1"></script>
@@ -979,7 +979,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="monster-mechanics.js?v=3"></script>
 <script src="tracker-backup.js?v=1"></script>
 <script src="full-backup.js?v=1"></script>
-<script src="player-display.js?v=states-8"></script>
+<script src="player-display.js?v=states-9"></script>
 <script src="app-tooltips.js?v=1"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
 <script src="hero-card.js?v=hp-9"></script>
@@ -1068,9 +1068,10 @@ async function loadUuidMap() {
     // ========== Сессии ==========
     let sessions = {};
     let currentSessionId = "default";
+    let knownMonsterTypes=[];
     const combatHistory=CombatHistory.create(30);
     let historyPending=false,historyGeneration=0;
-    function combatSnapshot(){return {combatants,currentTurnIndex,currentRound,nextId};}
+    function combatSnapshot(){return {combatants,currentTurnIndex,currentRound,nextId,knownMonsterTypes};}
     function updateUndoButton(){const btn=document.getElementById('undoCombatBtn');if(btn){btn.disabled=!combatHistory.size;btn.title=combatHistory.size?'Отменить последнее изменение боя (Ctrl+Z)':'Нет изменений для отмены';}}
     function flushCombatHistory(){if(!historyPending)return;historyPending=false;combatHistory.commit(combatSnapshot());updateUndoButton();}
     function queueCombatHistory(){if(historyPending)return;historyPending=true;const generation=historyGeneration;queueMicrotask(()=>{if(generation===historyGeneration)flushCombatHistory();});}
@@ -1078,7 +1079,7 @@ async function loadUuidMap() {
         flushCombatHistory();
         const state=combatHistory.undo();if(!state)return;
         historyGeneration++;historyPending=false;
-        ({combatants,currentTurnIndex,currentRound,nextId}=state);
+        ({combatants,currentTurnIndex,currentRound,nextId,knownMonsterTypes=[]}=state);
         renderCombat();document.getElementById('roundNumberTop').innerText=currentRound;
         saveCurrentStateToSession();updateUndoButton();
         const hero=combatants.find(c=>c.id===activeHeroDetailsId);
@@ -1092,6 +1093,7 @@ async function loadUuidMap() {
         sessions[currentSessionId].currentTurnIndex = currentTurnIndex;
         sessions[currentSessionId].currentRound = currentRound;
         sessions[currentSessionId].nextId = nextId;
+        sessions[currentSessionId].knownMonsterTypes=[...knownMonsterTypes];
         localStorage.setItem("dnd_sessions", JSON.stringify(sessions));
         localStorage.setItem("dnd_current_session", currentSessionId);
         queueCombatHistory();
@@ -1101,6 +1103,7 @@ async function loadUuidMap() {
         historyGeneration++;historyPending=false;
         currentSessionId = sessionId;
         const data = sessions[sessionId];
+        knownMonsterTypes=Array.isArray(data.knownMonsterTypes)?data.knownMonsterTypes.filter(k=>typeof k==='string'):[];
         combatants = data.combatants.map(c => {
             let condSet = new Set();
             if (c.conditions && c.conditions.__type === "Set") c.conditions.values.forEach(v => condSet.add(v));
@@ -2798,6 +2801,7 @@ function findSpellById(id) {
 
     function renderCombat() {
         CombatLabels.ensure(combatants);
+        CombatLabels.syncKnowledge(combatants,knownMonsterTypes);
         HagCoven.sync(combatants);
         const grid = document.getElementById('combatantsGrid');
         SpellEffects.advance(combatants,currentRound);
@@ -2850,7 +2854,7 @@ function findSpellById(id) {
                 ${isCurrent?'<div class="turn-flames" aria-hidden="true"></div>':''}
                 <div class="card-content">
                     ${isCurrent?'<div class="turn-label"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> Сейчас ходит</div>':''}
-                    <div class="combat-name-row">${c.isMonster?`<span class="monster-number" data-tooltip="Номер существа в текущем бою">№${c.monsterNumber}</span>`:''}<input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)"></div>
+                    <div class="combat-name-row">${c.isMonster?`<span class="monster-number" data-tooltip="Номер существа в текущем бою">№${c.monsterNumber}</span><button class="monster-knowledge" aria-pressed="${c.nameKnown===true}" aria-label="${c.nameKnown?'Скрыть название этого вида от игроков':'Раскрыть название этого вида игрокам'}" data-tooltip="${c.nameKnown?'Известное существо: нажми, чтобы скрыть этот вид':'Название скрыто от игроков: нажми, чтобы раскрыть весь вид'}"><i class="fa-solid ${c.nameKnown?'fa-eye':'fa-eye-slash'}"></i></button>`:''}<input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)"></div>
                     <div class="card-header">
                         <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе"><i class="fa-brands fa-buffer"></i></button>
                     </div>
@@ -2883,6 +2887,7 @@ function findSpellById(id) {
         combatants.forEach(c => {
             const cardDiv = document.querySelector(`.combat-card[data-combat-id="${c.id}"]`);
             if (cardDiv) attachDragEvents(cardDiv, c.id);
+            const knowledgeBtn=cardDiv?.querySelector('.monster-knowledge');if(knowledgeBtn)knowledgeBtn.onclick=()=>{knownMonsterTypes=CombatLabels.toggleKnowledge(combatants,c,knownMonsterTypes);renderCombat();saveCurrentStateToSession();};
             if (cardDiv && !c.isMonster) HeroCard.bind(cardDiv, c, () => { renderCombat(); saveCurrentStateToSession(); });
             for(const btn of cardDiv.querySelectorAll('.legendary-spend,.legendary-restore'))btn.onclick=()=>{const key=btn.dataset.resource;if(btn.classList.contains('legendary-spend')){if(!MonsterMechanics.spend(c,key))return;addLog(c,key==='actions'?'✨ Легендарное действие: −1':'🛡 Легендарное сопротивление: −1');}else{const r=c.legendaryResources[key];if(!r.used)return;r.used--;addLog(c,'✨ Восстановлен легендарный заряд');}renderCombat();saveCurrentStateToSession();};
             cardDiv.querySelector('.coven-manage')?.addEventListener('click',()=>showCovenEditor(c));

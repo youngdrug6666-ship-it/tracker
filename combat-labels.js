@@ -15,6 +15,10 @@ function ensure(all){
   for(const c of members)if(!c.monsterNumber){let n=1;while(used.has(n))n++;c.monsterNumber=n;used.add(n);}
  }
 }
+function typeKey(c){return String(c?.name||'Существо').normalize('NFKC').trim().toLowerCase();}
+function publicLabel(c){return c?.isMonster&&c.nameKnown!==true?'Неизвестное существо'+(c.monsterNumber?' №'+c.monsterNumber:''):label(c);}
+function syncKnowledge(all,known){const keys=new Set(known);for(const c of all)if(c.isMonster)c.nameKnown=keys.has(typeKey(c));}
+function toggleKnowledge(all,c,known){const key=typeKey(c),keys=new Set(known);if(keys.has(key))keys.delete(key);else keys.add(key);const result=[...keys];syncKnowledge(all,result);return result;}
 function label(c){return String(c?.name||'Существо').split(/\s+\/\s+/)[0]+(c?.isMonster&&c.monsterNumber?' №'+c.monsterNumber:'');}
 function effectSource(effect,all){
  const source=all.find(c=>String(c.id)===String(effect.casterId));
@@ -22,5 +26,5 @@ function effectSource(effect,all){
 }
 function durationLabel(value){const words={minute:'мин.',minutes:'мин.',hour:'ч.',hours:'ч.',day:'дн.',days:'дн.',round:'раунд',rounds:'раундов',inst:'Мгновенно',instantaneous:'Мгновенно',special:'Особая'};return String(value||'').replace(/\b[a-z]+\b/gi,v=>words[v.toLowerCase()]||v);}
 function effectTooltip(effect,all){return effect.name+' · Наложил: '+effectSource(effect,all)+(effect.duration?' · Длительность: '+durationLabel(effect.duration):'')+(effect.concentration?' · Концентрация':'')+' · Нажмите ×, чтобы снять';}
-const api={ensure,label,effectSource,effectTooltip};root.CombatLabels=api;if(typeof module==='object'&&module.exports)module.exports=api;
+const api={ensure,label,typeKey,publicLabel,syncKnowledge,toggleKnowledge,effectSource,effectTooltip};root.CombatLabels=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof globalThis==='object'?globalThis:window);
