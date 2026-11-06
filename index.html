@@ -858,6 +858,7 @@ html,body{max-width:100%;box-sizing:border-box}
 #topBar .top-bar-left>.btn{flex:1 0 auto;justify-content:center;display:inline-flex;align-items:center}
 #topBar .menu-wrapper .btn{justify-content:center;display:inline-flex;align-items:center}
 @media(max-width:768px){#topBar .top-bar-left{flex:1 1 auto}#combatantsGrid{align-items:stretch}.combat-card .turn-label{top:-17px}}
+@media(max-width:480px){#nextTurnBtnTop .btn-label{font-size:0}#nextTurnBtnTop .fa-icon{font-size:15px}#nextTurnBtnTop{min-width:38px}}
 
 .combat-card .card-header{position:absolute;right:5px;top:5px;margin:0!important;z-index:4}
 .combat-card .name-input{box-sizing:border-box;padding-right:36px;margin-bottom:2px}
@@ -888,7 +889,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
                 <button class="btn" id="resetRoundBtnTop" data-tooltip="Сбросить раунд" style="background:#5a3e2a;">0</button>
             </div>
             <button class="btn" id="prevTurnBtnTop" data-tooltip="Предыдущий ход"><i class="fa-solid fa-angle-left fa-icon"></i></button>
-            <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход"><span class="btn-label"><i class="fa-solid fa-angle-right fa-icon"></i>Следующий ход</span></button>
+            <button class="btn btn-primary" id="nextTurnBtnTop" data-tooltip="Следующий ход" aria-label="Следующий ход"><span class="btn-label"><i class="fa-solid fa-angle-right fa-icon"></i>Следующий ход</span></button>
             <button class="btn btn-primary" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Сортировать по иниц</span></button>
             <button class="btn" id="undoCombatBtn" disabled aria-label="Отменить последнее действие"><i class="fa-solid fa-rotate-left"></i> Отменить</button>
             <button class="btn" id="rollAllInitBtn" style="background:#91220b;" data-tooltip="Один бросок инициативы для всех монстров с одинаковым названием"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
