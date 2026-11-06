@@ -18,6 +18,8 @@
     const signed = n => (n >= 0 ? '+' : '') + n;
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function passivePerception(hero) {
+        const override=hero.heroControls?.passivePerceptionOverride;
+        if(Number.isInteger(override)&&override>=0&&override<=99)return override;
         const skill=hero.heroData?.skills?.perception || {};
         const rank=skill.isProf===2?2:skill.isProf?1:0;
         return 10 + (hero.stats?.wis?.mod ?? mod(num(hero.stats?.wis?.score,10)))
@@ -233,6 +235,15 @@
         on('.hero-score',el=>{const score=Math.max(1,Math.min(30,num(el.value,10)));hero.stats[el.dataset.key].score=score;(hero.heroData.stats ||= {})[el.dataset.key]={...(hero.heroData.stats?.[el.dataset.key]||{}),score};});
         on('.hero-inspiration',()=>hero.inspiration=!hero.inspiration,'click');
         on('.hero-shield',()=>h.shield=!h.shield,'click');
+        on('.hero-passive',()=>{
+            let value=root.prompt('Пассивное восприятие (целое число 0–99). Пустое поле — расчёт из листа.',String(passivePerception(hero)));
+            while(value!==null){
+                const text=value.trim();
+                if(!text){delete h.passivePerceptionOverride;break;}
+                if(/^\d{1,2}$/.test(text)){h.passivePerceptionOverride=Number(text);break;}
+                value=root.prompt('Введите целое число от 0 до 99. Пустое поле — автоматический расчёт.',value);
+            }
+        },'click');
         on('.hero-vision',()=>{const t=sensesAndDefenses(hero);const v=root.prompt('Тёмное зрение: дальность или описание. Пустое поле — нет.',h.visionOverride??t.darkvision??'');if(v!==null)h.visionOverride=v.trim();},'click');
         on('.hero-defense',()=>{const t=sensesAndDefenses(hero);const v=root.prompt('Сопротивления и иммунитеты. Пустое поле — нет.',h.defenseOverride??[t.resistances.join(', '),t.poisonImmunity?'Иммунитет к урону ядом':''].filter(Boolean).join('; '));if(v!==null)h.defenseOverride=v.trim();},'click');
         on('.hero-speed',el=>hero.speed=Math.max(0,num(el.value)));
