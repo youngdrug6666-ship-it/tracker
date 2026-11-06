@@ -23,7 +23,7 @@
         const skill=hero.heroData?.skills?.perception || {};
         const rank=skill.isProf===2?2:skill.isProf?1:0;
         return 10 + (hero.stats?.wis?.mod ?? mod(num(hero.stats?.wis?.score,10)))
-            + rank*num(hero.proficiency ?? hero.heroControls?.proficiency,2) + num(skill.bonus);
+            + rank*num(hero.proficiency ?? hero.heroControls?.proficiency,2) + num(skill.bonus) + (root.FeatRules?.total(hero,'passive')||0);
     }
     function sheetText(value) {
         if (!value || typeof value !== 'object') return '';
@@ -41,9 +41,10 @@
         for(const [pattern,label] of [[/сопротивлени[ея].{0,35}урону\s+холодом/i,'холод'],[/сопротивлени[ея].{0,35}урону\s+огн[её]м/i,'огонь'],[/сопротивлени[ея].{0,35}урону\s+ядом/i,'яд'],[/сопротивлени[ея].{0,35}урону\s+некротическ/i,'некротический'],[/сопротивлени[ея].{0,35}урону\s+лучист/i,'лучистый']])if(pattern.test(prose))damage.push(label);
         if(!damage.length){if(/(?:^|\W)тифлинг(?:\W|$)/i.test(race))damage.push('огонь');else if(/(?:^|\W)(?:дварф|дворф)(?:\W|$)/i.test(race))damage.push('яд');else if(/(?:^|\W)аасимар(?:\W|$)/i.test(race))damage.push('некротический','лучистый');}
         const poisonImmunity=/иммунитет\s+к\s+урону\s+ядом/i.test(prose);
-        return {darkvision,resistances:[...new Set(damage)],poisonImmunity};
+        return {darkvision,resistances:[...new Set([...damage,...(root.FeatRules?.resistances(hero)||[])])],poisonImmunity};
     }
     function ensure(hero) {
+        root.FeatRules?.before(hero);
         hero.stats ||= {};
         hero.heroData ||= {};
         for (const key of Object.keys(abilities)) {
@@ -141,7 +142,7 @@
         return hero;
     }
     function itemTotal(hero,field){return (hero.heroControls?.items||[]).reduce((sum,item)=>sum+(item.enabled?num(item[field]):0),0);}
-    function saveValue(hero,key){const d=hero.heroData.saves[key];return hero.stats[key].mod+(d.isProf?hero.proficiency:0)+num(hero.heroControls.saveBonus)+num(d.bonus)+itemTotal(hero,'saveBonus');}
+    function saveValue(hero,key){const d=hero.heroData.saves[key];return hero.stats[key].mod+((d.isProf||root.FeatRules?.saveProficient(hero,key))?hero.proficiency:0)+num(hero.heroControls.saveBonus)+num(d.bonus)+itemTotal(hero,'saveBonus')+(root.FeatRules?.total(hero,'saveBonus')||0);}
     function breakdown(hero,kind,key){
         const h=hero.heroControls,rows=[];
         const itemField={ac:'bonus',save:'saveBonus',spellAttack:'spellAttackBonus',spellDC:'spellDcBonus'}[kind];
@@ -152,7 +153,7 @@
             if(h.shield)rows.push('Щит: +2');total=hero.ac;
         }else if(kind==='save'){
             rows.push('Спасбросок '+abilities[key]+': характеристика '+signed(hero.stats[key].mod));
-            if(hero.heroData.saves[key].isProf)rows.push('Владение: '+signed(hero.proficiency));
+            if(hero.heroData.saves[key].isProf||root.FeatRules?.saveProficient(hero,key))rows.push('Владение: '+signed(hero.proficiency));
             if(num(hero.heroData.saves[key].bonus))rows.push('Поправка LSS: '+signed(num(hero.heroData.saves[key].bonus)));
             if(num(h.saveBonus))rows.push('Доп. ко всем спасам: '+signed(num(h.saveBonus)));
             total=saveValue(hero,key);
@@ -164,9 +165,13 @@
             total=kind==='spellDC'?hero.spellSaveDC:hero.spellAttack;
         }
         for(const item of h.items||[])if(item.enabled&&num(item[itemField]))rows.push((item.name||'Предмет')+': '+signed(num(item[itemField])));
+        const featBonus=root.FeatRules?.total(hero,kind==='spellDC'?'spellDC':kind==='save'?'saveBonus':kind)||0;if(featBonus)rows.push('Черты: '+signed(featBonus));
         return rows.join(' · ')+' · Итого: '+(kind==='ac'||kind==='spellDC'?total:signed(total));
     }
     function recalculate(hero) {
+        if(root.FeatRules)root.FeatRules.apply(hero,recalculateBase);else recalculateBase(hero);
+    }
+    function recalculateBase(hero) {
         const h=hero.heroControls;
         if (!h) return;
         for (const key of Object.keys(abilities)) hero.stats[key].mod=mod(num(hero.stats[key].score,10));
@@ -227,12 +232,12 @@
     function bind(card,hero,changed) {
         const h=hero.heroControls;
         const on=(selector,apply,event='change')=>card.querySelectorAll(selector).forEach(el=>el.addEventListener(event,e=>{
-            e.stopPropagation();apply(el);recalculate(hero);changed();
+            e.stopPropagation();if(el.matches('.hero-score'))el.dataset.featDelta=String(hero._featApplied?.stats?.[el.dataset.key]||0);root.FeatRules?.before(hero);apply(el);recalculate(hero);changed();
         }));
         on('.hero-detail-use-slot',el=>{const slot=hero.spellSlots[el.dataset.level];slot.used=Math.min(slot.max,(slot.used||0)+1);},'click');
         on('.hero-detail-restore-slot',el=>{const slot=hero.spellSlots[el.dataset.level];slot.used=Math.max(0,(slot.used||0)-1);},'click');
         on('.hero-detail-slot-max',el=>{const slot=hero.spellSlots[el.dataset.level];slot.max=Math.max(0,Math.floor(num(el.value)));slot.used=Math.min(slot.max,slot.used||0);});
-        on('.hero-score',el=>{const score=Math.max(1,Math.min(30,num(el.value,10)));hero.stats[el.dataset.key].score=score;(hero.heroData.stats ||= {})[el.dataset.key]={...(hero.heroData.stats?.[el.dataset.key]||{}),score};});
+        on('.hero-score',el=>{const score=Math.max(1,Math.min(30,num(el.value,10)-num(el.dataset.featDelta)));hero.stats[el.dataset.key].score=score;(hero.heroData.stats ||= {})[el.dataset.key]={...(hero.heroData.stats?.[el.dataset.key]||{}),score};});
         on('.hero-inspiration',()=>hero.inspiration=!hero.inspiration,'click');
         on('.hero-shield',()=>h.shield=!h.shield,'click');
         on('.hero-passive',()=>{
@@ -246,7 +251,7 @@
         },'click');
         on('.hero-vision',()=>{const t=sensesAndDefenses(hero);const v=root.prompt('Тёмное зрение: дальность или описание. Пустое поле — нет.',h.visionOverride??t.darkvision??'');if(v!==null)h.visionOverride=v.trim();},'click');
         on('.hero-defense',()=>{const t=sensesAndDefenses(hero);const v=root.prompt('Сопротивления и иммунитеты. Пустое поле — нет.',h.defenseOverride??[t.resistances.join(', '),t.poisonImmunity?'Иммунитет к урону ядом':''].filter(Boolean).join('; '));if(v!==null)h.defenseOverride=v.trim();},'click');
-        on('.hero-speed',el=>hero.speed=Math.max(0,num(el.value)));
+        on('.hero-speed',el=>hero.speed=Math.max(0,num(el.value)-(root.FeatRules?.total(hero,'speed')||0)));
         on('.hero-proficiency',el=>h.proficiency=Math.max(0,Math.min(12,num(el.value,2))));
         on('.hero-save-bonus',el=>h.saveBonus=num(el.value));
         on('.hero-base-ac',el=>{h.acFormula=null;h.baseAc=num(el.value,10);});
