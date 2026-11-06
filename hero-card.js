@@ -204,7 +204,10 @@
         <details><summary>Предметы: КД, спасброски и заклинания</summary>${h.items.map((item,i)=>`<div class="hero-item"><input class="hero-item-enabled" data-index="${i}" type="checkbox" ${item.enabled?'checked':''} aria-label="Использовать предмет"><input class="hero-item-name" data-index="${i}" value="${esc(item.name)}" aria-label="Название предмета"><label>КД<input class="hero-item-bonus" data-index="${i}" type="number" value="${num(item.bonus)}" aria-label="КД"></label><label>Все спасы<input class="hero-item-save-bonus" data-index="${i}" type="number" value="${num(item.saveBonus)}" aria-label="Все спасы"></label><label>Атака закл.<input class="hero-item-spell-attack" data-index="${i}" type="number" value="${num(item.spellAttackBonus)}" aria-label="Атака закл."></label><label>СЛ закл.<input class="hero-item-spell-dc" data-index="${i}" type="number" value="${num(item.spellDcBonus)}" aria-label="СЛ закл."></label><button class="hero-item-remove" data-index="${i}" aria-label="Удалить предмет">×</button></div>`).join('')}<button class="hero-item-add">+ Предмет</button> <button class="hero-item-cloak">+ Плащ защиты</button><p>Учитывайте предмет здесь один раз: если бонус уже включён в базовое значение LSS, уберите его из базы.</p></details></details>`;
     }
     function quick(hero) {
-        return `<div class="hero-quick hero-quick-compact"><button class="hero-inspiration ${hero.inspiration?'equipped':''}" aria-pressed="${!!hero.inspiration}" title="Выдать или потратить вдохновение">✦ Вдохновение</button><button class="hero-shield ${hero.heroControls.shield?'equipped':''}" aria-pressed="${hero.heroControls.shield}" title="Взять или убрать щит">🛡 Щит</button></div>`;
+        const t=sensesAndDefenses(hero),h=hero.heroControls;
+        const vision=h.visionOverride??(t.darkvision||'');
+        const defense=h.defenseOverride??[t.resistances.join(', '),t.poisonImmunity?'Иммунитет к урону ядом':''].filter(Boolean).join('; ');
+        return `<div class="hero-quick hero-quick-compact"><button class="hero-inspiration ${hero.inspiration?'equipped':''}" aria-pressed="${!!hero.inspiration}" title="Выдать или потратить вдохновение">✦ Вдох.</button><button class="hero-shield ${h.shield?'equipped':''}" aria-pressed="${h.shield}" title="Взять или убрать щит">🛡 Щит</button><button class="hero-vision ${vision?'equipped':''}" title="${esc(vision||'Нет тёмного зрения')} · нажмите для изменения">☾ Темн.зр.</button><button class="hero-defense ${defense?'equipped':''}" data-tooltip="${esc(defense||'Сопротивления не указаны')} · нажмите для изменения" title="${esc(defense||'Сопротивления не указаны')}">🛡 Сопр.</button></div>`;
     }
     function summaryStats(hero) {
         return `<div class="hero-stat-summary">${Object.entries(abilities).map(([key,label])=>`<div data-tooltip="${esc(hero.isMonster?'Характеристика '+label:breakdown(hero,'save',key))}"><span>${label}</span><b>${hero.stats[key].score} (${signed(hero.stats[key].mod)})</b></div>`).join('')}</div>`;
@@ -230,6 +233,8 @@
         on('.hero-score',el=>{const score=Math.max(1,Math.min(30,num(el.value,10)));hero.stats[el.dataset.key].score=score;(hero.heroData.stats ||= {})[el.dataset.key]={...(hero.heroData.stats?.[el.dataset.key]||{}),score};});
         on('.hero-inspiration',()=>hero.inspiration=!hero.inspiration,'click');
         on('.hero-shield',()=>h.shield=!h.shield,'click');
+        on('.hero-vision',()=>{const t=sensesAndDefenses(hero);const v=root.prompt('Тёмное зрение: дальность или описание. Пустое поле — нет.',h.visionOverride??t.darkvision??'');if(v!==null)h.visionOverride=v.trim();},'click');
+        on('.hero-defense',()=>{const t=sensesAndDefenses(hero);const v=root.prompt('Сопротивления и иммунитеты. Пустое поле — нет.',h.defenseOverride??[t.resistances.join(', '),t.poisonImmunity?'Иммунитет к урону ядом':''].filter(Boolean).join('; '));if(v!==null)h.defenseOverride=v.trim();},'click');
         on('.hero-speed',el=>hero.speed=Math.max(0,num(el.value)));
         on('.hero-proficiency',el=>h.proficiency=Math.max(0,Math.min(12,num(el.value,2))));
         on('.hero-save-bonus',el=>h.saveBonus=num(el.value));
