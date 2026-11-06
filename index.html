@@ -2322,6 +2322,8 @@ function findSpellById(id) {
             document.getElementById('detailFeatures').closest('section').insertAdjacentHTML('beforebegin',FeatRules.panel(featTarget));
             FeatRules.bind(host,featTarget,()=>{renderCombat();saveCurrentStateToSession();showMonsterDetails(monsterName,true,featTarget.id);});
             document.getElementById('detailAC').textContent=featTarget.ac;
+            if(FeatRules.total(featTarget,'speed'))document.getElementById('detailSpeed').insertAdjacentHTML('beforeend',' <small>(ходьба с чертами: '+featTarget.speed+' фт)</small>');
+            const featSaves=Object.entries({str:'СИЛ',dex:'ЛОВ',con:'ТЕЛ',int:'ИНТ',wis:'МДР',cha:'ХАР'}).filter(([key])=>FeatRules.saveProficient(featTarget,key)).map(([key,label])=>label+' '+((featTarget.stats?.[key]?.mod||0)+getMonsterProfBonus(full)));if(featSaves.length)document.getElementById('detailSaves').insertAdjacentHTML('beforeend',' <small> · от черт: '+escapeHtml(featSaves.join(', '))+'</small>');
             document.getElementById('detailHP').textContent=featTarget.currentHp+' / '+featTarget.maxHp;
             document.getElementById('detailStats').innerHTML=Object.entries({str:'СИЛ',dex:'ЛОВ',con:'ТЕЛ',int:'ИНТ',wis:'МДР',cha:'ХАР'}).map(([key,label])=>{const score=featTarget.stats?.[key]?.score??10;const mod=Math.floor((score-10)/2);return '<div class="monster-stat-cell"><span class="lbl">'+label+'</span><span class="val">'+score+' ('+(mod>=0?'+':'')+mod+')</span></div>';}).join('');
         }
@@ -2918,7 +2920,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
             let spellHtml = '';
             let dc=c.spellSaveDC,attack=c.spellAttack;
             const casterModes=monsterFull?MonsterMechanics.casting(monsterFull):[];if(HagCoven.active(combatants,c))casterModes.unshift({name:'Шабаш · Интеллект',...HagCoven.casting(c)});
-            if(monsterFull){dc=casterModes[0]?.dc;attack=casterModes[0]?.attack;}
+            if(monsterFull){dc=casterModes[0]?.dc??c.spellSaveDC;attack=casterModes[0]?.attack??c.spellAttack;if(casterModes.length){if(Number.isFinite(Number(dc)))dc=Number(dc)+FeatRules.total(c,'spellDC');if(Number.isFinite(Number(attack)))attack=Number(attack)+FeatRules.total(c,'spellAttack');}}
             if(dc||attack!==undefined&&attack!==null)spellHtml=`<div class="spell-stats">${dc?`<span data-tooltip="${escapeHtml(casterModes.length?casterModes.map(m=>m.name+': СЛ '+(m.dc??'—')+', атака '+(m.attack??'—')).join('; '):c.isMonster?'Сложность спасброска от заклинаний':HeroCard.breakdown(c,'spellDC'))}"><i class="fa-solid fa-dice-d6"></i> СЛ ${dc}</span>`:''}${Number.isFinite(Number(attack))&&attack!==undefined&&attack!==null?`<span data-tooltip="${escapeHtml(c.isMonster?'Бонус атаки заклинанием':HeroCard.breakdown(c,'spellAttack'))}"><i class="fa-solid fa-wand-sparkles"></i> Атк ${Number(attack)>=0?'+':''}${attack}</span>`:''}</div>`;
             let activeConditionsHtml = '';
             c.conditions.forEach(cond => { 
