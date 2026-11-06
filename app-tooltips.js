@@ -9,6 +9,8 @@ function init(){
  document.addEventListener('mouseout',e=>{if(active&&!active.contains(e.relatedTarget))hide();});
  document.addEventListener('focusin',e=>show(e.target.closest('[data-tooltip]')));
  document.addEventListener('focusout',hide);document.addEventListener('pointerdown',hide,true);document.addEventListener('scroll',hide,true);window.addEventListener('resize',hide);document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
+ document.addEventListener('click',e=>{if(!matchMedia('(hover: none)').matches)return;const target=e.target.closest('button[data-tooltip]');if(target){if(active===target)hide();else show(target);}else hide();});
 }
 root.AppTooltips={place,init};if(typeof module!=='undefined')module.exports=root.AppTooltips;else init();
 })(typeof window==='undefined'?globalThis:window);
+
