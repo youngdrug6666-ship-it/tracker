@@ -13,8 +13,8 @@ async function advanceAfterEnd(entry){
  const index=list.findIndex(r=>r.id===entry.id);
  if(index<0||list.length<2){refreshPlayback();return;}
  const next=list[(index+1)%list.length];
- selected.music=next.id;kind='music';mixer.remove(entry.id);
- try{await mixer.toggle(next);pendingNext=null;status.textContent='Следующий трек: '+next.name;}
+ selected.music=next.id;kind='music';
+ try{await mixer.continueMusic(entry.id,next);pendingNext=null;status.textContent='Следующий трек: '+next.name;}
  catch{pendingNext=next.id;status.textContent='Браузер приостановил фоновое воспроизведение. Нажми ▶ для продолжения.';}
  refreshPlayback();
 }
