@@ -988,7 +988,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="player-display.js?v=states-9"></script>
 <script src="app-tooltips.js?v=2"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
-<script src="hero-card.js?v=compact-11"></script>
+<script src="hero-card.js?v=passive-12"></script>
 <script src="audio-mixer.js?v=6"></script>
 <script defer src="audio-player.js?v=mixer-10"></script>
 <link rel="stylesheet" href="audio-player.css?v=mixer-4">
@@ -2832,7 +2832,7 @@ function findSpellById(id) {
             const monsterSenses=monsterFull?extractString(monsterFull.senses):'';
             const monsterPassive=Number(monsterFull?.passivePerception)||Number(monsterSenses.match(/пассивн(?:ое|ый)\s+восприяти[ея]\s*(\d+)/i)?.[1]);
             const monsterSight=monsterSenses.match(/(?:т[её]мное зрение|darkvision)\s*(\d+)?\s*(?:фт|фут|ft|feet)?/i);
-            const cardSenses=c.isMonster?`${Number.isFinite(monsterPassive)&&monsterPassive>0?`<span title="Пассивное восприятие"><i class="fa-solid fa-eye"></i> Воспр. ${monsterPassive}</span>`:''}${monsterSight?`<span title="Тёмное зрение"><i class="fa-solid fa-moon"></i> Тёмное зрение${monsterSight[1]?' '+monsterSight[1]+' фт':''}</span>`:''}`:`<span title="Пассивное восприятие"><i class="fa-solid fa-eye"></i> Воспр. ${HeroCard.passivePerception(c)}</span>`;
+            const cardSenses=c.isMonster?`${Number.isFinite(monsterPassive)&&monsterPassive>0?`<span title="Пассивное восприятие"><i class="fa-solid fa-eye"></i> Воспр. ${monsterPassive}</span>`:''}${monsterSight?`<span title="Тёмное зрение"><i class="fa-solid fa-moon"></i> Тёмное зрение${monsterSight[1]?' '+monsterSight[1]+' фт':''}</span>`:''}`:`<button type="button" class="hero-passive" title="Пассивное восприятие · нажмите, чтобы изменить" aria-label="Изменить пассивное восприятие: ${HeroCard.passivePerception(c)}"><i class="fa-solid fa-eye"></i> Воспр. ${HeroCard.passivePerception(c)}</button>`;
             let statsHtml = '';
             if (!c.isMonster || ['str','dex','con','int','wis','cha'].every(k=>Number.isFinite(Number(c.stats?.[k]?.score)))) statsHtml = HeroCard.summaryStats(c);
             if(monsterFull){const defenses=[['damage_vulnerabilities','Уязвимости','fa-heart-crack','damage'],['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(monsterFull[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Уязвимости'?'Уязв.':label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
