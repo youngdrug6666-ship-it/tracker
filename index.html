@@ -906,6 +906,16 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 .combat-card .combat-select-label{width:22px;height:22px;min-height:0;padding:0;display:grid;place-items:center}
 .combat-card .combat-select{width:14px;height:14px}
 .combat-card .ally-toggle{width:22px;height:22px;min-height:0;padding:0;display:grid;place-items:center;border-radius:7px;font-size:10px}
+
+/* Custom selection control; native checkbox remains keyboard accessible. */
+.combat-card .combat-select-label{position:relative;border-radius:7px}
+.combat-card .combat-select{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;z-index:1;cursor:pointer}
+.combat-select-mark{display:grid;place-items:center;box-sizing:border-box;width:22px;height:22px;border:1px solid #73869d66;border-radius:7px;background:#203042;color:#8194ac;transition:background .15s,border-color .15s,color .15s}
+.combat-select-mark i{font-size:10px;opacity:.35}
+.combat-select-label:hover .combat-select-mark{border-color:#d5b96c;background:#344039}
+.combat-select:checked+.combat-select-mark{background:#b99c5f;border-color:#e5ca86;color:#17202c}
+.combat-select:checked+.combat-select-mark i{opacity:1}
+.combat-select:focus-visible+.combat-select-mark{outline:2px solid #f2d99b;outline-offset:2px}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -2912,7 +2922,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
                 <div class="card-content">
                     ${isCurrent?'<div class="turn-label"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> Сейчас ходит</div>':''}
                     <div class="combat-name-row">${c.isMonster?`<span class="monster-number" data-tooltip="Номер существа в текущем бою">№${c.monsterNumber}</span><button class="monster-knowledge" aria-pressed="${c.nameKnown===true}" aria-label="${c.nameKnown?'Скрыть название этого вида от игроков':'Раскрыть название этого вида игрокам'}" data-tooltip="${c.nameKnown?'Известное существо: нажми, чтобы скрыть этот вид':'Название скрыто от игроков: нажми, чтобы раскрыть весь вид'}"><i class="fa-solid ${c.nameKnown?'fa-eye':'fa-eye-slash'}"></i></button>`:''}<input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)"></div>
-                    <div class="card-header"><label class="combat-select-label" title="Выбрать для общего урона"><input type="checkbox" class="combat-select" data-id="${c.id}" ${selectedCombatants.has(c.id)?'checked':''} aria-label="Выбрать ${escapeHtml(c.name)} для общего урона"></label>${c.isMonster?`<button type="button" class="ally-toggle" data-id="${c.id}" aria-pressed="${!!c.isAlly}" aria-label="${c.isAlly?'Сделать врагом':'Сделать союзником'}" title="${c.isAlly?'Союзник · сделать врагом':'Враг · сделать союзником'}"><i class="fa-solid ${c.isAlly?'fa-handshake':'fa-khanda'}" aria-hidden="true"></i></button>`:''}
+                    <div class="card-header"><label class="combat-select-label" title="Выбрать для общего урона"><input type="checkbox" class="combat-select" data-id="${c.id}" ${selectedCombatants.has(c.id)?'checked':''} aria-label="Выбрать ${escapeHtml(c.name)} для общего урона"><span class="combat-select-mark" aria-hidden="true"><i class="fa-solid fa-check"></i></span></label>${c.isMonster?`<button type="button" class="ally-toggle" data-id="${c.id}" aria-pressed="${!!c.isAlly}" aria-label="${c.isAlly?'Сделать врагом':'Сделать союзником'}" title="${c.isAlly?'Союзник · сделать врагом':'Враг · сделать союзником'}"><i class="fa-solid ${c.isAlly?'fa-handshake':'fa-khanda'}" aria-hidden="true"></i></button>`:''}
                         <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе"><i class="fa-brands fa-buffer"></i></button>
                     </div>
                     <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; margin-top:4px;">
