@@ -92,6 +92,10 @@
         .info-burger:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); }
         .name-input { background: rgba(31, 42, 54, 0.85); border-radius: 40px; padding: 4px 10px; border: 1px solid #b38f48; width: 100%; color: white; font-weight: bold; font-size: 0.8rem; margin-bottom: 6px; }
         .race-class { font-size: 0.7rem; color: #f3e0b0; background: rgba(0,0,0,0.6); border-radius: 20px; padding: 2px 8px; cursor: help; }
+        .card-senses { display:flex; flex-wrap:wrap; gap:5px; margin:4px 0; }
+        .card-senses span, .card-senses button { display:inline-flex; align-items:center; gap:4px; border:1px solid #5d7180; border-radius:8px; background:rgba(18,33,45,.88); color:#e9f1e9; padding:3px 7px; font-family:inherit; font-size:11px; font-weight:600; line-height:1.3; min-height:26px; }
+        .card-senses button { cursor:help; }
+        @media (max-width:768px) { .card-senses span, .card-senses button { min-height:34px; font-size:12px; } }
         .stats-row { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.65rem; background: rgba(0,0,0,0.5); border-radius: 20px; padding: 3px 6px; justify-content: space-between; }
         .stat-item { display: inline-flex; align-items: center; gap: 2px; cursor: help; }
         .ac-badge { background: rgba(42, 53, 69, 0.85); border-radius: 40px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; }
@@ -980,11 +984,11 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="tracker-backup.js?v=1"></script>
 <script src="full-backup.js?v=1"></script>
 <script src="player-display.js?v=states-9"></script>
-<script src="app-tooltips.js?v=1"></script>
+<script src="app-tooltips.js?v=2"></script>
 <link rel="stylesheet" href="monster-builder.css?v=4">
-<script src="hero-card.js?v=hp-9"></script>
+<script src="hero-card.js?v=hp-10"></script>
 <script src="audio-mixer.js?v=4"></script>
-<script defer src="audio-player.js?v=mixer-8"></script>
+<script defer src="audio-player.js?v=mixer-9"></script>
 <link rel="stylesheet" href="audio-player.css?v=mixer-4">
 <script>
    (function(){
@@ -2817,8 +2821,16 @@ function findSpellById(id) {
             const isCurrent = idx === currentTurnIndex;
             let turnClass = isCurrent ? (c.isMonster ? 'current-turn-monster' : 'current-turn-hero') : '';
             const activeConds = c.conditions.size + (c.exhaustion > 0 ? 1 : 0);
-            const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<div class="race-class" data-tooltip="Раса: ${c.race || '?'} | Класс: ${c.class || '?'}">${c.race ? `<i class="fa-brands fa-critical-role"></i> ${escapeHtml(c.race)}` : ''} ${c.class ? `<i class="fa-solid fa-user-plus"></i> ${escapeHtml(c.class)}` : ''}</div>` : '';
+            const heroTraits=!c.isMonster?HeroCard.sensesAndDefenses(c):null;
+            const raceDefense=heroTraits?.resistances.length?`Сопротивление: ${heroTraits.resistances.join(', ')}`:'';
+            const raceImmunity=heroTraits?.poisonImmunity?'Иммунитет к урону ядом':'';
+            const raceTooltip=[`Раса: ${c.race||'не указана'}`,`Класс: ${c.class||'не указан'}`,raceDefense,raceImmunity].filter(Boolean).join(' · ');
+            const raceClassHtml = (!c.isMonster && (c.race || c.class)) ? `<button type="button" class="race-class" data-tooltip="${escapeHtml(raceTooltip)}" aria-label="${escapeHtml(raceTooltip)}">${c.race ? `<i class="fa-brands fa-critical-role"></i> ${escapeHtml(c.race)}` : ''} ${c.class ? `<i class="fa-solid fa-user-plus"></i> ${escapeHtml(c.class)}` : ''}</button>` : '';
             const monsterFull=c.isMonster&&monstersReady?fullMonstersMap.get(c.name.toLowerCase()):null;
+            const monsterSenses=monsterFull?extractString(monsterFull.senses):'';
+            const monsterPassive=Number(monsterFull?.passivePerception)||Number(monsterSenses.match(/пассивн(?:ое|ый)\s+восприяти[ея]\s*(\d+)/i)?.[1]);
+            const monsterSight=monsterSenses.match(/(?:т[её]мное зрение|darkvision)\s*(\d+)?\s*(?:фт|фут|ft|feet)?/i);
+            const cardSenses=c.isMonster?`${Number.isFinite(monsterPassive)&&monsterPassive>0?`<span title="Пассивное восприятие"><i class="fa-solid fa-eye"></i> Воспр. ${monsterPassive}</span>`:''}${monsterSight?`<span title="Тёмное зрение"><i class="fa-solid fa-moon"></i> Тёмное зрение${monsterSight[1]?' '+monsterSight[1]+' фт':''}</span>`:''}`:`<span title="Пассивное восприятие"><i class="fa-solid fa-eye"></i> Воспр. ${HeroCard.passivePerception(c)}</span>${heroTraits.darkvision?`<span title="${escapeHtml(heroTraits.darkvision)}"><i class="fa-solid fa-moon"></i> ${escapeHtml(heroTraits.darkvision)}</span>`:''}${raceDefense||raceImmunity?`<button type="button" data-tooltip="${escapeHtml([raceDefense,raceImmunity].filter(Boolean).join(' · '))}" aria-label="${escapeHtml([raceDefense,raceImmunity].filter(Boolean).join(' · '))}"><i class="fa-solid fa-shield-halved"></i> Защита</button>`:''}`;
             let statsHtml = '';
             if (!c.isMonster || ['str','dex','con','int','wis','cha'].every(k=>Number.isFinite(Number(c.stats?.[k]?.score)))) statsHtml = HeroCard.summaryStats(c);
             if(monsterFull){const defenses=[['damage_vulnerabilities','Уязвимости','fa-heart-crack','damage'],['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(monsterFull[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Уязвимости'?'Уязв.':label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
@@ -2865,7 +2877,7 @@ function findSpellById(id) {
                         </div>
                         <div style="display:flex; gap:2px;"><input class="init-input" data-id="${c.id}" value="${c.initiative}" data-tooltip="Инициатива"><button class="init-roll-btn" data-id="${c.id}" data-tooltip="Бросить 1d20 + бонус"><i class="fa-solid fa-dice-d20"></i> d20</button></div>
                     </div>
-                    ${raceClassHtml}${statsHtml}${spellHtml}
+                    ${raceClassHtml}<div class="card-senses">${cardSenses}</div>${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
                     <div class="active-conditions">${compactConditions(c)?'':activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
                     ${concentrationHtml}
@@ -3133,3 +3145,4 @@ function findSpellById(id) {
 <script src="turn-flames.js?v=portal-5"></script>
 </body>
 </html>
+
