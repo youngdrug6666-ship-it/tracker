@@ -17,6 +17,30 @@
     const mod = score => Math.floor((score-10)/2);
     const signed = n => (n >= 0 ? '+' : '') + n;
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function passivePerception(hero) {
+        const skill=hero.heroData?.skills?.perception || {};
+        const rank=skill.isProf===2?2:skill.isProf?1:0;
+        return 10 + (hero.stats?.wis?.mod ?? mod(num(hero.stats?.wis?.score,10)))
+            + rank*num(hero.proficiency ?? hero.heroControls?.proficiency,2) + num(skill.bonus);
+    }
+    function sheetText(value) {
+        if (!value || typeof value !== 'object') return '';
+        if (Array.isArray(value)) return value.map(sheetText).join(' ');
+        return (typeof value.text==='string'?value.text+' ':'')
+            + Object.entries(value).filter(([key])=>key!=='text').map(([,part])=>sheetText(part)).join(' ');
+    }
+    function sensesAndDefenses(hero) {
+        const race=String(hero.race||hero.heroData?.info?.race?.value||'').toLocaleLowerCase('ru');
+        const prose=sheetText(hero.heroData?.text||{}).replace(/\s+/g,' ');
+        const sight=prose.match(/т[её]мное зрение.{0,100}?(\d+)\s*(?:фт|фут|feet|ft)/i);
+        const racialSight=/(?:^|\W)(?:эльф|полуэльф|тифлинг|аасимар|гном|дварф|дворф|орк|полуорк)(?:\W|$)/i.test(race);
+        const darkvision=sight?'Тёмное зрение '+sight[1]+' фт':/т[её]мное зрение/i.test(prose)||racialSight?'Тёмное зрение':null;
+        const damage=[];
+        for(const [pattern,label] of [[/сопротивлени[ея].{0,35}урону\s+холодом/i,'холод'],[/сопротивлени[ея].{0,35}урону\s+огн[её]м/i,'огонь'],[/сопротивлени[ея].{0,35}урону\s+ядом/i,'яд'],[/сопротивлени[ея].{0,35}урону\s+некротическ/i,'некротический'],[/сопротивлени[ея].{0,35}урону\s+лучист/i,'лучистый']])if(pattern.test(prose))damage.push(label);
+        if(!damage.length){if(/(?:^|\W)тифлинг(?:\W|$)/i.test(race))damage.push('огонь');else if(/(?:^|\W)(?:дварф|дворф)(?:\W|$)/i.test(race))damage.push('яд');else if(/(?:^|\W)аасимар(?:\W|$)/i.test(race))damage.push('некротический','лучистый');}
+        const poisonImmunity=/иммунитет\s+к\s+урону\s+ядом/i.test(prose);
+        return {darkvision,resistances:[...new Set(damage)],poisonImmunity};
+    }
     function ensure(hero) {
         hero.stats ||= {};
         hero.heroData ||= {};
@@ -230,7 +254,8 @@
         card.querySelector('.hero-sheet')?.addEventListener('toggle',e=>{hero.heroPanelOpen=e.target.open;});
         card.addEventListener('dragstart',e=>{if(e.target.closest('input,button,select,summary,table'))e.preventDefault();});
     }
-    const api={ensure,recalculate,statInputs,panel,quick,summaryStats,slots,details,bind,weaponAttack,weaponDamage,itemTotal,saveValue,breakdown};
+    const api={ensure,recalculate,statInputs,panel,quick,summaryStats,slots,details,bind,weaponAttack,weaponDamage,itemTotal,saveValue,breakdown,passivePerception,sensesAndDefenses};
     root.HeroCard=api;
     if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:window);
+
