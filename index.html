@@ -875,6 +875,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 .legendary-resources{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.legendary-resources:empty{display:none}.legendary-resources>div{display:flex;align-items:center;gap:4px;background:#172333dd;border:1px solid #74658a;border-radius:8px;padding:3px 6px;font-size:10px}.legendary-resources button{background:#34465b;border:0;color:#eae4f6;border-radius:5px;width:20px;height:20px;cursor:pointer}.legendary-resources button:disabled{opacity:.35;cursor:default}
 .hero-condition-icons{gap:4px!important;background:transparent!important;padding:3px 0!important;border-radius:0!important}.hero-condition-icons .cond-item{width:26px;height:26px;display:grid;place-items:center;position:relative;padding:0;border:1px solid #64748b66;border-radius:8px;background:#111827bb!important;color:#a4adbd;font-size:12px;cursor:pointer}.hero-condition-icons .cond-item.active{background:#7545b2!important;color:#fff;border-color:#d0a5ff;box-shadow:0 0 8px #a855f755}.hero-condition-icons .cond-item small{position:absolute;right:1px;bottom:0;font-size:8px}.hero-condition-icons .cond-item:hover{border-color:#d0a5ff}.hero-portrait-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.hero-portrait-controls label{cursor:pointer}
 .hero-quick.hero-quick-compact{display:flex;flex-wrap:nowrap!important;gap:4px!important;width:100%;min-width:0}.hero-quick.hero-quick-compact button{flex:1 1 0;min-width:0;padding:4px 3px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.combat-card .name-input{padding-right:100px}.combat-select-label{display:grid;place-items:center;width:24px;height:24px;cursor:pointer}.combat-select{accent-color:#b38f48;width:16px;height:16px}.ally-toggle{width:24px;height:24px;padding:0;border:1px solid #728497;border-radius:6px;background:#243344;color:#d9e2ec;cursor:pointer}.ally-toggle[aria-pressed="true"]{background:#315d3e;color:#bde7a2}.combat-card.ally-card{border-left-color:#9bcd6c;background-color:rgba(32,60,42,.7)}.combat-card.batch-selected{outline:2px solid #e8c874;outline-offset:3px}#batchDamagePanel{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:8px 2px 14px;padding:10px 12px;border:1px solid #b38f48;border-radius:12px;background:#182633;color:#f4e9d5}#batchDamagePanel[hidden]{display:none}#batchDamagePanel label{display:flex;align-items:center;gap:6px}#batchDamagePanel input{width:76px;padding:6px;background:#101c27;color:white;border:1px solid #75879c;border-radius:6px}#batchDamagePanel button{padding:7px 10px;border:1px solid #8c7956;border-radius:7px;background:#3b4a3a;color:#fff;cursor:pointer}#batchDamagePanel small{flex-basis:100%;font-size:11px;color:#bdc8d3}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -894,15 +895,15 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
             <button class="btn btn-primary" id="sortInitBtn" data-tooltip="Сортировать по убыванию инициативы"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Сортировать по иниц</span></button>
             <button class="btn" id="undoCombatBtn" disabled aria-label="Отменить последнее действие"><i class="fa-solid fa-rotate-left"></i> Отменить</button>
             <button class="btn" id="rollAllInitBtn" style="background:#91220b;" data-tooltip="Один бросок инициативы для всех монстров с одинаковым названием"><span class="btn-label"><i class="fa-solid fa-hand-fist fa-icon"></i>Инициатива монстрам</span></button>
-            <button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
+            <button class="btn" id="rollEveryoneInitBtn" data-tooltip="Монстры — по группам, герои — отдельным броском"><span class="btn-label">🎲 Инициатива всем</span></button><button class="btn" id="toggleBtn" data-tooltip="Открыть бестиарий"><span class="btn-label"><i class="fa-solid fa-dragon fa-icon"></i>Бестиарий</span></button>
             <button class="btn" id="toggleSpellsBtn" data-tooltip="Все заклинания"><span class="btn-label"><i class="fa-solid fa-scroll fa-icon"></i>Заклинания</span></button>
-			<a href="translator.html" class="btn" style="background:#004687;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
+			
 
         </div>
             <div class="menu-wrapper">
                 <button class="btn" id="burgerMenuBtn" data-tooltip="Дополнительные действия"><span class="btn-label"><i class="fa-brands fa-buffer fa-icon"></i>Меню</span></button>
                 <div class="burger-menu" id="burgerMenu">
-                    <div class="burger-grid">
+                    <div class="burger-grid"><a href="translator.html" class="btn" style="background:#004687;"><span class="btn-label"><i class="fa-solid fa-book-skull fa-icon"></i>Переводчик</span></a>
                         <button class="btn" id="addHeroBtn" data-tooltip="Добавить нового героя вручную"><span class="btn-label"><i class="fa-solid fa-square-plus fa-icon"></i>Новый герой</span></button>
                         <button class="btn btn-danger" id="clearMonstersBtn" data-tooltip="Удалить всех монстров из боя"><span class="btn-label"><i class="fa-solid fa-broom fa-icon"></i>Очистить врагов</span></button>
                         <button class="json-import" id="importJsonBtn" data-tooltip="Импорт персонажа из JSON (Long Story Short)"><span class="btn-label"><i class="fa-solid fa-file-import fa-icon"></i>Импорт героя (JSON)</span></button>
@@ -996,6 +997,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
    (function(){
     // ========== Глобальные данные ==========
     let combatants = [];
+    const selectedCombatants=new Set();
     let activeHeroDetailsId=null;
     let nextId = 1;
     let currentTurnIndex = 0;
@@ -1107,6 +1109,7 @@ async function loadUuidMap() {
     function loadSession(sessionId) {
         if (!sessions[sessionId]) return;
         historyGeneration++;historyPending=false;
+        selectedCombatants.clear();
         currentSessionId = sessionId;
         const data = sessions[sessionId];
         knownMonsterTypes=Array.isArray(data.knownMonsterTypes)?data.knownMonsterTypes.filter(k=>typeof k==='string'):[];
@@ -2535,7 +2538,7 @@ function findSpellById(id) {
     function addHero() { 
         addCombatant({ name: `Герой ${nextId}`, race: "", class: "", ac: 14, hpFormula: "5d8+10", initBonus: 2, isMonster: false, maxHp: 30, stats: { str:{score:10,mod:0}, dex:{score:10,mod:0}, con:{score:10,mod:0}, int:{score:10,mod:0}, wis:{score:10,mod:0}, cha:{score:10,mod:0} } }); 
     }
-    function applyDamage(c, dmg) {
+    function applyDamage(c, dmg, defer=false) {
         dmg=Math.max(0,Math.floor(Number(dmg)||0));if(!dmg)return;
         let remaining=dmg;
         if(c.tempHp>0){const absorb=Math.min(c.tempHp,remaining);c.tempHp-=absorb;remaining-=absorb;addLog(c,`🛡️ Врем.ХП поглотило ${absorb}`);}
@@ -2545,8 +2548,15 @@ function findSpellById(id) {
             else{c.concentrationChecks||=[];c.concentrationChecks.push({damage:dmg,dc:Math.max(10,Math.floor(dmg/2))});}
         }
         addLog(c,`Урон ${dmg} → ❤️ ${c.currentHp}/${c.maxHp}`);
-        renderCombat();saveCurrentStateToSession();
+        if(!defer){renderCombat();saveCurrentStateToSession();}
     }
+    function updateBatchPanel(){
+let panel=document.getElementById('batchDamagePanel');
+if(!panel){panel=document.createElement('form');panel.id='batchDamagePanel';panel.innerHTML='<strong class="batch-count"></strong><label>Урон каждому <input name="damage" type="number" min="1" max="99999" step="1" required aria-label="Общий урон"></label><button type="submit">⚔ Нанести</button><button type="button" class="batch-clear">Снять выбор</button><small>Одинаковый урон каждому; сопротивления учитывайте вручную.</small>';document.getElementById('combatantsGrid').before(panel);panel.onsubmit=e=>{e.preventDefault();const damage=Number(panel.elements.damage.value);if(!Number.isInteger(damage)||damage<1||damage>99999)return;flushCombatHistory();for(const c of combatants)if(selectedCombatants.has(c.id))applyDamage(c,damage,true);renderCombat();saveCurrentStateToSession();};panel.querySelector('.batch-clear').onclick=()=>{selectedCombatants.clear();renderCombat();};}
+panel.hidden=!selectedCombatants.size;panel.querySelector('.batch-count').textContent='Выбрано: '+selectedCombatants.size;
+}
+document.addEventListener('change',e=>{if(!e.target.matches('.combat-select'))return;const id=Number(e.target.dataset.id);if(e.target.checked)selectedCombatants.add(id);else selectedCombatants.delete(id);e.target.closest('.combat-card').classList.toggle('batch-selected',e.target.checked);updateBatchPanel();});
+document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');if(!b)return;const c=combatants.find(c=>c.id===Number(b.dataset.id));if(!c||!c.isMonster)return;c.isAlly=!c.isAlly;addLog(c,c.isAlly?'⚑ Стал союзником':'⚑ Стал врагом');renderCombat();saveCurrentStateToSession();});
     function resolveConcentration(c,passed){
         const check=c.concentrationChecks?.shift();if(!check)return;
         if(!passed){SpellEffects.endConcentration(combatants,c);c.concentrationChecks=[];}
@@ -2572,8 +2582,9 @@ function findSpellById(id) {
         renderCombat(); 
         saveCurrentStateToSession(); 
     }
-    function rollGroupedMonsterInitiative() {
+    function rollGroupedMonsterInitiative(includeHeroes=false) {
         const groups = new Map();
+        if(includeHeroes)for(const c of combatants.filter(c=>!c.isMonster)){const roll=Math.floor(Math.random()*20)+1;c.initiative=roll+(Number(c.initBonus)||0);addLog(c,`🎲 Инициатива: ${roll} + ${Number(c.initBonus)||0} = ${c.initiative}`);}
         for (const c of combatants) {
             if (!c.isMonster) continue;
             const key = String(c.name || '').normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('ru');
@@ -2810,6 +2821,8 @@ function findSpellById(id) {
         CombatLabels.syncKnowledge(combatants,knownMonsterTypes);
         HagCoven.sync(combatants);
         const grid = document.getElementById('combatantsGrid');
+        for(const id of selectedCombatants)if(!combatants.some(c=>c.id===id))selectedCombatants.delete(id);
+        updateBatchPanel();
         SpellEffects.advance(combatants,currentRound);
         if (!combatants.length) { PlayerDisplay.publish(combatants,currentTurnIndex,currentRound);grid.innerHTML = '<div style="padding:60px;text-align:center;"><i class="fa-solid fa-user-plus"></i> Добавьте героев или монстров из бестиария</div>'; return; }
         SpellEffects.advance(combatants,currentRound);
@@ -2863,13 +2876,15 @@ function findSpellById(id) {
             let legendaryHtml='';
             if(monsterFull){const resources=MonsterMechanics.ensure(c,monsterFull,currentRound);legendaryHtml='<div class="legendary-resources">'+Object.entries(resources).map(([key,r])=>`<div><span data-tooltip="${key==='actions'?'Восстанавливаются в новом раунде':'Расходуются за день; восстановить можно кнопкой ↺'}">${key==='actions'?'Лег. действия':'Лег. сопротивл.'} <b>${r.max-r.used}/${r.max}</b></span><button class="legendary-spend" data-id="${c.id}" data-resource="${key}" ${r.used>=r.max?'disabled':''} data-tooltip="Потратить один заряд">−</button><button class="legendary-restore" data-id="${c.id}" data-resource="${key}" data-tooltip="Восстановить один заряд">+</button></div>`).join('')+'</div>';}
             let randomHpTooltip = c.hpFormula ? `Бросить ${c.hpFormula}` : 'Бросить ХП по формуле';
-            html += `<div class="combat-card ${c.isMonster ? 'monster-card' : 'hero-card'} ${turnClass}" data-combat-id="${c.id}">
+            html += `<div class="combat-card ${c.isMonster ? 'monster-card' : 'hero-card'} ${turnClass} ${c.isAlly?'ally-card':''} ${selectedCombatants.has(c.id)?'batch-selected':''}" data-combat-id="${c.id}">
                 ${c.avatar ? `<div class="card-bg" style="${bgStyle}"></div><div class="card-overlay"></div>` : ''}
                 ${isCurrent?'<div class="turn-flames" aria-hidden="true"></div>':''}
                 <div class="card-content">
                     ${isCurrent?'<div class="turn-label"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> Сейчас ходит</div>':''}
                     <div class="combat-name-row">${c.isMonster?`<span class="monster-number" data-tooltip="Номер существа в текущем бою">№${c.monsterNumber}</span><button class="monster-knowledge" aria-pressed="${c.nameKnown===true}" aria-label="${c.nameKnown?'Скрыть название этого вида от игроков':'Раскрыть название этого вида игрокам'}" data-tooltip="${c.nameKnown?'Известное существо: нажми, чтобы скрыть этот вид':'Название скрыто от игроков: нажми, чтобы раскрыть весь вид'}"><i class="fa-solid ${c.nameKnown?'fa-eye':'fa-eye-slash'}"></i></button>`:''}<input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)"></div>
                     <div class="card-header">
+<label class="combat-select-label" title="Выбрать для общего урона"><input type="checkbox" class="combat-select" data-id="${c.id}" ${selectedCombatants.has(c.id)?'checked':''} aria-label="Выбрать ${escapeHtml(c.name)}"></label>
+${c.isMonster?`<button type="button" class="ally-toggle" data-id="${c.id}" aria-pressed="${!!c.isAlly}" aria-label="${c.isAlly?'Сделать врагом':'Сделать союзником'}" title="${c.isAlly?'Союзник · сделать врагом':'Сделать союзником'}">⚑</button>`:''}
                         <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе"><i class="fa-brands fa-buffer"></i></button>
                     </div>
                     <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; margin-top:4px;">
@@ -2986,10 +3001,11 @@ function findSpellById(id) {
     document.getElementById('toggleSpellsBtn').onclick = showAllSpells;
     document.getElementById('sortInitBtn').onclick = sortByInitiative;
     document.getElementById('addHeroBtn').onclick = addHero;
-    document.getElementById('clearMonstersBtn').onclick = () => { combatants = combatants.filter(c => !c.isMonster); currentTurnIndex=0; renderCombat(); saveCurrentStateToSession(); };
+    document.getElementById('clearMonstersBtn').onclick = () => { combatants = combatants.filter(c => !c.isMonster || c.isAlly); currentTurnIndex=0; renderCombat(); saveCurrentStateToSession(); };
     document.getElementById('undoCombatBtn').onclick=undoCombatAction;
     document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&(e.code==='KeyZ'||['z','я'].includes(e.key.toLowerCase()))&&!e.shiftKey&&!e.target.closest('input,textarea,select,[contenteditable="true"]')){e.preventDefault();undoCombatAction();}});
-    document.getElementById('rollAllInitBtn').onclick = rollGroupedMonsterInitiative;
+    document.getElementById('rollAllInitBtn').onclick = () => rollGroupedMonsterInitiative(false);
+    document.getElementById('rollEveryoneInitBtn').onclick = () => rollGroupedMonsterInitiative(true);
     document.getElementById('nextTurnBtnTop').onclick = nextTurn;
     document.getElementById('prevTurnBtnTop').onclick = prevTurn;
     document.getElementById('nextRoundBtnTop').onclick = () => { currentRound++; document.getElementById('roundNumberTop').innerText = currentRound; addLog(combatants[0] || {log:[]}, `🌕 Раунд ${currentRound}`); renderCombat(); saveCurrentStateToSession(); };
