@@ -898,6 +898,14 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 #batchDamagePanel .batch-clear{width:34px;padding:0;background:transparent;color:#aab8c9;border-color:#74869b44}
 #batchDamagePanel .batch-note{flex-basis:100%;font-size:10px;color:#91a2b7;border-top:1px solid #8394ac22;padding-top:7px}
 @media(max-width:480px){#batchDamagePanel{gap:8px;padding:10px 12px;border-radius:12px}.batch-heading{gap:7px}.batch-symbol{width:28px;height:28px}.batch-heading strong{font-size:12px}.batch-heading small{display:none}.batch-controls{gap:5px}#batchDamagePanel input{width:64px}#batchDamagePanel button{padding:6px 8px}.combat-tools{min-height:32px}}
+
+/* Card actions occupy the existing name row without increasing card height. */
+.combat-card .card-header{gap:3px;align-items:center}
+.combat-card .name-input{padding-right:88px}
+.combat-card.hero-card .name-input{padding-right:60px}
+.combat-card .combat-select-label{width:22px;height:22px;min-height:0;padding:0;display:grid;place-items:center}
+.combat-card .combat-select{width:14px;height:14px}
+.combat-card .ally-toggle{width:22px;height:22px;min-height:0;padding:0;display:grid;place-items:center;border-radius:7px;font-size:10px}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -2904,7 +2912,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
                 <div class="card-content">
                     ${isCurrent?'<div class="turn-label"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> Сейчас ходит</div>':''}
                     <div class="combat-name-row">${c.isMonster?`<span class="monster-number" data-tooltip="Номер существа в текущем бою">№${c.monsterNumber}</span><button class="monster-knowledge" aria-pressed="${c.nameKnown===true}" aria-label="${c.nameKnown?'Скрыть название этого вида от игроков':'Раскрыть название этого вида игрокам'}" data-tooltip="${c.nameKnown?'Известное существо: нажми, чтобы скрыть этот вид':'Название скрыто от игроков: нажми, чтобы раскрыть весь вид'}"><i class="fa-solid ${c.nameKnown?'fa-eye':'fa-eye-slash'}"></i></button>`:''}<input class="name-input" data-field="name" data-id="${c.id}" value="${escapeHtml(c.name)}" data-tooltip="Имя персонажа (можно редактировать)"></div>
-                    <div class="card-header">
+                    <div class="card-header"><label class="combat-select-label" title="Выбрать для общего урона"><input type="checkbox" class="combat-select" data-id="${c.id}" ${selectedCombatants.has(c.id)?'checked':''} aria-label="Выбрать ${escapeHtml(c.name)} для общего урона"></label>${c.isMonster?`<button type="button" class="ally-toggle" data-id="${c.id}" aria-pressed="${!!c.isAlly}" aria-label="${c.isAlly?'Сделать врагом':'Сделать союзником'}" title="${c.isAlly?'Союзник · сделать врагом':'Враг · сделать союзником'}"><i class="fa-solid ${c.isAlly?'fa-handshake':'fa-khanda'}" aria-hidden="true"></i></button>`:''}
                         <button class="info-burger" data-id="${c.id}" data-tooltip="Подробная информация о существе"><i class="fa-brands fa-buffer"></i></button>
                     </div>
                     <div style="display:flex; justify-content:space-between; gap:6px; align-items:center; margin-top:4px;">
@@ -2916,7 +2924,6 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
                     </div>
                     ${raceClassHtml}<div class="card-senses">${cardSenses}</div>${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
-                    <div class="combat-tools"><label class="combat-select-label"><input type="checkbox" class="combat-select" data-id="${c.id}" ${selectedCombatants.has(c.id)?'checked':''} aria-label="Выбрать ${escapeHtml(c.name)} для общего урона"><span>Выбрать</span></label>${c.isMonster?`<button type="button" class="ally-toggle" data-id="${c.id}" aria-pressed="${!!c.isAlly}" aria-label="${c.isAlly?'Сделать врагом':'Сделать союзником'}" title="Нажмите, чтобы изменить сторону"><i class="fa-solid ${c.isAlly?'fa-handshake':'fa-khanda'}" aria-hidden="true"></i><span>${c.isAlly?'Союзник':'Враг'}</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>`:'<span class="combat-team-hero">Герой</span>'}</div>
                     <div class="active-conditions">${compactConditions(c)?'':activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
                     ${concentrationHtml}
                     <div class="hp-panel">
