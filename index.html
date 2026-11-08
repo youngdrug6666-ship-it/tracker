@@ -927,6 +927,15 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 .feat-entry p{font-size:12px;line-height:1.6;margin:9px 0}.feat-entry a{font-size:11px;color:#b7cbea;text-decoration:underline}.feat-entry .feat-ability-label{display:flex;gap:8px;align-items:center;margin:10px 0;font-size:12px}.feat-included-label{display:flex;align-items:center;gap:7px;font-size:11px;color:#b6c4d5;margin:12px 0}
 .feat-entry details{margin-top:10px}.feat-entry summary{cursor:pointer;font-size:12px;color:#d0b77d}.feat-effects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.feat-effects label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#b8c6d5}.feat-entry textarea{display:block;width:100%;min-height:65px;margin-top:5px}.feat-effect-summary{font-size:11px;padding:7px 9px;border-radius:7px;background:#45674433;color:#c2dbb4;margin:8px 0}.feat-empty{color:#9faec0;font-size:12px}
 @media(max-width:600px){.tracker-feats{padding:12px}.feat-add{grid-template-columns:1fr auto}.feat-add .feat-search{grid-column:1/-1}.feat-effects{grid-template-columns:repeat(2,minmax(0,1fr))}.feat-level{flex-wrap:wrap}}
+
+/* Keep each combat card at its natural compact height, independent of taller neighbours. */
+#combatantsGrid{align-items:start!important;grid-auto-rows:auto}
+#combatantsGrid>.combat-card{min-height:0!important;height:auto!important;align-self:start}
+#combatantsGrid>.combat-card>.card-content{height:auto!important;gap:3px}
+#combatantsGrid .log-area{margin-top:3px;padding:3px 6px}
+#combatantsGrid .card-senses{margin:2px 0}
+#combatantsGrid .card-senses span,#combatantsGrid .card-senses button{min-height:22px;padding:2px 6px;font-size:10px}
+#combatantsGrid .spell-slots{gap:4px 7px;padding:3px 6px;margin-top:2px}
 </style>
 <link rel="stylesheet" href="hero-card.css?v=4">
 </head>
@@ -1043,7 +1052,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="feat-rules.js?v=1"></script>
 <script src="hero-card.js?v=feats-13"></script>
 <script src="audio-mixer.js?v=6"></script>
-<script defer src="audio-player.js?v=mixer-10"></script>
+<script defer src="audio-player.js?v=folder-repeat-11"></script>
 <link rel="stylesheet" href="audio-player.css?v=mixer-4">
 <script>
    (function(){
