@@ -21,6 +21,9 @@ function prepare(pack,map,library,parseSlots,npcMap){
 }
 function resources(full,c,container,save,findSpell,showSpell){
  if(!full._supplementPack)return;
+ if(!document.getElementById('supplement-resource-style')){
+  const style=document.createElement('style');style.id='supplement-resource-style';style.textContent='.supplement-resources button{font:inherit;font-size:13px;color:#8bd9ed;background:#243748;border:1px solid #365168;border-radius:7px;padding:5px 8px;cursor:pointer}.supplement-resources button:hover{background:#304b60}.supplement-resources button:focus-visible{outline:2px solid #dac078;outline-offset:2px}.supplement-spell-group{display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;align-items:start;padding:12px;margin:8px 0;background:rgba(46,68,88,.2);border-radius:10px}.supplement-spell-group>strong{font-size:12px;color:#b9cad9;padding-top:5px}.supplement-spell-items{display:flex;flex-wrap:wrap;gap:8px}.supplement-spell-item{display:inline-flex;flex-wrap:wrap;gap:5px;align-items:center}@media(max-width:600px){.supplement-spell-group{grid-template-columns:1fr;gap:6px;padding:9px}.supplement-resources button{font-size:12px}}';document.head.append(style);
+ }
  const host=document.createElement('section');host.className='supplement-resources';
  host.style.cssText='margin:12px 0;padding:12px;border:1px solid #385065;border-radius:12px';
  const source=(full._sourceFiles||[]).map(s=>s.file+' · стр. '+s.page).filter((v,i,a)=>a.indexOf(v)===i);
@@ -34,13 +37,14 @@ function resources(full,c,container,save,findSpell,showSpell){
  }
  for(const [i,g] of (full.spellGroups||[]).entries()){
   const daily=g.label.match(/(\d+)\s*\/\s*(?:день|сутки)/i);
-  html+='<p><strong>'+esc(g.label)+'</strong></p>';
+  html+='<section class="supplement-spell-group"><strong>'+esc(g.label)+'</strong><div class="supplement-spell-items">';
   for(const [j,name] of g.spells.entries()){
    const key=i+':'+j,used=c?.supplementUses?.[key]||0,max=daily?Number(daily[1]):0;
-   html+='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0"><button data-spell-group="'+i+'" data-spell-index="'+j+'" style="color:#8bd9ed">'+esc(name.split(' / ')[0])+'</button>';
+   html+='<span class="supplement-spell-item"><button data-spell-group="'+i+'" data-spell-index="'+j+'">'+esc(name.split(' / ')[0])+'</button>';
    if(max&&c)html+='<span>'+Math.max(0,max-used)+' / '+max+'</span><button data-use="'+key+'" data-max="'+max+'" data-delta="1">−</button><button data-use="'+key+'" data-max="'+max+'" data-delta="-1">+</button>';
-   html+='</div>';
+   html+='</span>';
   }
+  html+='</div></section>';
  }
  if(!c&&(full.spellGroups?.length||Object.keys(full.spellSlots||{}).length))html+='<p><small>Добавь существо в бой, чтобы отмечать ячейки и дневные использования.</small></p>';
  host.innerHTML=html;container.prepend(host);
