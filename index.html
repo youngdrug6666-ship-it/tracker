@@ -1044,6 +1044,7 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="combat-history.js?v=1"></script>
 <script src="monster-builder.js?v=defenses-5"></script>
 <script src="monster-mechanics.js?v=3"></script>
+<script src="strahd-supplements.js?v=1"></script>
 <script src="tracker-backup.js?v=1"></script>
 <script src="full-backup.js?v=1"></script>
 <script src="player-display.js?v=states-9"></script>
@@ -1414,7 +1415,7 @@ function getFolderPlainName(type) {
             let html = '';
             filtered.forEach(m => {
                 html += `<div class="monster-item">
-                            <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} <i class="fa-solid fa-dice-d20"></i>+${m.initBonus} | CR ${m.cr}</span></div>
+                            <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} <i class="fa-solid fa-dice-d20"></i>+${m.initBonus} | CR ${m.cr??'—'}</span></div>
                             <button class="info-btn" ${monstersReady?'':'disabled'} data-name="${escapeHtml(m.name)}" data-tooltip="Подробная информация"><i class="fa-thin fa-dragon fa-icon"></i> Инфо</button>
                             <button class="add-btn" ${monstersReady?'':'disabled'} data-name="${escapeHtml(m.name)}" data-ac="${m.ac}" data-hpformula="${m.hpFormula}" data-init="${m.initBonus}" data-tooltip="Добавить в бой"><i class="fa-solid fa-plus fa-icon"></i> Добавить</button>
                          </div>`;
@@ -1431,7 +1432,7 @@ function getFolderPlainName(type) {
                 html += `<div class="folder-content collapsed" id="${folderId}">`;
                 groups[f].forEach(m => {
                     html += `<div class="monster-item">
-                                <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} <i class="fa-solid fa-dice-d20"></i>+${m.initBonus} | CR ${m.cr}</span></div>
+                                <div class="monster-info" data-name="${escapeHtml(m.name)}"><b>${escapeHtml(m.name)}</b><br><span style="font-size:0.7rem;">КД ${m.ac} ❤️ ${m.hpAvg} <i class="fa-solid fa-dice-d20"></i>+${m.initBonus} | CR ${m.cr??'—'}</span></div>
                                 <button class="info-btn" ${monstersReady?'':'disabled'} data-name="${escapeHtml(m.name)}" data-tooltip="Подробная информация"><i class="fa-thin fa-dragon fa-icon"></i> Инфо</button>
                                 <button class="add-btn" ${monstersReady?'':'disabled'} data-name="${escapeHtml(m.name)}" data-ac="${m.ac}" data-hpformula="${m.hpFormula}" data-init="${m.initBonus}" data-tooltip="Добавить в бой"><i class="fa-solid fa-plus fa-icon"></i> Добавить</button>
                              </div>`;
@@ -1945,14 +1946,13 @@ async function loadCustomMonstersTXT() {
     // ========== Поиск заклинания по русскому названию ==========
     function findSpellByName(rusName) {
         const aliases={'сопротивление':'resistance','указание':'guidance','наставление':'guidance','обнаружение яда и болезней':'detect poison and disease','приворот гуманоида':'charm person','паралич гуманоида':'hold person','полноценный образ':'major image','сила фантазма':'phantasmal force','полиглот':'tongues'};
-        const normalize=n=>String(n||'').toLowerCase().replace(/ё/g,'е').trim();
-        const lower = normalize(rusName), key=globalThis.FoundryData?.aliases?.[lower]||aliases[lower]||lower;
-        return allSpellsList.find(s => {
-            const fullName = s.spellName.toLowerCase();
-            const rusPart = fullName.split(/\s+\/\s+/)[0].trim();
-            return rusPart === lower || fullName === lower || fullName.split(/\s+\/\s+/).some(n=>normalize(n)===key);
-        });
+        const normalize=n=>String(n||'').toLowerCase().replace(/ё/g,'е').replace(/[’‘]/g,"'").replace(/\s+/g,' ').trim();
+        const variants=n=>String(n||'').split(/\s+\/\s+|,\s*/).map(normalize).filter(Boolean);
+        const keys=new Set(variants(rusName));
+        for(const key of [...keys]){const alias=globalThis.FoundryData?.aliases?.[key]||aliases[key];if(alias)keys.add(normalize(alias));}
+        return allSpellsList.find(s=>variants(s.spellName).some(n=>keys.has(n)));
     }
+
 function resolveUuid(id) {
     if (!id) return null;
     const cleanId = String(id).trim().split('.').pop();
@@ -2240,7 +2240,7 @@ function findSpellById(id) {
         }
         // Заклинания
         const spellsContainer = document.getElementById('spellsContainer');
-        const slots = parseSpellSlots(full.description || '');
+        const slots = {...parseSpellSlots(full.description || ''),...full.spellSlots};
         const casterEntries = ['features','actions','bonus_actions','reactions','legendary_actions'].flatMap(key=>full[key]||[]);
         const npcKeyForCaster = monsterName.toLowerCase().split('/')[0].trim();
         const isCaster = Object.keys(slots).length > 0 || (full.spells||[]).length > 0 || (npcSpellsMap.get(npcKeyForCaster)?.size||0)>0 || casterEntries.some(f=>/^(?:заклинания(?:\s|$|\()|spellcasting|врожд[её]нное колдовство|использование заклинаний)/i.test(f.name||''));
@@ -2336,6 +2336,8 @@ function findSpellById(id) {
             document.getElementById('detailHP').textContent=featTarget.currentHp+' / '+featTarget.maxHp;
             document.getElementById('detailStats').innerHTML=Object.entries({str:'СИЛ',dex:'ЛОВ',con:'ТЕЛ',int:'ИНТ',wis:'МДР',cha:'ХАР'}).map(([key,label])=>{const score=featTarget.stats?.[key]?.score??10;const mod=Math.floor((score-10)/2);return '<div class="monster-stat-cell"><span class="lbl">'+label+'</span><span class="val">'+score+' ('+(mod>=0?'+':'')+mod+')</span></div>';}).join('');
         }
+        if(full.spellGroups?.length)spellsContainer.innerHTML='';
+        StrahdSupplements.resources(full,featTarget,spellsContainer,()=>{renderCombat();saveCurrentStateToSession();},findSpellByName,showSpellDetail);
         document.getElementById('detailModal').style.display = 'flex';
     }
 
@@ -3227,7 +3229,16 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
         loadNPCSpells(),
         loadSpells(),
         loadUuidMap()   // <-- обязательно!
-     ]).then(() => {
+     ]).then(async () => {
+        try{
+            const response=await fetch('strahd-supplements.json?v=1');
+            if(!response.ok)throw new Error('HTTP '+response.status);
+            const report=StrahdSupplements.prepare(await response.json(),fullMonstersMap,monstersLibrary,parseSpellSlots,npcSpellsMap);
+            for(const full of report.records)registerCustomMonster(full);
+            const status=document.createElement('details');status.style.cssText='font-size:11px;margin:6px 0;color:#a9c6d9';
+            status.innerHTML='<summary>Допматериалы Страда · '+report.records.length+' существ</summary><p>ЛБ, LBH и Van Richten. Источники и страницы указаны в подробной информации.</p>'+(report.missing.length?'<p>Не найдены в базе: '+report.missing.map(r=>escapeHtml(r.baseName)).join(', ')+'</p>':'')+(report.unreadable.length?'<p>Не прочитан незавершённый файл «Врата Тсоленки» (.opdownload).</p>':'');
+            document.querySelector('.catalogue-tools').after(status);
+        }catch(error){console.error('Допматериалы Страда:',error);const status=document.createElement('p');status.textContent='Не удалось загрузить допматериалы Страда. Обнови страницу для повтора.';document.querySelector('.catalogue-tools').after(status);}
         monstersReady=true;loadSavedCustomMonsters();initFilters();renderBestiary();document.getElementById('addCustomMonsterBtn').disabled=false;
         renderCombat();saveCurrentStateToSession();
         adjustMobileSticky();
