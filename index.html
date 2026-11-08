@@ -3231,7 +3231,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
         loadUuidMap()   // <-- обязательно!
      ]).then(async () => {
         try{
-            const response=await fetch('strahd-supplements.json?v=1');
+            const response=await fetch('strahd-supplements.json?v=2');
             if(!response.ok)throw new Error('HTTP '+response.status);
             const report=StrahdSupplements.prepare(await response.json(),fullMonstersMap,monstersLibrary,parseSpellSlots,npcSpellsMap);
             for(const full of report.records)registerCustomMonster(full);
