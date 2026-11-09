@@ -1,0 +1,708 @@
+{
+  "version": 1,
+  "source": "https://spritepilot.com/free-game-assets/sound-effects",
+  "tracks": [
+    {
+      "id": "builtin-spritepilot-campfire",
+      "name": "Костёр — треск огня",
+      "folder": "Окружение",
+      "kind": "sound",
+      "url": "audio/sounds/Окружение/campfire.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-cave",
+      "name": "Пещера — подземный гул",
+      "folder": "Окружение",
+      "kind": "sound",
+      "url": "audio/sounds/Окружение/cave.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-forest",
+      "name": "Лес — дневная атмосфера",
+      "folder": "Окружение",
+      "kind": "sound",
+      "url": "audio/sounds/Окружение/forest.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-night",
+      "name": "Ночь — насекомые и шорохи",
+      "folder": "Окружение",
+      "kind": "sound",
+      "url": "audio/sounds/Окружение/night.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-ocean",
+      "name": "Море — прибой",
+      "folder": "Окружение",
+      "kind": "sound",
+      "url": "audio/sounds/Окружение/ocean.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-rain",
+      "name": "Дождь — ровный шум",
+      "folder": "Погода",
+      "kind": "sound",
+      "url": "audio/sounds/Погода/rain.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-river",
+      "name": "Река — течение воды",
+      "folder": "Окружение",
+      "kind": "sound",
+      "url": "audio/sounds/Окружение/river.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-wind",
+      "name": "Ветер — порывы",
+      "folder": "Погода",
+      "kind": "sound",
+      "url": "audio/sounds/Погода/wind.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-arrow-hit",
+      "name": "Стрела — попадание",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/arrow-hit.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-body-fall",
+      "name": "Падение тела",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/body-fall.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-bow-shot",
+      "name": "Лук — выстрел",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/bow-shot.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-kick",
+      "name": "Удар ногой",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/kick.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-punch",
+      "name": "Удар кулаком",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/punch.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-shield-block",
+      "name": "Щит — блок удара",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/shield-block.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-sword-clash",
+      "name": "Мечи — столкновение клинков",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/sword-clash.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-sword-swing",
+      "name": "Меч — взмах",
+      "folder": "Бой и оружие",
+      "kind": "sound",
+      "url": "audio/sounds/Бой и оружие/sword-swing.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-bat-wings",
+      "name": "Летучие мыши — взмахи крыльев",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/bat-wings.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-creature-squeak",
+      "name": "Мелкое существо — писк",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/creature-squeak.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-dragon-roar",
+      "name": "Дракон — рёв",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/dragon-roar.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-insect-buzz",
+      "name": "Насекомые — жужжание",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/insect-buzz.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-monster-growl",
+      "name": "Чудовище — рычание",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/monster-growl.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-slime",
+      "name": "Слизь — хлюпанье",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/slime.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-wolf-howl",
+      "name": "Волк — вой",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/wolf-howl.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-zombie-groan",
+      "name": "Зомби — стон",
+      "folder": "Существа",
+      "kind": "sound",
+      "url": "audio/sounds/Существа/zombie-groan.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-crate-break",
+      "name": "Ящик — разбивание дерева",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/crate-break.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-debris-crash",
+      "name": "Обвал — камни и обломки",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/debris-crash.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-explosion-big",
+      "name": "Взрыв — мощный",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/explosion-big.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-explosion-distant",
+      "name": "Взрыв — вдали",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/explosion-distant.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-explosion-small",
+      "name": "Взрыв — небольшой",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/explosion-small.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-glass-shatter",
+      "name": "Стекло — разбивание",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/glass-shatter.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-heavy-thud",
+      "name": "Тяжёлый предмет — падение",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/heavy-thud.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-metal-impact",
+      "name": "Металл — звонкий удар",
+      "folder": "Разрушения",
+      "kind": "sound",
+      "url": "audio/sounds/Разрушения/metal-impact.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-click",
+      "name": "Щелчок механизма",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/click.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-confirm",
+      "name": "Подтверждение",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/confirm.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-error",
+      "name": "Ошибка — сигнал отказа",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/error.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-menu-close",
+      "name": "Закрытие — короткий сигнал",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/menu-close.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-menu-open",
+      "name": "Открытие — короткий сигнал",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/menu-open.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-notification",
+      "name": "Уведомление — звонок",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/notification.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-tap",
+      "name": "Лёгкий стук",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/tap.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-toggle",
+      "name": "Переключатель",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/toggle.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-fireball",
+      "name": "Огненный шар",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/fireball.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-heal",
+      "name": "Лечение — магический эффект",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/heal.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-ice",
+      "name": "Лёд — замораживание",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/ice.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-lightning",
+      "name": "Молния — разряд",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/lightning.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-portal",
+      "name": "Портал — магический гул",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/portal.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-potion",
+      "name": "Зелье — выпить",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/potion.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-spell-cast",
+      "name": "Заклинание — сотворение",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/spell-cast.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-teleport",
+      "name": "Телепортация",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/teleport.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-alarm",
+      "name": "Тревога — сигнал",
+      "folder": "События",
+      "kind": "sound",
+      "url": "audio/sounds/События/alarm.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-clock-tick",
+      "name": "Часы — тиканье",
+      "folder": "Механизмы и сигналы",
+      "kind": "sound",
+      "url": "audio/sounds/Механизмы и сигналы/clock-tick.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-countdown",
+      "name": "Обратный отсчёт",
+      "folder": "События",
+      "kind": "sound",
+      "url": "audio/sounds/События/countdown.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-game-over",
+      "name": "Поражение — короткий сигнал",
+      "folder": "События",
+      "kind": "sound",
+      "url": "audio/sounds/События/game-over.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-level-complete",
+      "name": "Задача выполнена — сигнал",
+      "folder": "События",
+      "kind": "sound",
+      "url": "audio/sounds/События/level-complete.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-victory",
+      "name": "Победа — короткий сигнал",
+      "folder": "События",
+      "kind": "sound",
+      "url": "audio/sounds/События/victory.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-dash",
+      "name": "Рывок — свист воздуха",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/dash.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-jump",
+      "name": "Прыжок",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/jump.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-ladder",
+      "name": "Лестница — подъём",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/ladder.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-land",
+      "name": "Приземление",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/land.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-splash",
+      "name": "Всплеск воды",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/splash.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-steps-grass",
+      "name": "Шаги по траве",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/steps-grass.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-steps-stone",
+      "name": "Шаги по камню",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/steps-stone.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-steps-wood",
+      "name": "Шаги по дереву",
+      "folder": "Передвижение",
+      "kind": "sound",
+      "url": "audio/sounds/Передвижение/steps-wood.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-chest-open",
+      "name": "Сундук — открытие",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/chest-open.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-coin-bell",
+      "name": "Монета — звон",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/coin-bell.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-coin-drop",
+      "name": "Монета — падение",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/coin-drop.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-coin-glockenspiel",
+      "name": "Сокровище — перелив",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/coin-glockenspiel.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-gem",
+      "name": "Драгоценный камень — находка",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/gem.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-health",
+      "name": "Восстановление сил — сигнал",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/health.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-key",
+      "name": "Ключ — находка",
+      "folder": "Предметы и сокровища",
+      "kind": "sound",
+      "url": "audio/sounds/Предметы и сокровища/key.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-power-up",
+      "name": "Усиление — магический сигнал",
+      "folder": "Магия",
+      "kind": "sound",
+      "url": "audio/sounds/Магия/power-up.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-energy-charge",
+      "name": "Энергия — накопление",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/energy-charge.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-force-field",
+      "name": "Силовое поле — гул",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/force-field.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-laser-heavy",
+      "name": "Энергетическое орудие — выстрел",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/laser-heavy.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-laser-shot",
+      "name": "Энергетический луч — выстрел",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/laser-shot.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-ray-gun",
+      "name": "Лучевой артефакт — выстрел",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/ray-gun.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-reload",
+      "name": "Арбалет или механизм — перезарядка",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/reload.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-robot-servo",
+      "name": "Механический страж — сервопривод",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/robot-servo.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "builtin-spritepilot-shield-hit",
+      "name": "Энергетический щит — удар",
+      "folder": "Артефакты и техника",
+      "kind": "sound",
+      "url": "audio/sounds/Артефакты и техника/shield-hit.ogg",
+      "source": "SpritePilot",
+      "license": "CC0-1.0"
+    }
+  ]
+}

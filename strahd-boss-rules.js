@@ -1,6 +1,6 @@
 (function(root){'use strict';
 function ensure(c){const s=c.strahdBoss||={};Object.assign(s,{armor:!!s.armor,armorHp:Math.max(0,Number(s.armorHp)||0),heartExists:!!s.heartExists,heartHp:Math.max(0,Number(s.heartHp)||0)});return s;}
-function isStrahd(c){return !!c&&/^(?:страд(?:\s+фон\s+зарович)?)(?:\s*\/|\s*·|$)|\/\s*strahd(?:\s+von\s+zarovich)?(?:\s*·|$)/i.test(c.name||'');}
+function isStrahd(c){return !!c&&/^(?:страд(?:\s+фон\s+зарович)?)(?:\s*\/|\s*·|$)|\/\s*strahd(?:\s+von\s+zarovich)?(?:\s*·|$)/i.test(c.sourceName||c.name||'');}
 function armor(c,on){const s=ensure(c);if(!!on===s.armor)return s;if(on){if(s.armorUsed&&s.armorHp<=0)return s;s.armorBaseAc=c.ac;s.armorUsed=true;if(s.armorHp<=0)s.armorHp=150;s.armor=true;c.ac=21;}else{s.armor=false;if(s.armorBaseAc!==undefined)c.ac=s.armorBaseAc;}return s;}
 function dawn(c){const s=ensure(c);armor(c,false);s.armorHp=150;s.armorUsed=false;return s;}
 function heart(c,on){const s=ensure(c);if(!s.heartInitialized&&on){s.heartHp=100;s.heartInitialized=true;}s.heartExists=!!on;return s;}

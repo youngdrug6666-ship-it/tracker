@@ -4,7 +4,7 @@ function ensure(all){
  const groups=new Map();
  for(const c of all){
   if(!c.isMonster)continue;
-  const key=String(c.name||'Существо').trim().toLowerCase();
+  const key=String(c.sourceName||c.name||'Существо').trim().toLowerCase();
   if(c.monsterNumberGroup!==key){delete c.monsterNumber;c.monsterNumberGroup=key;}
   if(!groups.has(key))groups.set(key,[]);
   groups.get(key).push(c);
@@ -15,7 +15,7 @@ function ensure(all){
   for(const c of members)if(!c.monsterNumber){let n=1;while(used.has(n))n++;c.monsterNumber=n;used.add(n);}
  }
 }
-function typeKey(c){return String(c?.name||'Существо').normalize('NFKC').trim().toLowerCase();}
+function typeKey(c){return String(c?.sourceName||c?.name||'Существо').normalize('NFKC').trim().toLowerCase();}
 function publicLabel(c){return c?.isMonster&&c.nameKnown!==true?'Неизвестное существо'+(c.monsterNumber?' №'+c.monsterNumber:''):label(c);}
 function syncKnowledge(all,known){const keys=new Set(known);for(const c of all)if(c.isMonster)c.nameKnown=keys.has(typeKey(c));}
 function toggleKnowledge(all,c,known){const key=typeKey(c),keys=new Set(known);if(keys.has(key))keys.delete(key);else keys.add(key);const result=[...keys];syncKnowledge(all,result);return result;}

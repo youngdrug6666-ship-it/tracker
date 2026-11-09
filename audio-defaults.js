@@ -1,0 +1,4 @@
+(function(root){'use strict';
+async function install(manifest,existing,imported,fetchBlob,write,onSaved=()=>{}){const done=new Set(imported),present=new Set(existing);const pending=manifest.tracks.filter(t=>!present.has(t.id)&&!done.has(t.id));let cursor=0,count=0;const results=await Promise.allSettled(Array.from({length:Math.min(4,pending.length)},async()=>{while(cursor<pending.length){const track=pending[cursor++],blob=await fetchBlob(track.url);if(!blob?.size)throw Error('Пустой аудиофайл: '+track.name);await write({...track,blob});done.add(track.id);count++;onSaved(track.id);}}));const failed=results.find(r=>r.status==='rejected');if(failed)throw failed.reason;return count;}
+root.AudioDefaults={install};if(typeof module!=='undefined')module.exports=root.AudioDefaults;
+})(typeof globalThis==='undefined'?window:globalThis);

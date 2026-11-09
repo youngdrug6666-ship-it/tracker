@@ -1,0 +1,12 @@
+SpritePilot Sound Effects Pack, license
+
+CC0 1.0 Universal (public domain dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+To the extent possible under law, SpritePilot has waived all copyright and
+related or neighboring rights to the sound files in this pack. You can copy,
+modify, distribute and use them, even for commercial purposes, all without
+asking permission. Credit is not required.
+
+The full legal code is at:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
