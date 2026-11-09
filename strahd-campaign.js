@@ -1,0 +1,110 @@
+(function(root){'use strict';
+const R=root.StrahdBossRules||(typeof require==='function'?require('./strahd-boss-rules.js'):null);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const entry=(name,description)=>({name,description:'<p>'+description+'</p>'});
+const bookNames=['Золотой храм заговоров','Книга начинающего мага','Ослепительный мастер','Заклинания третьего круга','Заклинания четвёртого круга','Могущественные заклинания'];
+const lists=[
+['chill touch','control flames','create bonfire','fire bolt','frostbite','infestation','lightning lure','mind sliver','minor illusion','prestidigitation','ray of frost','shocking grasp','toll the dead'],
+['absorb elements','alarm','burning hands','catapult','chromatic orb','detect magic','disguise self','expeditious retreat','fog cloud',"Tasha's hideous laughter",'ice knife','magic missile','shield','sleep'],
+["Aganazzar's scorcher",'alter self',"Nystul's magic aura",'blindness/deafness','blur','cloud of daggers','continual flame','crown of madness','darkness','earthbind','flaming sphere','gust of wind','hold person','levitate','magic mouth',"Maximilian's earthen grasp",'mirror image','misty step','phantasmal force','see invisibility','shadow blade','shatter','suggestion',"Tasha's mind whip",'web'],
+['counterspell','dispel magic','enemies abound','fear','fireball','fly','glyph of warding','haste','hypnotic pattern','lightning bolt','nondetection','protection from energy','sleet storm','slow','spirit shroud','stinking cloud','summon lesser demons','summon shadowspawn','summon undead','thunder step','vampiric touch'],
+['blight',"Evard's black tentacles",'confusion','dimension door',"Mordenkainen's faithful hound",'fire shield','greater invisibility','hallucinatory terrain','ice storm','phantasmal killer','polymorph',"Otiluke's resilient sphere",'sickening radiance','summon aberration','summon construct','summon greater demon','wall of fire'],
+['animate objects','cloudkill','cone of cold','danse macabre','dominate person','dream','far step','geas','immolation','infernal calling','mislead','modify memory','scrying','seeming','steel wind strike','synaptic static','telekinesis','teleportation circle','wall of force']
+];
+const books=lists.map((spells,level)=>({name:bookNames[level],level,spells}));
+const defaultPrepared=['absorb elements','magic missile','shield','fog cloud','mirror image','misty step','hold person','suggestion','counterspell','dispel magic','fireball','hypnotic pattern','slow','dimension door','greater invisibility','polymorph','sickening radiance','cone of cold','steel wind strike','wall of force'];
+const actions={
+whisper:{name:'Шёпот кошмара',cost:1,text:'Существо в пределах 60 фт.: спасбросок Мудрости Сл 15. Провал: 2d6 психического урона; успех: половина. Голос погибшего близкого и чёрные нити под кожей.'},
+slide:{name:'Скользящая тень',cost:1,text:'Одна карга перемещается на 20 фт., не провоцируя атак по возможности. Обычное перемещение: не телепортация и не прохождение сквозь стены.'},
+protect:{name:'Сестринская защита',cost:2,text:'Другая участница шабаша в пределах 30 фт. получает 15 временных хитов до начала следующего хода Морганты. Временные хиты не складываются.'},
+grasp:{name:'Хватка проклятой земли',cost:2,text:'Один противник в пределах 30 фт.: спасбросок Силы Сл 15. При провале скорость 0 и нельзя совершать реакции до начала его следующего хода. Не паралич.'},
+scream:{name:'Вопль сотни душ',cost:3,text:'Один раз за сражение, пока живы все три карги. Выбранные существа в радиусе 15 фт. от точки в пределах 60 фт.: спасбросок Мудрости Сл 15. Провал: 4d6 психического урона; успех: половина.'}
+};
+const lair=[
+['Кровавые жернова','Спасбросок Ловкости Сл 15; при провале 2d6 рубящего урона и падение ничком.'],
+['Похищенные сны','Спасбросок Мудрости Сл 15; при провале помеха на следующую атаку до конца следующего хода.'],
+['Костяная пыль','Область радиусом 10 фт. сильно заслонена до следующей инициативы 20.'],
+['Схватившие руки','Участок 10 × 10 фт. становится труднопроходимым до следующей инициативы 20.']
+];
+function role(c){if(c?.covenRole)return c.covenRole;const n=String(c?.name||'');return /Морганта.*Мать Кошмаров/i.test(n)?'morgantha':/Сестра Кривошея/i.test(n)?'control':/Мать Безглазая/i.test(n)?'defense':null;}
+function group(c,all){if(!role(c))return [];if(c.covenGroup)return all.filter(x=>x.covenGroup===c.covenGroup&&role(x));const candidates=all.filter(x=>role(x));const mother=candidates.find(x=>role(x)==='morgantha');if(!mother)return [];return ['morgantha','control','defense'].map(r=>candidates.find(x=>role(x)===r)).filter(Boolean);}
+function poolFor(c,all){const g=group(c,all),m=g.find(x=>role(x)==='morgantha');if(!m)return null;m.covenBoss||={used:0,screamUsed:false,wards:[20,20,20],lairEnabled:false};return {members:g,mother:m,pool:m.covenBoss};}
+function state(c,all){const data=poolFor(c,all);if(!data)return {max:0,spells:false,allowed:[]};return R.covenState(data.members.map(x=>({...x,covenRole:role(x)})));}
+function augment(map,library,parseSlots=()=>({})){
+ const records=[],night=[...map.values()].find(m=>/\/\s*Night Hag\s*$/i.test(m.name));
+ if(night){
+  const specs=[['Морганта — Мать Кошмаров · Домашний шабаш (карга)','morgantha',160,'Командует шабашем, внушает кошмары и удерживает общий резерв легендарных действий.'],['Сестра Кривошея · Домашний шабаш (карга)','control',105,'Старая союзница Морганты. Удерживает героев на расстоянии и контролирует передвижение.'],['Мать Безглазая · Домашний шабаш (карга)','defense',105,'Старая союзница Морганты. Защищает союзниц, насылает проклятия и мешает заклинателям.']];
+  for(const [name,covenRole,hp,description] of specs){const m=structuredClone(night),row=library.find(x=>x.name===night.name);Object.assign(m,{name,baseName:name,ac:17,hpAvg:hp,hpFormula:String(hp),hp:String(hp),initBonus:row?.initBonus??m.stats?.dex?.mod??0,covenRole,_customMonster:true,_supplementPack:'strahd-homebrew-v1',source:'Домашний шабаш Морганты',_sourceFiles:[],_sourceNotes:['Домашние характеристики, заданные мастером; не официальный статблок.'],legendaryResistanceCount:covenRole==='morgantha'?2:0,legendaryCount:0,legendary_actions:[],lair_actions:lair.map(([name,text],i)=>entry((i+1)+'. '+name,text)),spellSlots:{}});
+   m.features=(m.features||[]).filter(e=>!/легендарн(?:ое сопротивление|ая устойчивость)/i.test(e.name));m.features.push(entry('Роль в усиленном шабаше',description),entry('Общий запас легендарных действий','Общие 3 заряда на весь шабаш, восстановление в начале хода Морганты. После гибели союзницы только Морганта получает 2 заряда. Без Морганты легендарные действия прекращаются. После гибели любой карги общие заклинания недоступны.'));
+   if(covenRole==='morgantha')m.features.push(entry('Легендарное сопротивление (2/день)','При провале спасброска Морганта может вместо этого преуспеть.'));
+   m.features.push(...Object.values(actions).map(a=>entry(a.name+' ('+a.cost+' общ. заряд'+(a.cost===1?'':'а')+')',a.text)));
+   if(covenRole==='control')m.spells=['hold person','web','slow'];if(covenRole==='defense')m.spells=['counterspell','bestow curse','dispel magic'];if(covenRole==='morgantha')m.spells=['magic missile','sleep','ray of enfeeblement'];
+   m.features.push(entry('Ролевые заклинания','Рекомендуемые заклинания роли используют общий запас ячеек шабаша; вне действующего шабаша недоступны.'));records.push(m);
+  }
+ }
+ for(const full of map.values())if(R.isStrahd(full)&&!/(?:armor|доспех|броня)/i.test(full.name)){
+  full._strahdBooks=structuredClone(books);full.spells=[...new Set([...(full.spells||[]),...lists[0],...defaultPrepared])];full.spellSaveDC=full.spellSaveDC||20;full.spellAttack=full.spellAttack||10;
+  if(!full._supplementPack){const copy=structuredClone(full),row=library.find(m=>m.name===full.name);copy.name='Страд фон Зарович · ЛБ';copy._customMonster=true;copy._supplementPack='strahd-homebrew-v1';copy.source='ЛБ · Руководство по Страду';copy._sourceFiles=[{file:'ЛБ (Проклятье Страда) Руководство по Страду фон Заровичу Pyram King.pdf',page:16},{file:'ЛБ (Проклятье Страда) Руководство по Страду фон Заровичу Pyram King.pdf',page:21}];copy.hpFormula=row?.hpFormula||copy.hpFormula||String(copy.hpAvg||copy.hp||144);copy.initBonus=row?.initBonus??copy.stats?.dex?.mod??4;copy.spellSlots={...parseSlots(full.description||''),...copy.spellSlots};for(const f of copy.features||[])if(/заклинан|spellcasting|колдовство/i.test(f.name))Object.assign(copy.spellSlots,parseSlots(f.description||''));if(!Object.keys(copy.spellSlots).length)copy.spellSlots=Object.fromEntries([4,3,3,3,1].map((max,i)=>[i+1,{max,used:0}]));if(!records.some(m=>m.name===copy.name))records.push(copy);}
+ }
+ return records;
+}
+function sync(c,full,all,round){
+ if(full?.covenRole)c.covenRole=full.covenRole;
+ if(R.isStrahd(c)){const s=R.ensure(c);if(s.armor&&s.armorHp<=0)R.armor(c,false);if(s.armor)c.ac=21;}
+ const data=poolFor(c,all);if(data){const st=state(c,all);data.pool.used=Math.max(0,Math.min(st.max,Number(data.pool.used)||0));if(!st.spells)for(const m of data.members)for(const key of Object.keys(m.spellSlots||{}))if(key.startsWith('coven-'))delete m.spellSlots[key];}
+}
+function damage(c,amount,all){return R.isStrahd(c)?R.absorb(c,amount).remaining:amount;}
+function startTurn(c,all,round){
+ if(R.isStrahd(c)){const s=R.ensure(c);if(s.lastHealRound!==round){s.lastHealRound=round;R.regenerate(c);}}
+ if(role(c)==='morgantha'){const data=poolFor(c,all);if(data&&data.pool.lastResetRound!==round){data.pool.lastResetRound=round;data.pool.used=0;for(const member of data.members){const mark=member.covenProtection;if(mark){member.tempHp=Math.max(0,(Number(member.tempHp)||0)-Math.max(0,Number(mark.remaining)||0));delete member.covenProtection;}}}}
+ for(const x of all)if(x.covenGrasp&&String(x.id)===String(c.id)){if(x.speed===0)x.speed=x.covenGrasp.speed;x.reactionsBlocked=x.covenGrasp.reactionsBlocked;delete x.covenGrasp;}
+}
+function applyGrasp(target){if(!target)return;target.covenGrasp||={speed:target.speed,reactionsBlocked:!!target.reactionsBlocked};target.speed=0;target.reactionsBlocked=true;}
+function onTempDamage(c,before,after){if(c.covenProtection)c.covenProtection.remaining=Math.max(0,c.covenProtection.remaining-Math.max(0,before-after));}
+function defenses(c,base={}){const s=R.isStrahd(c)?R.ensure(c):null;if(!s?.armor)return base;const append=(old,list)=>[String(old||''),...list].filter(Boolean).join(', ');return {...base,damage_resistances:append(base.damage_resistances,['холод','огонь','излучение']),damage_immunities:append(base.damage_immunities,['молния','яд'])};}
+function ensureStyle(){if(document.getElementById('strahd-campaign-style'))return;const s=document.createElement('style');s.id='strahd-campaign-style';s.textContent='.campaign-panel{padding:14px;margin:12px 0;border:1px solid #5d547a;border-radius:12px;background:#152231}.campaign-panel button,.campaign-panel select,.campaign-panel input{font:inherit;color:#b9e8f4;background:#243748;border:1px solid #405b70;border-radius:7px;padding:6px 9px;margin:3px;max-width:100%}.campaign-panel button:disabled{opacity:.45;cursor:not-allowed}.campaign-panel .campaign-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0}.campaign-panel small{color:#b6c8d6}.campaign-panel summary{cursor:pointer;padding:5px}.campaign-panel .campaign-spells{display:flex;flex-wrap:wrap;gap:5px}.campaign-panel h4{margin:9px 0 5px}.campaign-panel p{margin:7px 0}';document.head.append(s);}
+function spellLink(name,findSpell){const s=findSpell?.(name);return {spell:s,label:s?(s.spellName||s.name||name).split(/\s+\/\s+/)[0]:name};}
+function panel(full,c,host,all,save,findSpell,showSpell,round=0){
+ if(!R.isStrahd(full)&&!role(full)&&!role(c))return;ensureStyle();const el=document.createElement('section');el.className='campaign-panel';
+ const refresh=()=>{save?.();el.remove();panel(full,c,host,all,save,findSpell,showSpell,round);};
+ if(R.isStrahd(full)){
+  const s=c?R.ensure(c):null,prepared=c?(c.strahdPrepared||=defaultPrepared.slice()):defaultPrepared.slice();
+  let html='<h3>Броня Страда и Сердце скорби</h3>';
+  if(c)html+='<p><strong>Броня '+s.armorHp+'/150</strong> · <strong>Сердце '+s.heartHp+'/100</strong></p><div class="campaign-row"><button data-boss="armor" '+(s.armorUsed&&s.armorHp<=0?'disabled':'')+'>'+(s.armor?'Снять броню':'Надеть броню')+'</button><button data-boss="heart">'+(s.heartExists?'Отключить связь с сердцем':'Подключить сердце')+'</button><button data-boss="dawn">Новый рассвет: восстановить броню</button><button data-boss="repair">Восстановить уничтоженное сердце</button></div>';
+  else html+='<p><small>Добавьте Страда в бой, чтобы управлять бронёй и сердцем.</small></p>';
+  html+='<p>'+(s?.armor?'<strong>Броня надета.</strong> ':'')+'КД 21; сопротивление холоду, огню и излучению; иммунитет молнии и яду. Отдельный запас брони 150 ХП. При его исчерпании броня спадает, все её эффекты прекращаются до следующего рассвета.</p>';
+  if(s?.armor)html+='<h4>Действие брони на инициативе Страда</h4><p><strong>Шокирующий разряд.</strong> Дальняя атака заклинанием: +10, дальность 60 фт., одна цель. Попадание: 10 (3d6) молнией. Преимущество против цели в металлической броне.</p>';
+  html+='<p>Сердце скорби принимает урон первым (100 ХП), затем броня, затем обычные временные хиты и хиты Страда. Живое подключённое сердце лечит Страда на 30 в начале его хода, не выше максимума. Разрушенное сердце не лечит. Переключение связи не восстанавливает хиты сердца.</p><h3>Книги заклинаний Страда</h3><p>Источник: «Руководство по Страду фон Заровичу», PDF стр. 16. Шесть книг, включая «Могущественные заклинания» 5-го уровня.</p><p><strong>Подготовлено '+prepared.length+' / 20</strong> · заговоры не занимают лимит.</p>';
+  html+='<details open><summary>Подготовленные заклинания</summary><div class="campaign-spells">'+prepared.map(n=>'<button data-show-spell="'+esc(n)+'">'+esc(spellLink(n,findSpell).label)+'</button>').join('')+'</div></details>';
+  for(const book of books)html+='<details><summary>'+esc(book.name)+' · '+(book.level?book.level+' ур.':'заговоры')+'</summary><div class="campaign-spells">'+book.spells.map(n=>'<span><button data-show-spell="'+esc(n)+'">'+esc(spellLink(n,findSpell).label)+'</button>'+(c&&book.level?'<button data-prepare="'+esc(n)+'" aria-label="'+esc((prepared.includes(n)?'Убрать из подготовленных: ':'Подготовить: ')+spellLink(n,findSpell).label)+'">'+(prepared.includes(n)?'✓':'＋')+'</button>':'')+'</span>').join('')+'</div></details>';
+  html+='<p><small>Ячейки расходуются в обычном окне применения заклинания. Подготовка изменяет список этого участника боя; новые ячейки не создаются.</small></p><div class="campaign-message" role="status"></div>';el.innerHTML=html;
+  el.querySelectorAll('[data-boss]').forEach(b=>b.onclick=()=>{if(!c)return;const a=b.dataset.boss;if(a==='armor')R.armor(c,!s.armor);if(a==='heart')R.heart(c,!s.heartExists);if(a==='dawn')R.dawn(c);if(a==='repair')R.repairHeart(c);refresh();});
+  el.querySelectorAll('[data-prepare]').forEach(b=>b.onclick=()=>{const n=b.dataset.prepare,i=prepared.indexOf(n);if(i>=0)prepared.splice(i,1);else if(prepared.length<20)prepared.push(n);else{el.querySelector('.campaign-message').textContent='Лимит 20: сначала уберите одно подготовленное заклинание.';return;}refresh();});
+  el.querySelectorAll('[data-show-spell]').forEach(b=>b.onclick=()=>{const s=spellLink(b.dataset.showSpell,findSpell).spell;if(s)showSpell?.(s);else el.querySelector('.campaign-message').textContent='Описание заклинания отсутствует в текущей базе: '+b.dataset.showSpell;});
+ }else{
+  if(!c){el.innerHTML='<h3>Усиленный шабаш Морганты</h3><p>Домашняя механика мастера. Добавьте Морганту и обеих союзниц в бой для общего запаса заклинаний, легендарных действий и логова.</p>';host.prepend(el);return;}
+  const data=poolFor(c,all),st=state(c,all);let html='<h3>Усиленный шабаш Морганты</h3><p><small>Домашняя механика. Общий резерв, не отдельный запас каждой карги.</small></p>';
+  if(!data){html+='<p>Добавьте Морганту — Мать Кошмаров, Сестру Кривошею и Мать Безглазую в бой.</p>';el.innerHTML=html;host.prepend(el);return;}
+  const {pool,mother,members}=data,canAct=st.max>0&&(st.spells||c.id===mother.id),legalActors=members.filter(x=>x.currentHp>0),linked=members.length===3&&members.every(x=>x.covenGroup&&x.covenGroup===mother.covenGroup&&x.covenActive);
+  html+='<p><strong>Общие заряды: '+Math.max(0,st.max-pool.used)+' / '+st.max+'</strong>. Восстановление — начало хода Морганты.</p><p>Заклинания шабаша: <strong>'+(st.spells&&linked?'доступны':'недоступны')+'</strong>.</p>';
+  if(members.length===3)html+='<button data-link>Объединить этих трёх карг в шабаш</button>';
+  html+='<div class="campaign-row"><label>Исполнитель<select data-actor>'+legalActors.map(x=>'<option value="'+x.id+'" '+(x.id===c.id?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label><label>Цель<select data-target>'+all.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select></label></div>';
+  for(const [key,a] of Object.entries(actions)){const disabled=!canAct||!st.allowed.includes(key)||pool.used+a.cost>st.max||(key==='scream'&&pool.screamUsed);html+='<details><summary>'+a.cost+' · '+a.name+'</summary><p>'+a.text+'</p><button data-action="'+key+'" '+(disabled?'disabled':'')+'>Использовать · '+a.cost+' заряд'+(a.cost===1?'':'а')+'</button></details>';}
+  html+='<h4>Логово · инициатива 20</h4><label><input data-lair-toggle type="checkbox" '+(pool.lairEnabled?'checked':'')+'> Использовать действия логова</label><p>Один эффект за раунд. Три костяных оберега: КД 13, по 20 ХП. После разрушения всех трёх логово отключается.</p><div class="campaign-row">'+pool.wards.map((hp,i)=>'<label>Оберег '+(i+1)+' <input data-ward="'+i+'" type="number" min="0" max="20" value="'+hp+'" style="width:70px"> /20</label>').join('')+'</div>';
+  const lairDisabled=!pool.lairEnabled||pool.wards.every(x=>x<=0)||pool.lairRound===round||mother.currentHp<=0;
+  html+='<button data-lair-random '+(lairDisabled?'disabled':'')+'>Бросить 1d4 и использовать эффект</button><p>'+lair.map(([n,t],i)=>(i+1)+'. <strong>'+n+'</strong>: '+t).join('<br>')+'</p><div class="campaign-message" role="status">'+esc(pool.lastMessage||'')+'</div>';
+  if(pool.pendingGrasp)html+='<button data-grasp-fail>Хватка: спасбросок провален</button><button data-grasp-pass>Хватка: спасбросок успешен</button>';
+  html+='<button data-reset-battle>Новое сражение: сбросить разовый вопль и заряды</button>';el.innerHTML=html;
+  el.querySelector('[data-link]')?.addEventListener('click',()=>{try{root.HagCoven.configure(all,members.map(x=>x.id),true);refresh();}catch(e){el.querySelector('.campaign-message').textContent=e.message;}});
+  el.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{const actor=all.find(x=>String(x.id)===el.querySelector('[data-actor]').value),target=all.find(x=>String(x.id)===el.querySelector('[data-target]').value),key=b.dataset.action,now=state(c,all);if(!actor||actor.currentHp<=0||(!now.spells&&actor.id!==mother.id))return;if(key==='protect'&&(!target||!members.includes(target)||target.id===actor.id)){el.querySelector('.campaign-message').textContent='Для защиты выберите другую участницу шабаша.';return;}if(!R.spendCoven(pool,members.map(x=>({...x,covenRole:role(x)})),key))return;if(key==='protect'&&target.tempHp<15){target.tempHp=15;target.covenProtection={remaining:15};}if(key==='grasp'&&target){pool.pendingGrasp=target.id;pool.lastMessage='Хватка: '+target.name+' совершает спасбросок Силы Сл 15. Отметьте результат кнопкой ниже.';}else pool.lastMessage=actions[key].name+': '+actor.name+'. '+actions[key].text;refresh();});
+  el.querySelector('[data-grasp-fail]')?.addEventListener('click',()=>{const target=all.find(x=>x.id===pool.pendingGrasp);if(target){applyGrasp(target);pool.lastMessage=target.name+': скорость 0, реакции запрещены до начала следующего хода.';}delete pool.pendingGrasp;refresh();});
+  el.querySelector('[data-grasp-pass]')?.addEventListener('click',()=>{delete pool.pendingGrasp;pool.lastMessage='Спасбросок успешен: хватка не действует.';refresh();});
+  el.querySelector('[data-lair-toggle]').onchange=e=>{pool.lairEnabled=e.target.checked;refresh();};
+  el.querySelectorAll('[data-ward]').forEach(i=>i.onchange=()=>{pool.wards[Number(i.dataset.ward)]=Math.max(0,Math.min(20,Math.floor(Number(i.value)||0)));if(pool.wards.every(x=>x<=0))pool.lairEnabled=false;refresh();});
+  el.querySelector('[data-lair-random]').onclick=()=>{if(!pool.lairEnabled||pool.wards.every(x=>x<=0)||pool.lairRound===round||mother.currentHp<=0)return;const index=Math.floor(Math.random()*4);pool.lairRound=round;pool.lastMessage='Инициатива 20 · '+(index+1)+': '+lair[index][0]+'. '+lair[index][1];refresh();};
+  el.querySelector('[data-reset-battle]').onclick=()=>{pool.used=0;pool.screamUsed=false;delete pool.lastResetRound;delete pool.lairRound;pool.lastMessage='Начато новое сражение. Хиты карг и оберегов сохранены.';refresh();};
+ }
+ host.prepend(el);
+}
+root.StrahdCampaign={books,actions,lair,augment,role,group,state,poolFor,sync,damage,startTurn,onTempDamage,applyGrasp,defenses,panel};if(typeof module!=='undefined')module.exports=root.StrahdCampaign;
+})(typeof window==='undefined'?globalThis:window);

@@ -1,0 +1,13 @@
+(function(root){'use strict';
+function ensure(c){const s=c.strahdBoss||={};Object.assign(s,{armor:!!s.armor,armorHp:Math.max(0,Number(s.armorHp)||0),heartExists:!!s.heartExists,heartHp:Math.max(0,Number(s.heartHp)||0)});return s;}
+function isStrahd(c){return !!c&&/^(?:страд(?:\s+фон\s+зарович)?)(?:\s*\/|\s*·|$)|\/\s*strahd(?:\s+von\s+zarovich)?(?:\s*·|$)/i.test(c.name||'');}
+function armor(c,on){const s=ensure(c);if(!!on===s.armor)return s;if(on){if(s.armorUsed&&s.armorHp<=0)return s;s.armorBaseAc=c.ac;s.armorUsed=true;if(s.armorHp<=0)s.armorHp=150;s.armor=true;c.ac=21;}else{s.armor=false;if(s.armorBaseAc!==undefined)c.ac=s.armorBaseAc;}return s;}
+function dawn(c){const s=ensure(c);armor(c,false);s.armorHp=150;s.armorUsed=false;return s;}
+function heart(c,on){const s=ensure(c);if(!s.heartInitialized&&on){s.heartHp=100;s.heartInitialized=true;}s.heartExists=!!on;return s;}
+function repairHeart(c){const s=ensure(c);s.heartHp=100;s.heartInitialized=true;return s;}
+function absorb(c,damage){const s=ensure(c);let remaining=Math.max(0,Math.floor(Number(damage)||0));const result={heart:0,armor:0,remaining};if(s.heartExists&&s.heartHp>0){result.heart=Math.min(s.heartHp,remaining);s.heartHp-=result.heart;remaining-=result.heart;}if(s.armor&&s.armorHp>0){result.armor=Math.min(s.armorHp,remaining);s.armorHp-=result.armor;remaining-=result.armor;if(s.armorHp===0)armor(c,false);}result.remaining=remaining;return result;}
+function regenerate(c){const s=ensure(c);if(!s.heartExists||s.heartHp<=0||Number(c.currentHp)<=0)return 0;const n=Math.max(0,Math.min(30,Number(c.maxHp)-Number(c.currentHp)));c.currentHp+=n;return n;}
+function covenState(members){const mother=members.find(c=>c.covenRole==='morgantha'),alive=members.filter(c=>Number(c.currentHp)>0);if(!mother||mother.currentHp<=0)return {max:0,spells:false,allowed:[]};const all=members.length===3&&alive.length===3;return {max:all?3:2,spells:all,allowed:all?['whisper','slide','protect','grasp','scream']:alive.length===2?['whisper','slide','protect','grasp']:['whisper','slide']};}
+function spendCoven(pool,members,action){const state=covenState(members),cost={whisper:1,slide:1,protect:2,grasp:2,scream:3}[action];pool.used=Number(pool.used)||0;if(!state.allowed.includes(action)||!cost||pool.used+cost>state.max||(action==='scream'&&pool.screamUsed))return false;pool.used+=cost;if(action==='scream')pool.screamUsed=true;return true;}
+root.StrahdBossRules={ensure,isStrahd,armor,dawn,heart,repairHeart,absorb,regenerate,covenState,spendCoven};if(typeof module!=='undefined')module.exports=root.StrahdBossRules;
+})(typeof window==='undefined'?globalThis:window);

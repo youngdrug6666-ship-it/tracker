@@ -930,8 +930,10 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 
 /* Keep each combat card at its natural compact height, independent of taller neighbours. */
 #combatantsGrid{align-items:start!important;grid-auto-rows:auto}
-#combatantsGrid>.combat-card{min-height:0!important;height:auto!important;align-self:start}
-#combatantsGrid>.combat-card>.card-content{height:auto!important;gap:3px}
+#combatantsGrid>.combat-card{min-height:340px!important;height:340px!important;max-height:340px;align-self:start;transform:none!important;animation:none!important}
+#combatantsGrid>.combat-card>.card-content{height:100%!important;min-height:0;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:thin;gap:3px;padding-right:2px}
+#combatantsGrid>.combat-card>.card-content>*{flex-shrink:0}
+#combatantsGrid .turn-label{position:static;align-self:flex-end;height:0;min-height:0;overflow:visible;transform:translateY(-12px);margin:0;padding-top:0;padding-bottom:0}
 #combatantsGrid .log-area{margin-top:3px;padding:3px 6px}
 #combatantsGrid .card-senses{margin:2px 0}
 #combatantsGrid .card-senses span,#combatantsGrid .card-senses button{min-height:22px;padding:2px 6px;font-size:10px}
@@ -1045,6 +1047,9 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="monster-builder.js?v=defenses-5"></script>
 <script src="monster-mechanics.js?v=3"></script>
 <script src="strahd-supplements.js?v=2"></script>
+<script src="coffin-spawn-variants.js?v=1"></script>
+<script src="strahd-boss-rules.js?v=1"></script>
+<script src="strahd-campaign.js?v=3"></script>
 <script src="tracker-backup.js?v=1"></script>
 <script src="full-backup.js?v=1"></script>
 <script src="player-display.js?v=states-9"></script>
@@ -1397,13 +1402,14 @@ function getFolderPlainName(type) {
     }
 
     function renderBestiary() {
-        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const searchNormalize=value=>String(value||'').toLowerCase().replace(/ё/g,'е').replace(/наккер/g,'накер').replace(/\s+/g,' ').trim();
+        const search = searchNormalize(document.getElementById('searchInput').value);
         const folder = document.getElementById('folderSelect').value;
         const crVal = document.getElementById('crFilter').value;
         const extra={type:document.getElementById('monsterTypeFilter').value,size:document.getElementById('monsterSizeFilter').value,alignment:document.getElementById('monsterAlignmentFilter').value,source:document.getElementById('monsterSourceFilter').value};
         let filtered = monstersLibrary.filter(m => {
             if (folder !== 'all' && m.folder !== folder) return false;
-            if (search && !m.name.toLowerCase().includes(search)) return false;
+            if (search && !searchNormalize(m.name).includes(search)) return false;
             if (crVal !== 'all' && m.cr != parseFloat(crVal)) return false;
             const meta=monsterFilterData(m);for(const [key,value] of Object.entries(extra))if(value && value!=='all' && meta[key]!==value)return false;
             return true;
@@ -1952,7 +1958,6 @@ async function loadCustomMonstersTXT() {
         for(const key of [...keys]){const alias=globalThis.FoundryData?.aliases?.[key]||aliases[key];if(alias)keys.add(normalize(alias));}
         return allSpellsList.find(s=>variants(s.spellName).some(n=>keys.has(n)));
     }
-
 function resolveUuid(id) {
     if (!id) return null;
     const cleanId = String(id).trim().split('.').pop();
@@ -2107,8 +2112,8 @@ function findSpellById(id) {
             }).join('');
         }
         document.getElementById('detailVulner').innerText = translateList(extractString(full.damage_vulnerabilities), 'damage') || '—';
-        document.getElementById('detailResist').innerText = translateList(extractString(full.damage_resistances), 'damage') || '—';
-        document.getElementById('detailImmun').innerText = translateList(extractString(full.damage_immunities), 'damage') || '—';
+        document.getElementById('detailResist').innerText = translateList(extractString(StrahdCampaign.defenses(featTarget,full).damage_resistances), 'damage') || '—';
+        document.getElementById('detailImmun').innerText = translateList(extractString(StrahdCampaign.defenses(featTarget,full).damage_immunities), 'damage') || '—';
         document.getElementById('detailCondImmun').innerText = translateList(extractString(full.condition_immunities), 'conditions') || '—';
         
         // Функция для рендеринга списка действий/особенностей
@@ -2338,6 +2343,8 @@ function findSpellById(id) {
         }
         if(full.spellGroups?.length)spellsContainer.innerHTML='';
         StrahdSupplements.resources(full,featTarget,spellsContainer,()=>{renderCombat();saveCurrentStateToSession();},findSpellByName,showSpellDetail);
+        CoffinSpawnVariants.panel(full,featTarget,spellsContainer,()=>{renderCombat();saveCurrentStateToSession();});
+        if(featTarget)StrahdCampaign.panel(full,featTarget,spellsContainer,combatants,()=>{renderCombat();saveCurrentStateToSession();document.getElementById('detailAC').textContent=featTarget.ac;document.getElementById('detailHP').textContent=featTarget.currentHp+' / '+featTarget.maxHp;const defense=StrahdCampaign.defenses(featTarget,full);document.getElementById('detailResist').innerText=translateList(extractString(defense.damage_resistances),'damage')||'—';document.getElementById('detailImmun').innerText=translateList(extractString(defense.damage_immunities),'damage')||'—';},findSpellByName,showSpellDetail,currentRound);
         document.getElementById('detailModal').style.display = 'flex';
     }
 
@@ -2616,11 +2623,13 @@ function findSpellById(id) {
     function applyDamage(c, dmg, defer=false) {
         dmg=Math.max(0,Math.floor(Number(dmg)||0));if(!dmg)return;
         let remaining=dmg;
-        if(c.tempHp>0){const absorb=Math.min(c.tempHp,remaining);c.tempHp-=absorb;remaining-=absorb;addLog(c,`🛡️ Врем.ХП поглотило ${absorb}`);}
+        if(StrahdBossRules.isStrahd(c))remaining=StrahdBossRules.absorb(c,remaining).remaining;
+        const concentrationDamage=remaining;
+        if(c.tempHp>0){const before=c.tempHp;const absorb=Math.min(c.tempHp,remaining);c.tempHp-=absorb;remaining-=absorb;StrahdCampaign.onTempDamage(c,before,c.tempHp);addLog(c,`🛡️ Врем.ХП поглотило ${absorb}`);}
         if(remaining>0)c.currentHp=Math.max(0,c.currentHp-remaining);
-        if(c.conditions.has('Концентрация')){
+        if(concentrationDamage>0&&c.conditions.has('Концентрация')){
             if(c.currentHp===0){SpellEffects.endConcentration(combatants,c);c.concentrationChecks=[];addLog(c,'Концентрация завершена: 0 ХП');}
-            else{c.concentrationChecks||=[];c.concentrationChecks.push({damage:dmg,dc:Math.max(10,Math.floor(dmg/2))});}
+            else{c.concentrationChecks||=[];c.concentrationChecks.push({damage:concentrationDamage,dc:Math.max(10,Math.floor(concentrationDamage/2))});}
         }
         addLog(c,`Урон ${dmg} → ❤️ ${c.currentHp}/${c.maxHp}`);
         if(!defer){renderCombat();saveCurrentStateToSession();}
@@ -2696,6 +2705,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
         const next=PlayerDisplay.step(combatants,currentTurnIndex,direction);if(!next)return;
         currentTurnIndex=next.index;
         if(next.wrapped){if(direction>0)currentRound++;else if(currentRound>0)currentRound--;document.getElementById('roundNumberTop').innerText=currentRound;addLog(combatants[currentTurnIndex],`🌀 Раунд ${currentRound}`);}
+        if(direction>0)StrahdCampaign.startTurn(combatants[currentTurnIndex],combatants,currentRound);
         renderCombat();scrollToCurrentTurn();saveCurrentStateToSession();
     }
     function nextTurn(){stepCombatTurn(1);}
@@ -2908,6 +2918,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
             if(c.isMonster)FeatRules.before(c);
             if (!c.isMonster) HeroCard.ensure(c);
             else {const full=monstersReady?fullMonstersMap.get(c.name.toLowerCase()):null;if(full){if(!full._customMonster&&/\/ (?:Green|Night|Sea) Hag$/.test(full.name))c.spellSlots=Object.fromEntries(Object.entries(c.spellSlots||{}).filter(([k])=>k.startsWith('coven-')));c.stats=structuredClone(full.stats||c.stats);c.spellSlots||={};for(const [key,slot] of Object.entries(full.spellSlots||{}))if(!c.spellSlots[key])c.spellSlots[key]=structuredClone(slot);if(full._customMonster){c.spellSlots={...MonsterMechanics.syncSlots(c.spellSlots,full.spellSlots),...Object.fromEntries(Object.entries(c.spellSlots).filter(([k])=>k.startsWith('coven-')))};c.spellSaveDC=full.spellSaveDC;c.spellAttack=full.spellAttack;}for(const entry of full._customMonster||/\/ (?:Green|Night|Sea) Hag$/.test(full.name)?[]:[...(full.features||[]),...(full.actions||[])]){if(!/заклинан|колдовство|spellcasting/i.test(entry.name))continue;for(const [key,slot] of Object.entries(parseSpellSlots(entry._displayDescription??entry.description)))if(!c.spellSlots[key])c.spellSlots[key]=slot;}}SpellEffects.updateMonsterArmor(c);FeatRules.apply(c);}
+            if(c.isMonster)StrahdCampaign.sync(c,fullMonstersMap.get(c.name.toLowerCase()),combatants,currentRound);
             if(!c.conditions.has('Концентрация'))c.concentrationChecks=[];
             const check=c.concentrationChecks?.[0];
             const concentrationHtml=check?`<div class="concentration-check" role="status"><span>Концентрация · ТЕЛ${FeatRules.has(c,'104-war-caster')?' · преимущество':''} <b>СЛ ${check.dc}</b>${c.concentrationChecks.length>1?` · ещё ${c.concentrationChecks.length-1}`:''}</span><div><button class="concentration-pass" data-id="${c.id}">Успех</button><button class="concentration-fail" data-id="${c.id}">Провал</button></div></div>`:'';
@@ -2926,7 +2937,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
             const cardSenses=c.isMonster?`${Number.isFinite(monsterPassive)&&monsterPassive>0?`<span title="Пассивное восприятие"><i class="fa-solid fa-eye"></i> Воспр. ${monsterPassive}</span>`:''}${monsterSight?`<span title="Тёмное зрение"><i class="fa-solid fa-moon"></i> Тёмное зрение${monsterSight[1]?' '+monsterSight[1]+' фт':''}</span>`:''}`:`<button type="button" class="hero-passive" title="Пассивное восприятие · нажмите, чтобы изменить" aria-label="Изменить пассивное восприятие: ${HeroCard.passivePerception(c)}"><i class="fa-solid fa-eye"></i> Воспр. ${HeroCard.passivePerception(c)}</button>`;
             let statsHtml = '';
             if (!c.isMonster || ['str','dex','con','int','wis','cha'].every(k=>Number.isFinite(Number(c.stats?.[k]?.score)))) statsHtml = HeroCard.summaryStats(c);
-            if(monsterFull){const defenses=[['damage_vulnerabilities','Уязвимости','fa-heart-crack','damage'],['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(monsterFull[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Уязвимости'?'Уязв.':label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
+            if(monsterFull){const defenses=[['damage_vulnerabilities','Уязвимости','fa-heart-crack','damage'],['damage_resistances','Сопротивления','fa-shield-halved','damage'],['damage_immunities','Иммунитеты к урону','fa-shield','damage'],['condition_immunities','Иммунитеты к состояниям','fa-heart-circle-check','conditions']];statsHtml+=`<div class="monster-defenses">${defenses.map(([key,label,icon,kind])=>{const value=translateList(extractString(StrahdCampaign.defenses(c,monsterFull)[key]),kind);return value&&value!=='—'?`<button type="button" aria-label="${label}" data-tooltip="${escapeHtml(label+': '+value)}"><i class="fa-solid ${icon}"></i><span>${label==='Уязвимости'?'Уязв.':label==='Сопротивления'?'Сопр.':label==='Иммунитеты к урону'?'Иммун.':'Состояния'}</span></button>`:'';}).join('')}</div>`;}
             const featResists=FeatRules.resistances(c);if(c.isMonster&&featResists.length)statsHtml+=`<div class="monster-defenses"><button type="button" data-tooltip="${escapeHtml('Сопротивления от черт: '+featResists.join(', '))}">🛡 Черты</button></div>`;
             let spellHtml = '';
             let dc=c.spellSaveDC,attack=c.spellAttack;
@@ -3231,12 +3242,16 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
         loadUuidMap()   // <-- обязательно!
      ]).then(async () => {
         try{
-            const response=await fetch('strahd-supplements.json?v=3');
+            const response=await fetch('strahd-supplements.json?v=4');
             if(!response.ok)throw new Error('HTTP '+response.status);
             const report=StrahdSupplements.prepare(await response.json(),fullMonstersMap,monstersLibrary,parseSpellSlots,npcSpellsMap);
+            const spawnBase=[...fullMonstersMap.values()].find(m=>/\/\s*Vampire Spawn\s*$/i.test(m.name));
+            if(spawnBase)report.records.push(...CoffinSpawnVariants.build(spawnBase));
+            else report.missing.push({baseName:'Порождение вампира / Vampire Spawn'});
             for(const full of report.records)registerCustomMonster(full);
+            const campaignRecords=StrahdCampaign.augment(fullMonstersMap,monstersLibrary,parseSpellSlots);for(const full of campaignRecords)registerCustomMonster(full);
             const status=document.createElement('details');status.style.cssText='font-size:11px;margin:6px 0;color:#a9c6d9';
-            status.innerHTML='<summary>Допматериалы Страда · '+report.records.length+' существ</summary><p>ЛБ, LBH и Van Richten. Источники и страницы указаны в подробной информации.</p>'+(report.missing.length?'<p>Не найдены в базе: '+report.missing.map(r=>escapeHtml(r.baseName)).join(', ')+'</p>':'')+(report.unreadable.length?'<p>Не прочитан незавершённый файл «Врата Тсоленки» (.opdownload).</p>':'');
+            status.innerHTML='<summary>Допматериалы Страда · '+(report.records.length+campaignRecords.length)+' существ</summary><p>ЛБ, LBH и Van Richten. Источники и страницы указаны в подробной информации.</p>'+(report.missing.length?'<p>Не найдены в базе: '+report.missing.map(r=>escapeHtml(r.baseName)).join(', ')+'</p>':'')+(report.unreadable.length?'<p>Не прочитан незавершённый файл «Врата Тсоленки» (.opdownload).</p>':'');
             document.querySelector('.catalogue-tools').after(status);
         }catch(error){console.error('Допматериалы Страда:',error);const status=document.createElement('p');status.textContent='Не удалось загрузить допматериалы Страда. Обнови страницу для повтора.';document.querySelector('.catalogue-tools').after(status);}
         monstersReady=true;loadSavedCustomMonsters();initFilters();renderBestiary();document.getElementById('addCustomMonsterBtn').disabled=false;
@@ -3249,4 +3264,3 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
 <script src="turn-flames.js?v=portal-5"></script>
 </body>
 </html>
-

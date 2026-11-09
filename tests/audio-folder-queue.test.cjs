@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+const src=fs.readFileSync(__dirname+'/../audio-player.js','utf8');
+const start=src.indexOf('async function advanceAfterEnd'),end=src.indexOf("document.addEventListener('visibilitychange'");
+const step=src.slice(src.indexOf('function step('),src.indexOf('function setRange('));
+const calls=[];const ctx={rows:[{id:'a',kind:'music',folder:'Боевая'},{id:'other',kind:'music',folder:'Общее'},{id:'b',kind:'music',folder:'Боевая'},{id:'sound',kind:'sound',folder:'Боевая'}],musicQueueFolder:'Боевая',folder:'Боевая',selected:{music:'a'},kind:'music',status:{},refreshPlayback(){},mixer:{continueMusic:async(id,r)=>calls.push(r.id),remove(){},entries:new Map()},play:id=>calls.push(id)};
+vm.createContext(ctx);vm.runInContext(src.slice(start,end)+step,ctx);
+(async()=>{await ctx.advanceAfterEnd({id:'a',kind:'music',audio:{loop:false}});assert.deepEqual(calls,['b']);await ctx.advanceAfterEnd({id:'b',kind:'music',audio:{loop:false}});assert.deepEqual(calls,['b','a']);ctx.step(1);assert.equal(calls.at(-1),'b');const n=calls.length;await ctx.advanceAfterEnd({id:'a',kind:'music',audio:{loop:true}});assert.equal(calls.length,n);
+const toggle=src.match(/\$\('\.audio-repeat'\)\.onclick=\(\)=>\{([\s\S]*?)\};/)[1];
+ctx.prefs={repeat:false,soundRepeat:false};ctx.save=()=>{};ctx.mixer.entries.set('a',{kind:'music',audio:{loop:false}});ctx.mixer.entries.set('sound',{kind:'sound',audio:{loop:false}});vm.runInContext('{'+toggle+'}',ctx);assert.equal(ctx.prefs.repeat,true);assert.equal(ctx.mixer.entries.get('a').audio.loop,true);assert.equal(ctx.mixer.entries.get('sound').audio.loop,false);ctx.step(1);assert.equal(ctx.prefs.repeat,true);vm.runInContext('{'+toggle+'}',ctx);assert.equal(ctx.prefs.repeat,false);
+console.log('PASS: automatic/manual folder queue, wrap, native repeat, sticky channel repeat, separate sound repeat.');})().catch(e=>{console.error(e);process.exitCode=1;});

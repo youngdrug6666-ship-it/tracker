@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');const SpellEffects=require('../spell-effects.js');
 const source=fs.readFileSync('index.html','utf8');const code=source.slice(source.indexOf('    function applyDamage('),source.indexOf('    function applyHeal('));
 const caster={id:1,currentHp:80,maxHp:80,tempHp:50,conditions:new Set(['Концентрация']),concentrationEffect:'a'},target={id:2,conditions:new Set(),activeSpellEffects:[{id:'a'}]};
-const ctx={combatants:[caster,target],SpellEffects,Math,Number,addLog:()=>{},renderCombat:()=>{},saveCurrentStateToSession:()=>{}};vm.createContext(ctx);vm.runInContext(code,ctx);
+const ctx={combatants:[caster,target],SpellEffects,Math,Number,StrahdBossRules:require('../strahd-boss-rules.js'),StrahdCampaign:require('../strahd-campaign.js'),document:{addEventListener(){}},addLog:()=>{},renderCombat:()=>{},saveCurrentStateToSession:()=>{}};vm.createContext(ctx);vm.runInContext(code,ctx);
 ctx.applyDamage(caster,41);assert.equal(caster.currentHp,80);assert.equal(caster.tempHp,9);assert.equal(caster.concentrationChecks[0].dc,20);
 ctx.applyDamage(caster,3);assert.equal(caster.concentrationChecks.length,2);assert.equal(caster.concentrationChecks[1].dc,10);
 ctx.resolveConcentration(caster,true);assert(caster.conditions.has('Концентрация'));assert.equal(caster.concentrationChecks.length,1);
