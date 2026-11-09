@@ -7,7 +7,7 @@ assert.equal(new Set(variants.map(m=>m.name)).size,6);
 assert.equal(variants.find(m=>m.name.includes('следопыт')).spells[0],"hunter's mark");
 assert.equal(variants.find(m=>m.name.includes('паладин')).spellSlots[1].max,3);
 assert.equal(variants.find(m=>m.name.includes('волшебник')).spellSlots[2].max,2);
-for(const m of variants){assert.equal(m.hpAvg,82);assert.ok(m.actions.length);assert.ok(m.features.length);}
+for(const m of variants){assert.equal(m.hpAvg,82);assert.equal(m.initBonus,base.initBonus??base.stats.dex.mod);assert.ok(m.actions.length);assert.ok(m.features.length);}
 const html=fs.readFileSync(__dirname+'/../index.html','utf8');
 for(const m of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 console.log('PASS: six independent variants, base preserved, spell slots, hunter mark, integration syntax');

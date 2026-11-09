@@ -7,7 +7,7 @@ function build(base){
  if(role==='паладин'){m.spellSlots={1:{max:3,used:0}};m.spells=['bless','command','shield of faith'];m.spellSaveDC=12;m.spellAttack=4;}
  if(role==='следопыт'){m.spellSlots={1:{max:3,used:0}};m.spells=["hunter's mark",'cure wounds','ensnaring strike'];m.spellSaveDC=12;m.spellAttack=4;}
  const ability=role==='волшебник'?'int':role==='паладин'?'cha':role==='следопыт'?'wis':null;if(ability){m.stats[ability]={score:14,mod:2};m.spellSaveDC=13;m.spellAttack=5;}
- m._coffinRole=role;
+ m.initBonus=base.initBonus??base.stats?.dex?.mod??0;m._coffinRole=role;
  if(role==='волшебник')m.spellGroups=[{label:'Заговоры',level:0,spells:m.spells.slice(0,3)},{label:'1 уровень (4 ячейки)',level:1,spells:m.spells.slice(3,6)},{label:'2 уровень (2 ячейки)',level:2,spells:m.spells.slice(6)}];
  else if(m.spells.length)m.spellGroups=[{label:'1 уровень (3 ячейки)',level:1,spells:[...m.spells]}];
  if(role==='воин')m.features.push(entry('Улучшенные критические попадания','Архетип Чемпион: атаки оружием становятся критическими при натуральных 19 и 20.'));
