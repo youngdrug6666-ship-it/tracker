@@ -19,6 +19,7 @@ function prepare(pack,map,library,parseSlots,npcMap){
  }
  return {records,missing,unreadable:pack.unreadable||[],issues:pack.issues||[]};
 }
+function spellLabel(name,findSpell){const spell=findSpell?.(name);const label=String(spell?.spellName||spell?.name||name);const parts=label.split(/\s*\/\s*/);return parts.find(p=>/[а-яё]/i.test(p))?.trim()||parts[0].trim();}
 function resources(full,c,container,save,findSpell,showSpell){
  if(!full._supplementPack)return;
  if(!document.getElementById('supplement-resource-style')){
@@ -40,7 +41,7 @@ function resources(full,c,container,save,findSpell,showSpell){
   html+='<section class="supplement-spell-group"><strong>'+esc(g.label)+'</strong><div class="supplement-spell-items">';
   for(const [j,name] of g.spells.entries()){
    const key=i+':'+j,used=c?.supplementUses?.[key]||0,max=daily?Number(daily[1]):0;
-   html+='<span class="supplement-spell-item"><button data-spell-group="'+i+'" data-spell-index="'+j+'">'+esc(name.split(' / ')[0])+'</button>';
+   html+='<span class="supplement-spell-item"><button data-spell-group="'+i+'" data-spell-index="'+j+'">'+esc(spellLabel(name,findSpell))+'</button>';
    if(max&&c)html+='<span>'+Math.max(0,max-used)+' / '+max+'</span><button data-use="'+key+'" data-max="'+max+'" data-delta="1">−</button><button data-use="'+key+'" data-max="'+max+'" data-delta="-1">+</button>';
    html+='</span>';
   }
@@ -55,5 +56,5 @@ function resources(full,c,container,save,findSpell,showSpell){
   host.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const k=b.dataset.use;c.supplementUses[k]=Math.max(0,Math.min(Number(b.dataset.max),(c.supplementUses[k]||0)+Number(b.dataset.delta)));redraw();});
  }
 }
-root.StrahdSupplements={prepare,resources};if(typeof module!=='undefined')module.exports=root.StrahdSupplements;
+root.StrahdSupplements={prepare,resources,spellLabel};if(typeof module!=='undefined')module.exports=root.StrahdSupplements;
 })(typeof window==='undefined'?globalThis:window);

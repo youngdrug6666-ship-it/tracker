@@ -1046,10 +1046,10 @@ body [data-tooltip]::before,body [data-tooltip]::after{content:none!important;di
 <script src="combat-history.js?v=1"></script>
 <script src="monster-builder.js?v=defenses-5"></script>
 <script src="monster-mechanics.js?v=3"></script>
-<script src="strahd-supplements.js?v=2"></script>
+<script src="strahd-supplements.js?v=3"></script>
 <script src="coffin-spawn-variants.js?v=1"></script>
 <script src="strahd-boss-rules.js?v=1"></script>
-<script src="strahd-campaign.js?v=3"></script>
+<script src="strahd-campaign.js?v=4"></script>
 <script src="tracker-backup.js?v=1"></script>
 <script src="full-backup.js?v=1"></script>
 <script src="player-display.js?v=states-9"></script>
@@ -2075,7 +2075,8 @@ function findSpellById(id) {
         activeMonsterName=monsterName;
         dialog.querySelector('.tracker-feats')?.remove();
         const featTarget=combatants.find(c=>c.isMonster&&c.id===combatId);
-        const full = fullMonstersMap.get(monsterName.toLowerCase());
+        const sourceFull = fullMonstersMap.get(monsterName.toLowerCase());
+        const full = sourceFull&&StrahdCampaign.effective(featTarget,sourceFull);
         if (!full) { alert(`Нет подробных данных для ${monsterName}`); return; }
         document.getElementById('detailName').innerText = full.name || monsterName;
         const img = document.getElementById('detailImage');
@@ -2344,7 +2345,7 @@ function findSpellById(id) {
         if(full.spellGroups?.length)spellsContainer.innerHTML='';
         StrahdSupplements.resources(full,featTarget,spellsContainer,()=>{renderCombat();saveCurrentStateToSession();},findSpellByName,showSpellDetail);
         CoffinSpawnVariants.panel(full,featTarget,spellsContainer,()=>{renderCombat();saveCurrentStateToSession();});
-        if(featTarget)StrahdCampaign.panel(full,featTarget,spellsContainer,combatants,()=>{renderCombat();saveCurrentStateToSession();document.getElementById('detailAC').textContent=featTarget.ac;document.getElementById('detailHP').textContent=featTarget.currentHp+' / '+featTarget.maxHp;const defense=StrahdCampaign.defenses(featTarget,full);document.getElementById('detailResist').innerText=translateList(extractString(defense.damage_resistances),'damage')||'—';document.getElementById('detailImmun').innerText=translateList(extractString(defense.damage_immunities),'damage')||'—';},findSpellByName,showSpellDetail,currentRound);
+        if(featTarget)StrahdCampaign.panel(full,featTarget,spellsContainer,combatants,()=>{renderCombat();saveCurrentStateToSession();showMonsterDetails(monsterName,true,featTarget.id);return true;},findSpellByName,showSpellDetail,currentRound);
         document.getElementById('detailModal').style.display = 'flex';
     }
 
@@ -2982,7 +2983,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.ally-toggle');i
                         </div>
                         <div style="display:flex; gap:2px;"><input class="init-input" data-id="${c.id}" value="${c.initiative}" data-tooltip="Инициатива"><button class="init-roll-btn" data-id="${c.id}" data-tooltip="Бросить 1d20 + бонус"><i class="fa-solid fa-dice-d20"></i> d20</button></div>
                     </div>
-                    ${raceClassHtml}<div class="card-senses">${cardSenses}</div>${statsHtml}${spellHtml}
+                    ${StrahdBossRules.isStrahd(c)&&c.strahdBoss?.armor?`<div class="armor-status" style="font-size:10px;line-height:1.4;color:#b9e8f4">Броня ${c.strahdBoss.armorHp}/150 · Сопр.: холод, огонь, излучение · Иммун.: молния, яд</div>`:''}${raceClassHtml}<div class="card-senses">${cardSenses}</div>${statsHtml}${spellHtml}
                     ${!c.isMonster ? HeroCard.quick(c) : ''}
                     <div class="active-conditions">${compactConditions(c)?'':activeConditionsHtml}${(c.activeSpellEffects||[]).map(effect=>`<button class="spell-effect-remove" data-effect="${escapeHtml(effect.id)}" data-tooltip="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}" aria-label="${escapeHtml(CombatLabels.effectTooltip(effect,combatants))}">✨ ${escapeHtml(effect.name)}${Number.isFinite(effect.expiresRound)?` · ${Math.max(0,effect.expiresRound-currentRound)}р`:``} ×</button>`).join('')}</div>
                     ${concentrationHtml}

@@ -61,12 +61,13 @@ function startTurn(c,all,round){
 }
 function applyGrasp(target){if(!target)return;target.covenGrasp||={speed:target.speed,reactionsBlocked:!!target.reactionsBlocked};target.speed=0;target.reactionsBlocked=true;}
 function onTempDamage(c,before,after){if(c.covenProtection)c.covenProtection.remaining=Math.max(0,c.covenProtection.remaining-Math.max(0,before-after));}
-function defenses(c,base={}){const s=R.isStrahd(c)?R.ensure(c):null;if(!s?.armor)return base;const append=(old,list)=>[String(old||''),...list].filter(Boolean).join(', ');return {...base,damage_resistances:append(base.damage_resistances,['холод','огонь','излучение']),damage_immunities:append(base.damage_immunities,['молния','яд'])};}
+function defenses(c,base={}){const s=R.isStrahd(c)?R.ensure(c):null;if(!s?.armor)return base;const text=v=>root.MonsterMechanics?.text(v)??(typeof v==='string'?v:Array.isArray(v)?v.map(text).join(', '):v&&typeof v==='object'?text(v.value??v.text??v.data??v.content??''):'');const append=(old,list)=>[...new Set([...text(old).split(','),...list].map(s=>s.trim()).filter(Boolean))].join(', ');return {...base,damage_resistances:append(base.damage_resistances,['холод','огонь','излучение']),damage_immunities:append(base.damage_immunities,['молния','яд'])};}
+function effective(c,full){const view=defenses(c,full);if(!R.isStrahd(c)||!R.ensure(c).armor)return view;return {...view,actions:[...(full.actions||[]).filter(a=>!a._strahdArmorAction),{name:'Броня Страда · Шокирующий разряд',description:'<p>Действие брони на инициативе Страда. Дальняя атака заклинанием: +10 к попаданию, дальность 60 фт., одна цель. Попадание: 10 (3d6) урона молнией. Преимущество против цели в металлической броне.</p>',_strahdArmorAction:true}]};}
 function ensureStyle(){if(document.getElementById('strahd-campaign-style'))return;const s=document.createElement('style');s.id='strahd-campaign-style';s.textContent='.campaign-panel{padding:14px;margin:12px 0;border:1px solid #5d547a;border-radius:12px;background:#152231}.campaign-panel button,.campaign-panel select,.campaign-panel input{font:inherit;color:#b9e8f4;background:#243748;border:1px solid #405b70;border-radius:7px;padding:6px 9px;margin:3px;max-width:100%}.campaign-panel button:disabled{opacity:.45;cursor:not-allowed}.campaign-panel .campaign-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0}.campaign-panel small{color:#b6c8d6}.campaign-panel summary{cursor:pointer;padding:5px}.campaign-panel .campaign-spells{display:flex;flex-wrap:wrap;gap:5px}.campaign-panel h4{margin:9px 0 5px}.campaign-panel p{margin:7px 0}';document.head.append(s);}
-function spellLink(name,findSpell){const s=findSpell?.(name);return {spell:s,label:s?(s.spellName||s.name||name).split(/\s+\/\s+/)[0]:name};}
+function spellLink(name,findSpell){const s=findSpell?.(name);return {spell:s,label:(root.StrahdSupplements||(typeof require==='function'?require('./strahd-supplements.js'):null))?.spellLabel(name,findSpell)||name};}
 function panel(full,c,host,all,save,findSpell,showSpell,round=0){
  if(!R.isStrahd(full)&&!role(full)&&!role(c))return;ensureStyle();const el=document.createElement('section');el.className='campaign-panel';
- const refresh=()=>{save?.();el.remove();panel(full,c,host,all,save,findSpell,showSpell,round);};
+ const refresh=()=>{if(save?.()===true)return;el.remove();panel(full,c,host,all,save,findSpell,showSpell,round);};
  if(R.isStrahd(full)){
   const s=c?R.ensure(c):null,prepared=c?(c.strahdPrepared||=defaultPrepared.slice()):defaultPrepared.slice();
   let html='<h3>Броня Страда и Сердце скорби</h3>';
@@ -106,5 +107,5 @@ function panel(full,c,host,all,save,findSpell,showSpell,round=0){
  }
  host.prepend(el);
 }
-root.StrahdCampaign={books,actions,lair,augment,role,group,state,poolFor,sync,damage,startTurn,onTempDamage,applyGrasp,defenses,panel};if(typeof module!=='undefined')module.exports=root.StrahdCampaign;
+root.StrahdCampaign={books,actions,lair,augment,role,group,state,poolFor,sync,damage,startTurn,onTempDamage,applyGrasp,defenses,effective,panel};if(typeof module!=='undefined')module.exports=root.StrahdCampaign;
 })(typeof window==='undefined'?globalThis:window);
